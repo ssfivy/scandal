@@ -33,6 +33,8 @@
 #include <scandal/error.h>
 #include <scandal/led.h>
 
+#include <scandal/uart.h>
+
 /* "spi_devices.h" must #define MCP2510 in order for this to compile.
    MCP2510 is the identifier of the SPI device to be used with
    spi_select(); */
@@ -115,14 +117,15 @@ void init_can(void){
 	/*! \todo Configure the MCP2510 Interrupt registers */
 
 	/* Set up recieve filters */
-	/*! \todo Set up the MCP2510 Receive registers */
-	/* Below is a temporary measure */
 	value = 0;
-	value |= (MCP2510_RECEIVE_EXTENDED << trRXM00);
-	MCP2510_write(RXB1CTRL, &value, 1);
-
-//	value |= (1 << trBUKT01); /* Allow overflow to buffer 1*/
+	value |= (MCP2510_RECEIVE_EXTENDED << trRXM00); // lets receive ext messages
+	value |= 0x1;
 	MCP2510_write(RXB0CTRL, &value, 1);
+
+	value = 0;
+	value |= (MCP2510_RECEIVE_STANDARD << trRXM01); // lets receive std messages
+	value |= 0x2;
+	MCP2510_write(RXB1CTRL, &value, 1);
 
 	/* Set the controller to normal mode */
 	MCP2510_set_mode(MCP2510_NORMAL_MODE);
@@ -142,7 +145,7 @@ void init_can(void){
 	rx_num_msgs = 0;
 #endif
 	
-	value = 0x03;
+	value = 0x03; /* interrupt on RX0 and RX1 */
 	MCP2510_write(CANINTE, &value, 1);
 
 	enable_can_interrupt();
@@ -186,7 +189,7 @@ u08 can_get_msg(can_msg* msg){
 
   return(NO_ERR);
 #else
-  return(MCP2510_receive_message(&(msg->id), msg->data, &(msg->length)));
+  return(MCP2510_receive_message(&(msg->id), msg->data, &(msg->length), &(msg->ext)));
 #endif
 }
 
@@ -203,8 +206,8 @@ u08 can_send_msg(can_msg* msg, u08 priority){
 #endif
 }
 
-u08 can_send_std_msg(can_msg* msg){
-  return(MCP2510_transmit_std_message(msg->id, msg->data, msg->length, priority));
+u08 can_send_std_msg(can_msg* msg, u08 priority) {
+	return(MCP2510_transmit_std_message(msg->id, msg->data, msg->length, priority));
 }
 
 #if CAN_TX_BUFFER_SIZE > 0
@@ -259,6 +262,7 @@ u08 buffer_received(void){
 		if(rx_num_msgs >= CAN_RX_BUFFER_SIZE){
 			disable_can_interrupt();
 			careful_clear_receive_interrupt(trRX0IF);
+			careful_clear_receive_interrupt(trRX1IF);
 			enable_can_interrupt();
 			return BUF_FULL_ERR;
 		}else{
@@ -266,7 +270,7 @@ u08 buffer_received(void){
 			pos = (rx_buf_start + rx_num_msgs) & CAN_RX_BUFFER_MASK;
 			msg = (can_msg*)&(canrxbuf[pos]);
 	
-			err = MCP2510_receive_message(&(msg->id), msg->data, &(msg->length));
+			err = MCP2510_receive_message(&(msg->id), msg->data, &(msg->length), &(msg->ext));
 	
 			if(err == NO_ERR){
 				rx_num_msgs++;
@@ -299,19 +303,28 @@ u08 can_register_id(u32 mask, u32 data, u08 priority){
 
   MCP2510_set_mode(MCP2510_CONFIGURATION_MODE);
 
-    /* SID10:SID3 */
+    /* SID10:SID3 of RX0 */
   buf[0] = fil1_data >> 21;
   buf[1] = (((fil1_data >> 18) & 0x07) << 5) | ((u32)1<<EXIDE) | ((fil1_data >> 16) & 0x03);
   buf[2] = ((fil1_data >> 8) & 0xFF);
   buf[3] = ((fil1_data >> 0) & 0xFF);
-  MCP2510_write(RXF0SIDH, buf, 4);
-
+  MCP2510_write(RXF1SIDH, buf, 4);
 
   buf[0] = fil1_mask >> 21;
   buf[1] = (((fil1_mask >> 18) & 0x07) << 5) | ((u32)1<<EXIDE) | ((fil1_mask >> 16) & 0x03);
   buf[2] = ((fil1_mask >> 8) & 0xFF);
   buf[3] = ((fil1_mask >> 0) & 0xFF);
   MCP2510_write(RXM0SIDH, buf, 4);
+
+	/* RX1 for std messages */
+	/* this is bad because we're using the same values as for ext messages. but for usbcan it should be fine. */
+  buf[0] = 0;
+  buf[1] = 0;
+  MCP2510_write(RXF2SIDH, buf, 2);
+
+  buf[0] = 0;
+  buf[1] = 0;
+  MCP2510_write(RXM1SIDH, buf, 2);
 
   MCP2510_set_mode(MCP2510_NORMAL_MODE);
 
@@ -417,7 +430,8 @@ u08     MCP2510_transmit_std_message(u32   id,
 				 u08   size,
 				 u08   priority){
   unsigned char value;
-  unsigned char idbuf[8];
+  unsigned char sid_l;
+  unsigned char sid_h;
 
   value = MCP2510_read_status();
   if((value & (1<<2)) != 0)    /* If the buffer is pending a transmission, return BUF_FULL_ERR */
@@ -429,11 +443,11 @@ u08     MCP2510_transmit_std_message(u32   id,
     size = 8;
 
   /* Load the ID */
-  idbuf[0] = (id >> 21) & 0xFF;
-  idbuf[1] = (((id >> 18) & 0x07) << 5) | (1<<EXIDE) | ((id >> 16) & 0x03);
-  idbuf[2] = ((id >> 8) & 0xFF);
-  idbuf[3] = ((id >> 0) & 0xFF);
-  MCP2510_write(TXB0SIDH, idbuf, 4);
+  sid_h = (id >> 3) & 0xFF; //the id should be 11 bits. Take the high 8
+  sid_l = ((id & 0x7) << 5) | (0<<EXIDE);
+
+  MCP2510_write(TXB0SIDH, &sid_h, 1);
+  MCP2510_write(TXB0SIDL, &sid_l, 1);
 
   /* Load the data */
   MCP2510_write(TXB0D0, buf, size);
@@ -449,7 +463,7 @@ u08     MCP2510_transmit_std_message(u32   id,
 }
 
 void careful_clear_receive_interrupt(u08  flag){
-	u08 	value;
+	u08 value;
 
 	/* This is a hack solution to a pretty nasty silicon bug.
 		It needs to be improved such that we don't lose any
@@ -466,100 +480,109 @@ void careful_clear_receive_interrupt(u08  flag){
 			while( value & (1<<2) ) /* Wait for the bit to be cleared */
 				value = MCP2510_read_status();
 			/* Once its been cleared, reset the receive flag */
-		    	MCP2510_bit_modify(CANINTF, (1<<flag), 0x00);
-		}else{
+			MCP2510_bit_modify(CANINTF, (1<<flag), 0x00);
+		} else {
 			/* Clear the receive flag */
-		   	MCP2510_bit_modify(CANINTF, (1<<flag), 0x00);
-		   	/* Re set the tx request */
+			MCP2510_bit_modify(CANINTF, (1<<flag), 0x00);
+			/* Re set the tx request */
 			MCP2510_bit_modify(TXB0CTRL, (1<<trTXREQ0), (1<<trTXREQ0));
 		}
-	}else /* The bit wasn't set at all... Clear the flag */
+	} else { /* The bit wasn't set at all... Clear the flag */
 		MCP2510_bit_modify(CANINTF, (1<<flag), 0x00);
-
+	}
 }
 
 /* buf has to be capable of holding 8 bytes */
-u08 MCP2510_receive_message(u32* id, u08* buf, u08* length){
-  u08     value;
+u08 MCP2510_receive_message(u32* id, u08* buf, u08* length, u08 *ext){
 
-  value = MCP2510_read_status();
-  if(value & (1<<STATUS_RX0IF)){ /* Valid message recieved */
-    	/* Make sure we haven't suffered an overflow error */
-  	MCP2510_read(EFLG, buf, 1);
-  	if(*buf & (1<<trRX0OVR)){
-  		careful_clear_receive_interrupt(trRX0IF);
-  		MCP2510_bit_modify(EFLG, (1<<trRX0OVR), 0x00);
-  		return NO_MSG_ERR;
-  	}
+	u08 value;
 
-    	/* Copy in the identifier - to be updated to support
-    	   extended identifiers */
-    	MCP2510_read(RXB0SIDH, buf, 4);
+	value = MCP2510_read_status();
 
-    	/* Check to make sure we haven't received a standard length ID */
-    	if(!(buf[1] & (1 << EXIDE))){
-    		return(STD_ID_ERR);
-    	}
+	if(value & (1<<STATUS_RX0IF)) { /* Valid message recieved */
+		/* Make sure we haven't suffered an overflow error */
+		MCP2510_read(EFLG, buf, 1);
 
-  	(*id) = ((u32)buf[0]) << 21;
-    	(*id) |= ((u32)(buf[1] >> 5) & 0x07) << 18 ;
-    	(*id) |= ((u32)(buf[1] & 0x03)) << 16;
-    	(*id) |= ((u32)buf[2]) << 8;
-    	(*id) |= ((u32)buf[3]) << 0;
+		if(*buf & (1<<trRX0OVR)){
+			careful_clear_receive_interrupt(trRX0IF);
+			MCP2510_bit_modify(EFLG, (1<<trRX0OVR), 0x00);
+			return NO_MSG_ERR;
+		}
 
-    	/* Read the length */
-    	MCP2510_read(RXB0DLC, buf, 1);
-    	*length = buf[0] & 0x0F;
+		/* Copy in the identifier - to be updated to support
+		   extended identifiers */
+		MCP2510_read(RXB0SIDH, buf, 4);
 
-    	/* Read length number of bytes from the recieve buffer */
-    	MCP2510_read(RXB0D0, buf, *length);
+		/* Check to make sure we haven't received a standard length ID */
+		if(!(buf[1] & (1 << EXIDE))){
+			return(STD_ID_ERR);
+		}
+
+		(*id) = ((u32)buf[0]) << 21;
+		(*id) |= ((u32)(buf[1] >> 5) & 0x07) << 18 ;
+		(*id) |= ((u32)(buf[1] & 0x03)) << 16;
+		(*id) |= ((u32)buf[2]) << 8;
+		(*id) |= ((u32)buf[3]) << 0;
+
+		(*ext) = 1;
+
+		/* Read the length */
+		MCP2510_read(RXB0DLC, buf, 1);
+		*length = buf[0] & 0x0F;
+
+		/* Read length number of bytes from the recieve buffer */
+		MCP2510_read(RXB0D0, buf, *length);
 
 
 	/* The function below clears the receive interrupt in a manner that should
 		work around the silicon bug detailed in errata item 6 */
-	careful_clear_receive_interrupt(trRX0IF);
+		careful_clear_receive_interrupt(trRX0IF);
 
-    	return NO_ERR;
-  }
+		return NO_ERR;
 
-//  if(value & (1<<STATUS_RX1IF)){ /* Valid message recieved */
-//
-//  	/* Make sure we haven't suffered an overflow error */
-//  	MCP2510_read(EFLG, buf, 1);
-//  	if(*buf & (1<<trRX1OVR)){
-//  		MCP2510_bit_modify(EFLG, (1<<trRX1OVR), 0x00);
-//  		careful_clear_receive_interrupt(trRX1IF);
-//  		return NO_MSG_ERR;
-//  	}
-//
-//   	/* Copy in the identifier */
-//    	MCP2510_read(RXB1SIDH, buf, 4);
-//
-//    	/* Check to make sure we haven't received a standard length ID */
-//    	if(!(buf[1] & (1 << EXIDE)))
-//    		return(STD_ID_ERR);
-//
-//  	(*id) = ((u32)buf[0]) << 21;
-//    	(*id) |= ((u32)(buf[1] >> 5) & 0x07) << 18 ;
-//   	(*id) |= ((u32)(buf[1] & 0x03)) << 16;
-//    	(*id) |= ((u32)buf[2]) << 8;
-//    	(*id) |= ((u32)buf[3]) << 0;
-//
-//    	/* Read the length */
-//    	MCP2510_read(RXB1DLC, buf, 1);
-//    	*length = buf[0] & 0x0F;
-//
-//    	/* Read length bytes from the recieve buffer */
-//    	MCP2510_read(RXB1D0, buf, *length);
-//
-//	careful_clear_receive_interrupt(trRX1IF);
-//
-//    	return NO_ERR;
-//    }
+	}
 
-  /* There was no message to be recieved,
-     return an error */
-  return NO_MSG_ERR;
+	if(value & (1<<STATUS_RX1IF)) { /* Valid message recieved */
+		/* we're using rx1 for std messages */
+
+		toggle_red_led();
+
+		/* Make sure we haven't suffered an overflow error */
+		MCP2510_read(EFLG, buf, 1);
+
+		if(*buf & (1<<trRX1OVR)){
+			MCP2510_bit_modify(EFLG, (1<<trRX1OVR), 0x00);
+			careful_clear_receive_interrupt(trRX1IF);
+			return NO_MSG_ERR;
+		}
+
+		/* Copy in the identifier */
+		MCP2510_read(RXB1SIDH, buf, 2);
+
+		/* Check to make sure we haven't received a ext length ID */
+		if((buf[1] & (0 << EXIDE)))
+			return(EXT_ID_ERR);
+
+		(*id) = ((u32)buf[0]) << 3;
+		(*id) |= ((u32)buf[1] & 0x70) >> 5;
+
+		(*ext) = 0;
+
+		/* Read the length */
+		MCP2510_read(RXB1DLC, buf, 1);
+		*length = buf[0] & 0x0F;
+
+		/* Read length bytes from the recieve buffer */
+		MCP2510_read(RXB1D0, buf, *length);
+
+		careful_clear_receive_interrupt(trRX1IF);
+
+		return NO_ERR;
+	}
+
+	/* There was no message to be recieved,
+	 return an error */
+	return NO_MSG_ERR;
 }
 
 

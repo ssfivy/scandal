@@ -57,6 +57,7 @@ typedef struct can_mg {
   u32 id;
   u08 data[CAN_MSG_MAXSIZE];
   u08 length;
+  u08 ext;
 } can_msg;
 
 /* Standard CAN Layer Prototypes */
@@ -67,8 +68,11 @@ void init_can(void);
 /*! Get a message from the CAN controller. */
 u08  can_get_msg(can_msg* msg);
 
-/*! Send a message using the CAN controller */
+/*! Send a EXTID message using the CAN controller */
 u08  can_send_msg(can_msg* msg, u08 priority);
+
+/*! Send a STDID message using the CAN controller */
+u08  can_send_std_msg(can_msg* msg, u08 priority);
 
 /*! Register a message ID/mask. This guarantees that these messages will
   not be filtered out by hardware filters. Other messages are not

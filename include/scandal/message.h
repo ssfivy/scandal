@@ -275,7 +275,8 @@ u08 			scandal_send_user_error(u08 err);
 u08             scandal_send_reset(u08 priority, u08 node);
 u08             scandal_send_user_config(u08 priority, u08 node, u08 param, u32 value1, u32 value2);
 u08             scandal_send_timesync(u08 priority, u08 node, uint64_t newtime);
-u08             scandal_send_ws_drive_command(uint8_t identifier, float first, float second);
+u08             scandal_send_ws_drive_command(uint32_t identifier, float first, float second);
+u08             scandal_send_ws_id(uint32_t identifier, const char *str, int len);
 
 /* More static inline functions */ 
 

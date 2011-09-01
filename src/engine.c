@@ -33,6 +33,7 @@
 #include <scandal/eeprom.h>
 #include <scandal/devices.h>
 #include <scandal/message.h>
+#include <scandal/uart.h>
 
 #include <project/scandal_config.h>
 
@@ -46,13 +47,15 @@ uint64_t        timesync_offset;
 /* Local Prototypes */
 void            do_first_run(void);
 
-u08             handle_message(can_msg*	msg);
+u08             handle_ext_message(can_msg*	msg);
+u08             handle_std_message(can_msg*	msg);
 inline u08      scandal_handle_channel(can_msg* msg);
 inline u08      scandal_handle_config(can_msg* msg);
 inline u08      scandal_handle_reset(can_msg* msg);
 inline u08      scandal_handle_user_config(can_msg* msg);
 inline u08      scandal_handle_command(can_msg* msg);
 inline u08      scandal_handle_timesync(can_msg* msg);
+inline u08      scandal_handle_ws_message(can_msg* msg);
 
 void            set_channel_mb(u16 chan_num, s32 m, s32 b);
 void            retrieve_channel_mb(u16 chan_num);
@@ -201,7 +204,11 @@ void handle_scandal(void){
 		break;
 
 	case NO_ERR:
-		handle_message(&msg);
+		if (msg.ext)
+			handle_ext_message(&msg);
+		else
+			handle_std_message(&msg);
+
 		break;
 
 	default:
@@ -209,8 +216,13 @@ void handle_scandal(void){
 	}
 }
 
+/* this is most likely to be a wave sculptor message */
+u08	handle_std_message(can_msg*	msg){
+	scandal_handle_ws_message(msg);
+	return NO_ERR;
+}
 /* Local Functions */
-u08	handle_message(can_msg*	msg){
+u08	handle_ext_message(can_msg*	msg){
   switch(scandal_get_msg_type(msg)){
   case TIMESYNC_TYPE: 
 	  scandal_handle_timesync(msg); 
@@ -440,3 +452,8 @@ u08	scandal_handle_command(can_msg* msg){
 
 	return NO_ERR;
 }  
+
+u08	scandal_handle_ws_message(can_msg* msg){
+//	UART_PrintfProgStr("WS Message!\n\r");
+	return;
+}

@@ -41,7 +41,8 @@
 void MCP2510_set_mode(u08 mode);
 u08  MCP2510_get_mode(void);
 u08  MCP2510_transmit_message(u32 id, u08*  buf, u08 size, u08 priority);
-u08  MCP2510_receive_message(u32* id, u08* buf, u08* length);
+u08  MCP2510_transmit_std_message(u32 id, u08* buf, u08 size, u08 priority);
+u08  MCP2510_receive_message(u32* id, u08* buf, u08* length, u08 *ext);
 /* MCP2510 Prototypes */
 void MCP2510_reset(void);
 void MCP2510_read(u08	addr, u08* buf, u08 num_bytes);

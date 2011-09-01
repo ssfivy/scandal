@@ -36,6 +36,7 @@
 #define BUF_FULL_ERR     2
 #define NO_MSG_ERR       3
 #define STD_ID_ERR	 4
+#define EXT_ID_ERR	 5
 
 u08  scandal_get_last_scandal_error();
 void scandal_do_scandal_err(u08 	err);

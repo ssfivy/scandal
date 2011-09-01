@@ -14,6 +14,7 @@
 #include <scandal/message.h>
 #include <scandal/timer.h>
 #include <scandal/error.h>
+#include <scandal/tritium.h>
 
 #include <project/scandal_config.h>
 
@@ -206,7 +207,7 @@ u08 scandal_send_timesync(u08 priority, u08 node, uint64_t newtime) {
 	return NO_ERR;
 }
 
-u08 scandal_send_ws_drive_command(uint8_t identifier, float first, float second) {
+u08 scandal_send_ws_drive_command(uint32_t identifier, float first, float second) {
 	group_64 ws_packet;
     can_msg msg;
 
@@ -215,14 +216,40 @@ u08 scandal_send_ws_drive_command(uint8_t identifier, float first, float second)
 
 	msg.id = identifier;
 
-	msg.data[0] = ws_packet.data_u8[7];
-	msg.data[1] = ws_packet.data_u8[6];
-	msg.data[2] = ws_packet.data_u8[5];
-	msg.data[3] = ws_packet.data_u8[4];
-	msg.data[4] = ws_packet.data_u8[3];
-	msg.data[5] = ws_packet.data_u8[2];
-	msg.data[6] = ws_packet.data_u8[1];
-	msg.data[7] = ws_packet.data_u8[0];
+	msg.data[0] = ws_packet.data_u8[0];
+	msg.data[1] = ws_packet.data_u8[1];
+	msg.data[2] = ws_packet.data_u8[2];
+	msg.data[3] = ws_packet.data_u8[3];
+	msg.data[4] = ws_packet.data_u8[4];
+	msg.data[5] = ws_packet.data_u8[5];
+	msg.data[6] = ws_packet.data_u8[6];
+	msg.data[7] = ws_packet.data_u8[7];
 
-	can_send_std_message(&msg, 0);
+	can_send_std_msg(&msg, 0);
 
+	return NO_ERR;
+
+}
+
+u08 scandal_send_ws_id(uint32_t identifier, const char *str, int len) {
+    can_msg msg;
+
+	msg.id = identifier;
+
+	// TODO
+	// len should always be 4. this is a hack, think about it some more.
+
+	msg.data[0] = str[len-1];
+	msg.data[1] = str[len-2];
+	msg.data[2] = str[len-3];
+	msg.data[3] = str[len-4];
+	msg.data[4] = 0;
+	msg.data[5] = 0;
+	msg.data[6] = 0;
+	msg.data[7] = 0;
+
+	can_send_std_msg(&msg, 0);
+
+	return NO_ERR;
+
+}

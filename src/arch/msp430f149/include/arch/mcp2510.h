@@ -30,9 +30,9 @@
 #ifndef __MCP2510__
 #define __MCP2510__
 
-#include <scandal_can.h>
-#include <scandal_types.h>
-#include <scandal_config.h>
+#include <scandal/can.h>
+#include <scandal/types.h>
+#include <project/scandal_config.h>
 
 /* -------------------------------------------------------------------------
    Function Prototypes

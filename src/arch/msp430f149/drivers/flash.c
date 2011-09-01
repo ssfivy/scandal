@@ -8,8 +8,8 @@
    
 #include <io.h>
 #include <signal.h>
-#include "scandal_eeprom.h"
-#include "scandal_led.h"
+#include <scandal/eeprom.h>
+#include <scandal/led.h>
 
 /* Notes on flash programming: 
    David Snowdon, 5/4/2008

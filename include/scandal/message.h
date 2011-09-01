@@ -266,19 +266,16 @@ static inline u32 scandal_mk_timesync_id(u08 priority){
 		((u32)TIMESYNC_TYPE << TYPE_OFFSET));
 }
 
-
-
-
-
 /* Function prototypes */
-u08 		    scandal_send_heartbeat(u32 status);
+u08 			scandal_send_heartbeat(u32 status);
 u08             scandal_send_channel_with_timestamp(u08 priority, u16 chan_num, 
-						    u32 value, sc_time_t timestamp);
+						u32 value, sc_time_t timestamp);
 u08 			scandal_send_scandal_error(u08 err);
 u08 			scandal_send_user_error(u08 err);
 u08             scandal_send_reset(u08 priority, u08 node);
 u08             scandal_send_user_config(u08 priority, u08 node, u08 param, u32 value1, u32 value2);
 u08             scandal_send_timesync(u08 priority, u08 node, uint64_t newtime);
+u08             scandal_send_ws_drive_command(uint8_t identifier, float first, float second);
 
 /* More static inline functions */ 
 

@@ -8,8 +8,8 @@
 
 /* Not yet implemented */
 
-#include "scandal_adc.h"
-#include "scandal_types.h"
+#include <scandal/adc.h>
+#include <scandal/types.h>
 
 void init_adc(void){
 

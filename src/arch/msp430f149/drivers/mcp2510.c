@@ -26,12 +26,12 @@
  * along with Sunswift MCP2515 Driver.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "scandal_can.h"
-#include "spi_devices.h"
-#include "scandal_spi.h"
-#include "scandal_error.h"
-#include "mcp2510.h"
-#include "scandal_led.h"
+#include <project/spi_devices.h>
+#include <arch/mcp2510.h>
+#include <scandal/can.h>
+#include <scandal/spi.h>
+#include <scandal/error.h>
+#include <scandal/led.h>
 
 /* "spi_devices.h" must #define MCP2510 in order for this to compile.
    MCP2510 is the identifier of the SPI device to be used with
@@ -201,6 +201,10 @@ u08 can_send_msg(can_msg* msg, u08 priority){
 #else
   return(MCP2510_transmit_message(msg->id, msg->data, msg->length, priority));
 #endif
+}
+
+u08 can_send_std_msg(can_msg* msg){
+  return(MCP2510_transmit_std_message(msg->id, msg->data, msg->length, priority));
 }
 
 #if CAN_TX_BUFFER_SIZE > 0
@@ -373,6 +377,42 @@ u08 MCP2510_get_mode(){
 /* Note: This routine will fail if none of the transmit buffers are available */
 /*! Transmit a message using the MCP2510 and a free Tx buffer */
 u08     MCP2510_transmit_message(u32   id,
+				 u08*  buf,
+				 u08   size,
+				 u08   priority){
+  unsigned char value;
+  unsigned char idbuf[8];
+
+  value = MCP2510_read_status();
+  if((value & (1<<2)) != 0)    /* If the buffer is pending a transmission, return BUF_FULL_ERR */
+   	return BUF_FULL_ERR;
+
+  /* In order to comply with the CAN standard, the size (DLC) must
+     be less than or equal to 8 */
+  if(size>8)
+    size = 8;
+
+  /* Load the ID */
+  idbuf[0] = (id >> 21) & 0xFF;
+  idbuf[1] = (((id >> 18) & 0x07) << 5) | (1<<EXIDE) | ((id >> 16) & 0x03);
+  idbuf[2] = ((id >> 8) & 0xFF);
+  idbuf[3] = ((id >> 0) & 0xFF);
+  MCP2510_write(TXB0SIDH, idbuf, 4);
+
+  /* Load the data */
+  MCP2510_write(TXB0D0, buf, size);
+
+  /* Set the size byte */
+  MCP2510_write(TXB0DLC, &size, 1);
+
+  /* Set the priority and flag the buffer to be transmitted */
+  MCP2510_bit_modify(TXB0CTRL, TXBNCTRL_TXP_MASK, priority);
+  MCP2510_RTS(0x01);
+
+  return(NO_ERR);
+}
+
+u08     MCP2510_transmit_std_message(u32   id,
 				 u08*  buf,
 				 u08   size,
 				 u08   priority){

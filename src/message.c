@@ -205,3 +205,24 @@ u08 scandal_send_timesync(u08 priority, u08 node, uint64_t newtime) {
 
 	return NO_ERR;
 }
+
+u08 scandal_send_ws_drive_command(uint8_t identifier, float first, float second) {
+	group_64 ws_packet;
+    can_msg msg;
+
+	ws_packet.data_fp[0] = first;
+	ws_packet.data_fp[1] = second;
+
+	msg.id = identifier;
+
+	msg.data[0] = ws_packet.data_u8[7];
+	msg.data[1] = ws_packet.data_u8[6];
+	msg.data[2] = ws_packet.data_u8[5];
+	msg.data[3] = ws_packet.data_u8[4];
+	msg.data[4] = ws_packet.data_u8[3];
+	msg.data[5] = ws_packet.data_u8[2];
+	msg.data[6] = ws_packet.data_u8[1];
+	msg.data[7] = ws_packet.data_u8[0];
+
+	can_send_std_message(&msg, 0);
+

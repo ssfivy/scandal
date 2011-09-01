@@ -35,7 +35,6 @@
 #include <scandal/message.h>
 
 #include <project/scandal_config.h>
-#include <project/driver_config.h>
 
 in_channel           in_channels[NUM_IN_CHANNELS];
 in_channel_handler   in_channel_handlers[NUM_IN_CHANNELS];
@@ -86,7 +85,7 @@ u08 scandal_init(void){
 		in_channels[i].value = 0;
 		in_channels[i].rcvd_time = 0;
 		in_channels[i].time = 0;
-		in_channel_handlers[i] = NULL;
+		in_channel_handlers[i] = 0;
 		/* Register the ID */
 		u32 id = scandal_mk_channel_id(0, my_config.ins[i].source_node,
 								my_config.ins[i].source_num);
@@ -316,7 +315,7 @@ u08	scandal_handle_channel(can_msg* msg){
 			in_channels[i].time = time;
 			in_channels[i].rcvd_time = sc_get_timer();
 
-			if (in_channel_handlers[i] != NULL) {
+			if (in_channel_handlers[i] != 0) {
 				in_channel_handler handler = in_channel_handlers[i];
 				handler(value, time);
 			}

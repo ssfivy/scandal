@@ -130,7 +130,7 @@ u08 can_send_msg(can_msg *msg, u08 priority) {
 /* Send a standard CAN message
  * TODO!
  */
-can_send_std_msg(can_msg* msg, u08 priority) {
+u08 can_send_std_msg(can_msg* msg, u08 priority) {
 	return NO_ERR;
 }
 

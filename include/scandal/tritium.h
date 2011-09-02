@@ -25,10 +25,6 @@
 #ifndef __TRITIUM_H__
 #define __TRITIUM_H__
 
-// Constant Definitions
-#define	TRUE			1
-#define FALSE			0
-
 // Typedefs for quickly joining multiple bytes/ints/etc into larger values
 // These rely on byte ordering in CPU & memory - i.e. they're not portable across architectures
 typedef union _group_64 {

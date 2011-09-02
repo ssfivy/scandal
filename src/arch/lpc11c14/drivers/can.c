@@ -127,6 +127,13 @@ u08 can_send_msg(can_msg *msg, u08 priority) {
 	return NO_ERR;
 }
 
+/* Send a standard CAN message
+ * TODO!
+ */
+u08 can_send_std_msg(can_msg* msg, u08 priority) {
+	return NO_ERR;
+}
+
 /* Register for a message type. Currently, each message that we want to register
  * for is given a specific message buffer. This limits the maximum number of in
  * channels to be 21 - 4 = 17. Look in scandal/engine.c for where this function

@@ -42,7 +42,7 @@
 #define SSP_DEBUG		0
 
 /* SPI read and write buffer size */
-#define SSP_BUFSIZE		16
+#define SSP_BUFSIZE		8
 #define FIFOSIZE		8
 
 #define DELAY_COUNT		10

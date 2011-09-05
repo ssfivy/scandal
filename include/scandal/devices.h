@@ -558,7 +558,6 @@
 
 /* In Channels */ 
 #define CURRENTINT_NUM_IN_CHANNELS                                      0
-//<<<<<<< scandal_devices.h
 
 /* MSPOnewire */ 
 /* Out Channels */ 

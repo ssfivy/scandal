@@ -408,6 +408,11 @@ void GPIOSetValue( uint32_t portNum, uint32_t bitPosi, uint32_t bitVal )
   LPC_GPIO[portNum]->MASKED_ACCESS[(1<<bitPosi)] = (bitVal<<bitPosi);
 }
 
+uint32_t GPIOGetValue( uint32_t portNum, uint32_t bitPosi)
+{
+  return LPC_GPIO[portNum]->MASKED_ACCESS[(1<<bitPosi)];
+}
+
 /*****************************************************************************
 ** Function name:		GPIOSetDir
 **

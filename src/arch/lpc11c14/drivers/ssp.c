@@ -19,10 +19,10 @@
  * warranty that such application will be suitable for the specified
  * use without further testing or modification.
 ****************************************************************************/
-#include "driver_config.h"
+#include <project/driver_config.h>
 #if CONFIG_ENABLE_DRIVER_SSP==1
-#include "gpio.h"
-#include "ssp.h"
+#include <arch/gpio.h>
+#include <arch/ssp.h>
 
 /* statistics of all the interrupts */
 volatile uint32_t interruptRxStat0 = 0;
@@ -185,10 +185,10 @@ void SSP_IOConfig( uint8_t portNum )
 	/* Enable AHB clock to the GPIO domain. */
 	LPC_SYSCON->SYSAHBCLKCTRL |= (1<<6);
 		
-	LPC_IOCON->PIO2_0 &= ~0x07;		/* SSP SSEL is a GPIO pin */
+//	LPC_IOCON->PIO2_0 &= ~0x07;		/* SSP SSEL is a GPIO pin */
 	/* port2, bit 0 is set to GPIO output and high */
-	GPIOSetDir( PORT2, 0, 1 );
-	GPIOSetValue( PORT2, 0, 1 );
+//	GPIOSetDir( PORT2, 0, 1 );
+//	GPIOSetValue( PORT2, 0, 1 );
 #endif
   }
   return;		
@@ -248,7 +248,7 @@ void SSP_Init( uint8_t portNum )
   else
   {
 	/* Set DSS data to 8-bit, Frame format SPI, CPOL = 0, CPHA = 0, and SCR is 15 */
-	LPC_SSP1->CR0 = 0x0707;
+	LPC_SSP1->CR0 = 0x0787; //currently set to clock data out on falling edge
 
 	/* SSPCPSR clock prescale register, master mode, minimum divisor is 0x02 */
 	LPC_SSP1->CPSR = 0x2;
@@ -384,7 +384,7 @@ void SSP_Receive( uint8_t portNum, uint8_t *buf, uint32_t Length )
 #if SSP_SLAVE
 	  while ( !(LPC_SSP1->SR & SSPSR_RNE) );
 #else
-	  LPC_SSP1->DR = 0xFF;
+	  LPC_SSP1->DR = 0x00;
 	  /* Wait until the Busy bit is cleared */
 	  while ( (LPC_SSP1->SR & (SSPSR_BSY|SSPSR_RNE)) != SSPSR_RNE );
 #endif

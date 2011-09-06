@@ -41,6 +41,7 @@ void GPIOIntDisable( uint32_t portNum, uint32_t bitPosi );
 uint32_t GPIOIntStatus( uint32_t portNum, uint32_t bitPosi );
 void GPIOIntClear( uint32_t portNum, uint32_t bitPosi );
 void GPIOSetValue( uint32_t portNum, uint32_t bitPosi, uint32_t bitVal );
+uint32_t GPIOGetValue( uint32_t portNum, uint32_t bitPosi);
 void GPIOSetDir( uint32_t portNum, uint32_t bitPosi, uint32_t dir );
 #endif
 #endif /* end __GPIO_H */

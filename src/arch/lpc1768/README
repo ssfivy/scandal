@@ -1,0 +1,24 @@
+This is all support files for developing with a LPC1768 microcontroller.
+
+LPC17xx.ld is the linker script for the LPC17xx series.
+Linker script determines the physical placement of code in the address space
+of the microcontroller.
+This is currently set to program the LPC1768 with 512 kB Flash, 
+32 kB local static RAM, 2x16 kB AHB ram (whatever it is)
+
+startup_LPC17xx.s is the assembly startup file for LPC17xx.
+This does things like setting up stacks, calling C libraries etc if needed before
+jumping to C code.
+
+LPC1700CMSIS is standard CMSIS from NXP. It's a bunch of #defines and
+functions to access lpc1768 registers / hardware.
+
+This folder is NOT modified at all from the standard CMSIS and should be 
+able to directly replaced with later versions of CMSIS from NXP.
+
+(except of some files calling "lpc17xx.h" instead of "LPC17xx.h" - 
+linux is case sensitive.)
+
+(and a lot of unused files are deleted, to keep size down 
+everytime someone does a cvs co. Normally it's ~50 MB by itself)
+

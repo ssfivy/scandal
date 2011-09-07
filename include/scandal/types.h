@@ -65,7 +65,7 @@ typedef signed int16   s16;
 typedef unsigned int32 u32; 
 
 #else
-#ifdef MSP430
+#ifdef msp430f149
 #include <sys/inttypes.h>
 /* MSPGCC is being used */
 typedef uint8_t        u08;
@@ -80,7 +80,7 @@ typedef uint64_t       u64;
 #define AVAILABLE_64
 
 #else
-#ifdef LPC11C14
+#ifdef lpc11c14
 #include <arch/type.h>
 
 typedef uint8_t        u08;

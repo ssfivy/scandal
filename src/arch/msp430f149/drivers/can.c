@@ -27,7 +27,9 @@
  */
 
 #include <project/spi_devices.h>
-#include <arch/mcp2510.h>
+
+#include <arch/can.h>
+
 #include <scandal/can.h>
 #include <scandal/spi.h>
 #include <scandal/error.h>

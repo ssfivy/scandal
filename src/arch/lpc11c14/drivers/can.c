@@ -72,7 +72,7 @@ uint32_t CANStatusLogCount = 0;
  */
 
 void init_can(void) {
-	CAN_Init(BITRATE50K16MHZ);
+	CAN_Init(BITRATE125K16MHZ);
 }
 
 /* Get a message from the CAN controller. */
@@ -87,7 +87,6 @@ u08 can_get_msg(can_msg* msg) {
 
 	for(i = 0; i < MSG_OBJ_MAX; i++) {
 		if (CANRxDone[i] == TRUE) {
-			int n = 0;
 			CAN_decode_packet(i, (int32_t*)(&can_data), (uint32_t*)(&can_timestamp), &priority, &msg_type, &node_address, &channel_num);
 
 			msg->id = can_buff[i].id;
@@ -165,6 +164,7 @@ u08 can_register_id(u32 mask, u32 data, u08 priority) {
 			return NO_ERR;
 		}
 	}
+	return NO_MSG_ERR;
 }
 
 /* does nothing yet */
@@ -193,7 +193,7 @@ void CAN_decode_packet(uint8_t msg_num, int32_t *data, uint32_t *timestamp,
 	CANRxDone[msg_num] = 0;
 }
 
-static inline void CAN_set_up_filter(uint8_t msg_id, uint32_t filter_mask, uint32_t filter_addr) {
+void CAN_set_up_filter(uint8_t msg_id, uint32_t filter_mask, uint32_t filter_addr) {
 
 	LPC_CAN->IF1_CMDMSK = WR|MASK|ARB|CTRL|DATAA|DATAB; //Configuring (Writing to) the message objects
 
@@ -433,7 +433,6 @@ void CAN_Send(uint16_t Pri, can_msg *msg) {
 	uint8_t BufferPos; //Buffer Position (Counter variable to see if the buffer position is BUSY
 	uint8_t BufferOffset=21; //The offset from which the buffer will start counting (Assumed 21 through 32)
 	uint8_t BufferFree; //Status of the buffer being checked, 1 indicates busy
-	uint32_t Buffers;
 
 	/* Data is stored in can_msg->data[0-4], timestamp is stored in can_msg->data[4-7] */
 	uint32_t can_data;

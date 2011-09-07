@@ -176,11 +176,10 @@ extern void CAN_CustomConfigureMessages( void );
 extern void CAN_MessageProcess( uint8_t MsgObjNo );
 //extern void CAN_Send( uint8_t msg_no, uint8_t received_flag, uint32_t *data );
 void CAN_Send(uint16_t Pri, can_msg *msg);
-static inline void CAN_set_up_filter(uint8_t msg_id, uint32_t filter_mask, uint32_t filter_addr);
+void CAN_set_up_filter(uint8_t msg_id, uint32_t filter_mask, uint32_t filter_addr);
 void CAN_decode_packet(uint8_t msg_num, int32_t *data, uint32_t *timestamp,
 	uint16_t *priority, uint16_t *type, uint16_t *node_address, uint16_t *channel_num);
 extern void CAN_MsgConfigParam(uint8_t msg_no, uint8_t *eob, uint32_t *filtermask, uint32_t *filteraddr);
-
 extern void FetchData(uint8_t MsgNum, int32_t *DataPointer, uint32_t *TimePointer);
 extern void FetchHeaders(uint8_t MsgNum, uint16_t *Pri, uint16_t *MsgType, uint16_t *NodAddr, uint16_t *Chnl_NodTyp);
 extern void ProcessReceived(uint8_t MsgNum);

@@ -20,8 +20,6 @@
 #ifndef __CAN_H__
 #define __CAN_H__
 
-#if CONFIG_ENABLE_DRIVER_CAN==1
-
 #include <project/driver_config.h>
 
 #include <arch/type.h>
@@ -39,23 +37,14 @@ at a time.
 */
 
 #define TRANSMIT_ONLY           0
-#define POLLING                 0
-#define LOOPBACK_MODE           0		
-#define BASIC_MODE              0
 
 #define CAN_DEBUG				0
 
-/* Only below flag is set, it uses the default setting 
-in the CAN bittiming configuration value. In this case, 
-CAN clock should be 8MHz CAN clock bitrate should be 500kbps. */
-#define USE_DEFAULT_BIT_TIMING  0
-
 /* Data structure for a CAN message */
-typedef struct
-{
-    uint32_t	id;
-    uint32_t 	dlc;
-    uint32_t	data[4];
+typedef struct {
+	uint32_t	id;
+	uint32_t	dlc;
+	uint32_t	data[4];
 } message_object;
 
 #define MSG_OBJ_MAX			0x0020
@@ -86,24 +75,24 @@ typedef struct
 /*    LPC_CAN->BT = 0x5801;	*/	/* 500kbps with 16M sysclk */
 /*    LPC_CAN->BT = 0x5803;	*/	/* 250kbps with 16M sysclk */
 
-#define BITRATE50K16MHZ			  0x00005853
+#define BITRATE50K16MHZ   0x00005853
 
-#define BITRATE100K8MHZ           0x00000113
-#define BITRATE125K8MHZ           0x0000010F
-#define BITRATE250K8MHZ           0x00000107
-#define BITRATE500K8MHZ           0x00000103
-#define BITRATE1000K8MHZ          0x00000101
+#define BITRATE100K8MHZ   0x00000113
+#define BITRATE125K8MHZ   0x0000010F
+#define BITRATE250K8MHZ   0x00000107
+#define BITRATE500K8MHZ   0x00000103
+#define BITRATE1000K8MHZ  0x00000101
 
-#define BITRATE100K16MHZ          0x00005809
-#define BITRATE125K16MHZ          0x00005807
-#define BITRATE250K16MHZ          0x00005803
-#define BITRATE500K16MHZ          0x00005801
+#define BITRATE100K16MHZ  0x00005809
+#define BITRATE125K16MHZ  0x00005807
+#define BITRATE250K16MHZ  0x00005803
+#define BITRATE500K16MHZ  0x00005801
 
-#define BITRATE100K24MHZ          0x00007E09
-#define BITRATE125K24MHZ          0x0000450F
-#define BITRATE250K24MHZ          0x00004507
-#define BITRATE500K24MHZ          0x00004503
-#define BITRATE1000K24MHZ         0x00004501
+#define BITRATE100K24MHZ  0x00007E09
+#define BITRATE125K24MHZ  0x0000450F
+#define BITRATE250K24MHZ  0x00004507
+#define BITRATE500K24MHZ  0x00004503
+#define BITRATE1000K24MHZ 0x00004501
 
 
 #define CAN_STATUS_INTERRUPT      0x8000    /* 0x0001-0x0020 are the # of the message 
@@ -163,29 +152,19 @@ typedef struct
 #define	EOB			(1 << 7)      /* End of buffer, always write to 1 */ 
 #define	DLC			0x000F        /* bit mask for DLC */ 
 
-#define ID_STD_MASK		0x07FF		
-#define ID_EXT_MASK		0x1FFFFFFF //0x00000000//
+#define ID_STD_MASK		0x07FF
+#define ID_EXT_MASK		0x1FFFFFFF
 #define DLC_MASK		0x0F
 
 #include <scandal/can.h>
 
-extern void CAN_IRQHandler (void);
-extern void CAN_Init( uint32_t CANBitClk );
-extern void CAN_ConfigureMessages( void );
-extern void CAN_CustomConfigureMessages( void );
+extern void CAN_Init( uint32_t baud );
 extern void CAN_MessageProcess( uint8_t MsgObjNo );
-//extern void CAN_Send( uint8_t msg_no, uint8_t received_flag, uint32_t *data );
-void CAN_Send(uint16_t Pri, can_msg *msg);
+int CAN_Send(uint16_t Pri, can_msg *msg);
 void CAN_set_up_filter(uint8_t msg_id, uint32_t filter_mask, uint32_t filter_addr);
 void CAN_decode_packet(uint8_t msg_num, int32_t *data, uint32_t *timestamp,
 	uint16_t *priority, uint16_t *type, uint16_t *node_address, uint16_t *channel_num);
-extern void CAN_MsgConfigParam(uint8_t msg_no, uint8_t *eob, uint32_t *filtermask, uint32_t *filteraddr);
-extern void FetchData(uint8_t MsgNum, int32_t *DataPointer, uint32_t *TimePointer);
-extern void FetchHeaders(uint8_t MsgNum, uint16_t *Pri, uint16_t *MsgType, uint16_t *NodAddr, uint16_t *Chnl_NodTyp);
-extern void ProcessReceived(uint8_t MsgNum);
-extern uint8_t BufferCheck(uint8_t ToCheck);
 
-#endif
 #endif  /* __CAN_H__ */
 /*****************************************************************************
 **                            End Of File

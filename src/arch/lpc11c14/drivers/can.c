@@ -44,7 +44,6 @@
 
 uint8_t recv_buf_used[MSG_OBJ_MAX]; /* this will be used to determine if a recv buffer is available */
 
-#define CUSTOM_CONFIG 1
 #define REORDER_DATA 1
 
 /* statistics of all the interrupts */
@@ -71,6 +70,7 @@ uint32_t CANStatusLogCount = 0;
  * } can_msg;
  */
 
+/* Scandal wrapper for init */
 void init_can(void) {
 	CAN_Init(BITRATE125K16MHZ);
 }
@@ -122,8 +122,7 @@ u08 can_get_msg(can_msg* msg) {
 
 /* Send a message using the CAN controller */
 u08 can_send_msg(can_msg *msg, u08 priority) {
-	CAN_Send((uint16_t)priority, msg);
-	return NO_ERR;
+	return CAN_Send((uint16_t)priority, msg);
 }
 
 /* Send a standard CAN message
@@ -133,12 +132,13 @@ u08 can_send_std_msg(can_msg* msg, u08 priority) {
 	return NO_ERR;
 }
 
-/* Register for a message type. Currently, each message that we want to register
- * for is given a specific message buffer. This limits the maximum number of in
- * channels to be 21 - 4 = 17. Look in scandal/engine.c for where this function
- * is called to see why. At the moment, I don't think there are any nodes with
- * large numbers of in channels. If we need to deal with this, it can be done 
- * in the future */
+/* Register for a message type. Currently, each message that we want to
+ * register for is given a specific message buffer. This limits the maximum
+ * number of in channels to be 21 - 4 = 17. (the 4 comes from the 4 types of
+ * messages that scandal registers for by default). Look in scandal/engine.c
+ * for where this function is called to see why. At the moment, I don't think
+ * there are any nodes with large numbers of in channels. If we need to deal
+ * with this, it can be done in the future */
 u08 can_register_id(u32 mask, u32 data, u08 priority) {
 	int i;
 
@@ -179,6 +179,7 @@ void can_poll(void) {}
  * End Scandal wrappers
  */
 
+/* Get a message out of the buffer and break it into bits */
 void CAN_decode_packet(uint8_t msg_num, int32_t *data, uint32_t *timestamp,
 	uint16_t *priority, uint16_t *type, uint16_t *node_address, uint16_t *channel_num) {
 
@@ -193,6 +194,7 @@ void CAN_decode_packet(uint8_t msg_num, int32_t *data, uint32_t *timestamp,
 	CANRxDone[msg_num] = 0;
 }
 
+/* Set up a message buffer to receive a particular type of message specified in filter and mask */
 void CAN_set_up_filter(uint8_t msg_id, uint32_t filter_mask, uint32_t filter_addr) {
 
 	LPC_CAN->IF1_CMDMSK = WR|MASK|ARB|CTRL|DATAA|DATAB; //Configuring (Writing to) the message objects
@@ -212,231 +214,178 @@ void CAN_set_up_filter(uint8_t msg_id, uint32_t filter_mask, uint32_t filter_add
 	LPC_CAN->IF1_DB2 = 0x0000;
 
 	/* Transfer data to message RAM */
-	LPC_CAN->IF1_CMDREQ = msg_id+1;
+	LPC_CAN->IF1_CMDREQ = msg_id + 1;
 
-	while( LPC_CAN->IF1_CMDREQ & IFCREQ_BUSY );
-
+	while( LPC_CAN->IF1_CMDREQ & IFCREQ_BUSY )
+		;
 }
 
-/*****************************************************************************
-** Function name:		MessageProcess
-**
-** Descriptions:		A valid message received, process message
-**
-** parameters:			Message Object number
-** Returned value:		None
-** 
-*****************************************************************************/
-void CAN_MessageProcess( uint8_t MsgNo )
-{
-  uint32_t MsgID;
-  uint32_t *p_add;
+/* A message has been received, copy the data out of the registers and reorder it for use */
+void CAN_MessageProcess( uint8_t MsgNo ) {
+	uint32_t MsgID;
+	uint32_t *p_add;
 
-#if BASIC_MODE
-  LPC_CAN->IF2_CMDMSK = RD|MASK|ARB|TREQ|DATAA|DATAB;
-  LPC_CAN->IF2_CMDREQ = IFCREQ_BUSY;    /* Start message transfer */
-#else
-  while ( LPC_CAN->IF2_CMDREQ & IFCREQ_BUSY );
-  LPC_CAN->IF2_CMDMSK = RD|MASK|ARB|CTRL|INTPND|TREQ|DATAA|DATAB;	
-  LPC_CAN->IF2_CMDREQ = MsgNo+1;    /* Start message transfer */
-#endif	
-  while ( LPC_CAN->IF2_CMDREQ & IFCREQ_BUSY );	/* Check new data bit */
+	while ( LPC_CAN->IF2_CMDREQ & IFCREQ_BUSY )
+		;
 
-  p_add = (uint32_t *)&can_buff[MsgNo];
-  if( LPC_CAN->IF2_ARB2 & ID_MTD )	/* bit 28-0 is 29 bit extended frame */
-  {
-	/* mask off MsgVal and Dir */ 
-	MsgID = (LPC_CAN->IF2_ARB1|((LPC_CAN->IF2_ARB2&0x5FFF)<<16));
-  }
-  else
-  {
-	/* bit 28-18 is 11-bit standard frame */
-	MsgID = (LPC_CAN->IF2_ARB2 &0x1FFF) >> 2;
-  }
+	LPC_CAN->IF2_CMDMSK = RD|MASK|ARB|CTRL|INTPND|TREQ|DATAA|DATAB;	
+	LPC_CAN->IF2_CMDREQ = MsgNo+1;    /* Start message transfer */
 
-  *p_add++ = MsgID;
-  *p_add++ = LPC_CAN->IF2_MCTRL & 0x000F;	// Get Msg Obj Data length
+	/* Check new data bit */
+	while ( LPC_CAN->IF2_CMDREQ & IFCREQ_BUSY )
+		;
 
+	/* where are we storing the message? */
+	p_add = (uint32_t *)&can_buff[MsgNo];
+
+	if( LPC_CAN->IF2_ARB2 & ID_MTD ) { /* bit 28-0 is 29 bit extended frame */
+		/* mask off MsgVal and Dir */ 
+		MsgID = (LPC_CAN->IF2_ARB1|((LPC_CAN->IF2_ARB2&0x5FFF)<<16));
+	} else {
+		/* bit 28-18 is 11-bit standard frame */
+		MsgID = (LPC_CAN->IF2_ARB2 &0x1FFF) >> 2;
+	}
+
+	*p_add++ = MsgID;
+	*p_add++ = LPC_CAN->IF2_MCTRL & 0x000F;	// Get Msg Obj Data length
 
 #if REORDER_DATA
-  uint32_t msghold;
-  uint32_t msgleftshift;
-  uint32_t msgrightshift;
+	uint32_t msghold;
+	uint32_t msgleftshift;
+	uint32_t msgrightshift;
 
-	  msghold=LPC_CAN->IF2_DA1; //Stores the next two bytes in msghold
-	  msgleftshift = (msghold & 0x000000FF)<<8; //Shifts the last byte left by 8 bits
-	  msgrightshift = (msghold & 0x0000FF00)>>8; //Shifts the second last byte right by 8 bits
-	  *p_add++ = msgleftshift | msgrightshift; //OR's the two shifted results to give the data in the right order
+	msghold = LPC_CAN->IF2_DA1; //Stores the next two bytes in msghold
+	msgleftshift = (msghold & 0x000000FF)<<8; //Shifts the last byte left by 8 bits
+	msgrightshift = (msghold & 0x0000FF00)>>8; //Shifts the second last byte right by 8 bits
+	*p_add++ = msgleftshift | msgrightshift; //OR's the two shifted results to give the data in the right order
 
-	  msghold=LPC_CAN->IF2_DA2; //Stores the next two bytes in msghold
-	  msgleftshift = (msghold & 0x000000FF)<<8; //Shifts the last byte left by 8 bits
-	  msgrightshift = (msghold & 0x0000FF00)>>8; //Shifts the second last byte right by 8 bits
-	  *p_add++ = msgleftshift | msgrightshift; //OR's the two shifted results to give the data in the right order
+	msghold = LPC_CAN->IF2_DA2; //Stores the next two bytes in msghold
+	msgleftshift = (msghold & 0x000000FF)<<8; //Shifts the last byte left by 8 bits
+	msgrightshift = (msghold & 0x0000FF00)>>8; //Shifts the second last byte right by 8 bits
+	*p_add++ = msgleftshift | msgrightshift; //OR's the two shifted results to give the data in the right order
 
-	  msghold=LPC_CAN->IF2_DB1; //Stores the next two bytes in msghold
-	  msgleftshift = (msghold & 0x000000FF)<<8; //Shifts the last byte left by 8 bits
-	  msgrightshift = (msghold & 0x0000FF00)>>8; //Shifts the second last byte right by 8 bits
-	  *p_add++ = msgleftshift | msgrightshift; //OR's the two shifted results to give the data in the right order
+	msghold = LPC_CAN->IF2_DB1; //Stores the next two bytes in msghold
+	msgleftshift = (msghold & 0x000000FF)<<8; //Shifts the last byte left by 8 bits
+	msgrightshift = (msghold & 0x0000FF00)>>8; //Shifts the second last byte right by 8 bits
+	*p_add++ = msgleftshift | msgrightshift; //OR's the two shifted results to give the data in the right order
 
-	  msghold=LPC_CAN->IF2_DB2; //Stores the next two bytes in msghold
-	  msgleftshift = (msghold & 0x000000FF)<<8; //Shifts the last byte left by 8 bits
-	  msgrightshift = (msghold & 0x0000FF00)>>8; //Shifts the second last byte right by 8 bits
-	  *p_add++ = msgleftshift | msgrightshift; //OR's the two shifted results to give the data in the right order
-
+	msghold = LPC_CAN->IF2_DB2; //Stores the next two bytes in msghold
+	msgleftshift = (msghold & 0x000000FF)<<8; //Shifts the last byte left by 8 bits
+	msgrightshift = (msghold & 0x0000FF00)>>8; //Shifts the second last byte right by 8 bits
+	*p_add++ = msgleftshift | msgrightshift; //OR's the two shifted results to give the data in the right order
 #else
-  *p_add++ = LPC_CAN->IF2_DA1;
-  *p_add++ = LPC_CAN->IF2_DA2;
-  *p_add++ = LPC_CAN->IF2_DB1;
-  *p_add++ = LPC_CAN->IF2_DB2;
+	*p_add++ = LPC_CAN->IF2_DA1;
+	*p_add++ = LPC_CAN->IF2_DA2;
+	*p_add++ = LPC_CAN->IF2_DB1;
+	*p_add++ = LPC_CAN->IF2_DB2;
 #endif
-  return;
+
+	return;
 }
 
-#if !POLLING
-#if CONFIG_CAN_DEFAULT_CAN_IRQHANDLER==1
-/*****************************************************************************
-** Function name:		CAN_IRQHandler
-**
-** Descriptions:		Processing CAN interrupt
-**
-** parameters:			None
-** Returned value:		None
-** 
-*****************************************************************************/
-void CAN_IRQHandler(void) 
-{
-  uint32_t canstat = canstat;
-  uint32_t can_int, msg_no;
+/* Something happened, see what it was and deal with it */
+void CAN_IRQHandler(void) {
+	uint32_t canstat = canstat;
+	uint32_t can_int, msg_no;
 
-  while ( (can_int = LPC_CAN->INT) != 0 )
-  {
-	if ( can_int & CAN_STATUS_INTERRUPT )
-	{
-	  canstat = LPC_CAN->STAT;
+	while ( (can_int = LPC_CAN->INT) != 0 ) {
+		if ( can_int & CAN_STATUS_INTERRUPT ) {
+			canstat = LPC_CAN->STAT;
 #if CAN_DEBUG
-	  CANStatusLog[CANStatusLogCount++] = canstat;
+			CANStatusLog[CANStatusLogCount++] = canstat;
 #endif
-	  if ( canstat & STAT_EWARN )
-	  {
-		EWarnCnt++;
-		return;
-	  }
-	  if ( canstat & STAT_BOFF )
-	  {
-		BOffCnt++;
-		return;
-	  }
-	}
-	else
-	{
-      if ( (canstat & STAT_LEC) == 0 ) 	/* NO ERROR */
-	  {
-		/* deal with RX only for now. */
-		msg_no = can_int & 0x7FFF;
-		if ( (msg_no >= 0x01) && (msg_no <= 0x20) )
-		{
-		  LPC_CAN->STAT &= ~STAT_RXOK;
-		  CAN_MessageProcess( msg_no-1 ); //msg_no goes up from 1, msg_no ranges from 0
-		  CANRxDone[msg_no-1] = TRUE;
+			if ( canstat & STAT_EWARN ) {
+				EWarnCnt++;
+				return;
+			}
+
+			if ( canstat & STAT_BOFF ) {
+				BOffCnt++;
+				return;
+			}
+
+		} else {
+			if ( (canstat & STAT_LEC) == 0 ) { /* NO ERROR */
+				/* deal with RX only for now. */
+				msg_no = can_int & 0x7FFF;
+				if ( (msg_no >= 0x01) && (msg_no <= 0x20) ) {
+					LPC_CAN->STAT &= ~STAT_RXOK;
+					CAN_MessageProcess( msg_no-1 ); //msg_no goes up from 1, msg_no ranges from 0
+					CANRxDone[msg_no-1] = TRUE;
+				}
+			}
 		}
-	  }
 	}
-  }	
-  return;
-}
-#endif
-#endif
-
-/*****************************************************************************
-** Function name:		CAN_Init
-**
-** Descriptions:		CAN clock, port initialization
-**				
-** parameters:			None
-** Returned value:		None
-** 
-*****************************************************************************/
-void CAN_Init( uint32_t CANBitClk )
-{
-  LPC_SYSCON->PRESETCTRL |= (0x1<<3);
-  LPC_SYSCON->SYSAHBCLKCTRL |= (1<<17);
-
-  /* The USB D- and CAN RX share the dedicated pin. The USB D+ 
-  and CAN TX share the dedicated pin. so, no IO configuration is 
-  needed for CAN. */
-  if ( !(LPC_CAN->CNTL & CTRL_INIT) )
-  {
-	/* If it's in normal operation already, stop it, reconfigure 
-	everything first, then restart. */
-	LPC_CAN->CNTL |= CTRL_INIT;		/* Default state */
-  }
-
-#if USE_DEFAULT_BIT_TIMING
-  /* AHB clock is 48Mhz. The CAN clock divider is within CAN block, 
-  set it to 8Mhz for now. Thus, default bit timing doesn't need to 
-  be touched. */
-  LPC_CAN->CLKDIV = 0x02;			/* Divided by 3 now for 16MHz */
-   /* Start configuring bit timing */
-  LPC_CAN->CNTL |= CTRL_CCE;
-  LPC_CAN->BT = 0x2301;
-  LPC_CAN->BRPE = 0x0000;
-  /* Stop configuring bit timing */
-  LPC_CAN->CNTL &= ~CTRL_CCE;
-#else
-  /* Be very careful with this setting because it's related to
-  the input bitclock setting value in CANBitClk. */
-  /* popular CAN clock setting assuming AHB clock is 48Mhz:
-  CLKDIV = 1, CAN clock is 48Mhz/2 = 24Mhz
-  CLKDIV = 2, CAN clock is 48Mhz/3 = 16Mhz
-  CLKDIV = 3, CAN clock is 48Mhz/4 = 12Mhz
-  CLKDIV = 5, CAN clock is 48Mhz/6 = 8Mhz */
-
-  /* AHB clock is 48Mhz, the CAN clock is 1/3 AHB clock = 16Mhz */
-  LPC_CAN->CLKDIV = 0x02;			/* Divided by 3 */
-  
-  /* Start configuring bit timing */
-  LPC_CAN->CNTL |= CTRL_CCE;
-  LPC_CAN->BT = CANBitClk;
-  LPC_CAN->BRPE = 0x0000;
-  /* Stop configuring bit timing */
-  LPC_CAN->CNTL &= ~CTRL_CCE;
-#endif
-
-  /* Initialization finishes, normal operation now. */
-  LPC_CAN->CNTL &= ~CTRL_INIT;
-  while ( LPC_CAN->CNTL & CTRL_INIT );
-
-#if (LOOPBACK_MODE | BASIC_MODE)
-  LPC_CAN->CNTL |= CTRL_TEST;
-  LPC_CAN->TEST &= ~((0x1<<2)|(0x1<<3)|(0x1<<4));
-#if LOOPBACK_MODE
-  LPC_CAN->TEST |= (0x1<<4);
-#endif
-#if BASIC_MODE
-  LPC_CAN->TEST |= (0x1<<2);
-#endif
-#endif  
-
-#if !POLLING
-  /* Enable the CAN Interrupt */
-  NVIC_EnableIRQ(CAN_IRQn);
-	
-  /* By default, auto TX is enabled, enable all related interrupts */
-  LPC_CAN->CNTL |= (CTRL_IE|CTRL_SIE|CTRL_EIE);
-#endif
-  return;
+	return;
 }
 
-void CAN_Send(uint16_t Pri, can_msg *msg) {
+/* Initialise the CAN controller at a certain baud rate */
+void CAN_Init( uint32_t baud ) {
+	LPC_SYSCON->PRESETCTRL |= (0x1<<3);
+	LPC_SYSCON->SYSAHBCLKCTRL |= (1<<17);
+
+	/* The USB D- and CAN RX share the dedicated pin. The USB D+ 
+	and CAN TX share the dedicated pin. so, no IO configuration is 
+	needed for CAN. */
+	if ( !(LPC_CAN->CNTL & CTRL_INIT) ) {
+		/* If it's in normal operation already, stop it, reconfigure 
+		everything first, then restart. */
+		LPC_CAN->CNTL |= CTRL_INIT;		/* Default state */
+	}
+
+	/* Be very careful with this setting because it's related to
+	the input bitclock setting value in CANBitClk. */
+	/* popular CAN clock setting assuming AHB clock is 48Mhz:
+	CLKDIV = 1, CAN clock is 48Mhz/2 = 24Mhz
+	CLKDIV = 2, CAN clock is 48Mhz/3 = 16Mhz
+	CLKDIV = 3, CAN clock is 48Mhz/4 = 12Mhz
+	CLKDIV = 5, CAN clock is 48Mhz/6 = 8Mhz */
+
+	/* AHB clock is 48Mhz, the CAN clock is 1/3 AHB clock = 16Mhz */
+	LPC_CAN->CLKDIV = 0x02;			/* Divided by 3 */
+
+	/* Start configuring bit timing */
+	LPC_CAN->CNTL |= CTRL_CCE;
+	LPC_CAN->BT = baud;
+	LPC_CAN->BRPE = 0x0000;
+	/* Stop configuring bit timing */
+	LPC_CAN->CNTL &= ~CTRL_CCE;
+
+	/* Initialization finishes, normal operation now. */
+	LPC_CAN->CNTL &= ~CTRL_INIT;
+
+	while ( LPC_CAN->CNTL & CTRL_INIT )
+		;
+
+	/* Enable the CAN Interrupt */
+	NVIC_EnableIRQ(CAN_IRQn);
+
+	/* By default, auto TX is enabled, enable all related interrupts */
+	LPC_CAN->CNTL |= (CTRL_IE|CTRL_SIE|CTRL_EIE);
+	return;
+}
+
+/* Returns true of the buffer is BUSY so move on to the next buffer */
+uint8_t BufferCheck(uint8_t ToCheck) {
+	uint32_t BufferStatus = (((LPC_CAN->TXREQ2) & (0x0000FFFF)) << 16) | ((LPC_CAN->TXREQ1) & (0x0000FFFF));
+
+	/* Return value to be 1 or 0 depending on if the buffer is free or not */
+	return (((uint8_t) (BufferStatus >> (ToCheck -1))) & 0x01);
+}
+
+/* Send a message */
+int CAN_Send(uint16_t Pri, can_msg *msg) {
 	uint32_t tx_addr = 0x1FFFFFFF & msg->id;
-	uint8_t length = 8;
-	uint8_t BufferPos; //Buffer Position (Counter variable to see if the buffer position is BUSY
-	uint8_t BufferOffset=21; //The offset from which the buffer will start counting (Assumed 21 through 32)
-	uint8_t BufferFree; //Status of the buffer being checked, 1 indicates busy
+	uint8_t  length = 8;
+	uint8_t  BufferPos; //Buffer Position (Counter variable to see if the buffer position is BUSY
+	uint8_t  BufferOffset = 21; //The offset from which the buffer will start counting (Assumed 21 through 32)
+	uint8_t  BufferFree; //Status of the buffer being checked, 1 indicates busy
+	uint32_t timeout = 10000;
 
 	/* Data is stored in can_msg->data[0-4], timestamp is stored in can_msg->data[4-7] */
 	uint32_t can_data;
 	uint32_t can_timestamp;
+
 	memcpy(&can_data, msg->data, sizeof(uint32_t));
 	memcpy(&can_timestamp, msg->data+sizeof(uint32_t), sizeof(uint32_t));
 
@@ -459,49 +408,37 @@ void CAN_Send(uint16_t Pri, can_msg *msg) {
 	LPC_CAN->IF1_DB2 = ((can_timestamp & 0xFFFF0000) >> 16);
 	LPC_CAN->IF1_CMDMSK = WR|MASK|ARB|CTRL|TREQ|DATAA|DATAB;
 
-
 	//Buffers=(((LPC_CAN->TXREQ2) & (0x0000FFFF)) << 16) | ((LPC_CAN->TXREQ1) & (0x0000FFFF));
 	//BufferStat = BufferCheck(21);
 
-	BufferPos=0;
-	BufferFree=BufferCheck(BufferPos+BufferOffset);
+	BufferPos = 0;
+	BufferFree = BufferCheck (BufferPos+BufferOffset);
 
-	//BufferFree = (Buffer >> (20-1));
-
-	//Spins here while BufferFree=1 (Current buffer is busy)
-
-	while(BufferFree){
+	/* Spins here while BufferFree=1 (Current buffer is busy) and timeout hasn't expired.
+	 * We shouldn't wait forever. If something is wrong, we need to tell someone. */
+	while (BufferFree && timeout-- > 0) {
 		BufferPos++;
-		//BufferPos=BufferPos%13;
 
-		if(BufferPos<12){ //Buffer Position should either be
-			BufferFree=BufferCheck(BufferPos+BufferOffset);
-		}else{
-			BufferFree=1; //Force exit of the loop
+		if (BufferPos < 12) { //Buffer Position should either be
+			BufferFree = BufferCheck (BufferPos+BufferOffset);
+		} else {
+			BufferFree = 1; //Force exit of the loop
 		}
-
-		//BufferFree=BufferCheck(BufferPos+BufferOffset);
 	}
 
+	if (timeout == 0)
+		return NO_MSG_ERR;
 
-	if((BufferPos+BufferOffset)<=MSG_OBJ_MAX){ //Make sure we haven't gone beyond the maximum buffer size we're allowed to use.
+	if ((BufferPos+BufferOffset) <= MSG_OBJ_MAX) { //Make sure we haven't gone beyond the maximum buffer size we're allowed to use.
 		LPC_CAN->IF1_CMDREQ = (BufferPos+BufferOffset);
-	}else{
+	} else {
 		//Return some sort of error as all the buffers were full, maybe test by having an LED initially OFF
 		//and turning it on here
 	}
-	while( LPC_CAN->IF1_CMDREQ & IFCREQ_BUSY ) {
-	  ;/* Waits untill IF1 transfer thingy has done its duties */
+
+	while ( LPC_CAN->IF1_CMDREQ & IFCREQ_BUSY ) {
+		; /* Waits untill IF1 transfer thingy has done its duties */
 	}
-}
 
-//Returns true of the buffer is BUSY so move on to the next buffer
-uint8_t BufferCheck(uint8_t ToCheck){
-	uint32_t BufferStatus;
-	BufferStatus=(((LPC_CAN->TXREQ2) & (0x0000FFFF)) << 16) | ((LPC_CAN->TXREQ1) & (0x0000FFFF));
-
-	//Return value to be 1 or 0 depending on if the buffer is free or not
-	uint8_t ret = (((uint8_t) (BufferStatus >> (ToCheck -1))) & 0x01);
-
-	return ret;
+	return NO_ERR;
 }

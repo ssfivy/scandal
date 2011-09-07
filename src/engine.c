@@ -34,6 +34,7 @@
 #include <scandal/devices.h>
 #include <scandal/message.h>
 #include <scandal/uart.h>
+#include <scandal/utils.h>
 
 #include <project/scandal_config.h>
 

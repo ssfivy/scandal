@@ -10,6 +10,8 @@
 ******************************************************************************/
 #include <project/driver_config.h>
 
+#include <string.h>
+
 #if CONFIG_ENABLE_DRIVER_UART==1
 #include <arch/uart.h>
 
@@ -329,6 +331,103 @@ static int UART_printi(char **out, int i, int b, int sg, int width, int pad, int
 	return pc + UART_prints (out, s, width, pad);
 }
 
+static float round_nums[8] = {
+	0.5,
+	0.05,
+	0.005,
+	0.0005,
+	0.00005,
+	0.000005,
+	0.0000005,
+	0.00000005
+} ;
+
+static unsigned UART_printfloat(char **outbfr, float i, unsigned dec_digits)
+{
+	static char local_bfr[81] ;
+	char *output = (outbfr == 0) ? local_bfr : *outbfr ;
+	register float dbl = i;
+	float test2 = 8.2233;
+	register int test = (int)dbl;
+
+	UART_printf("\n\r--in printfloat: 0x%x 0x%x 0x%x 0x%x 0x%x--\n\r", test, test, dbl, (uint32_t)test2);
+
+	//*******************************************
+	//	extract negative info
+	//*******************************************
+	if (dbl < 0.0) {
+		*output++ = '-';
+		dbl *= -1.0;
+	}
+	//	handling rounding by adding .5LSB to the floating-point data
+	if (dec_digits < 8) {
+		dbl += round_nums[dec_digits];
+	}
+
+
+	//**************************************************************************
+	//	construct fractional multiplier for specified number of digits.
+	//**************************************************************************
+	uint32_t mult = 1;
+	uint32_t idx;
+	for (idx=0; idx < dec_digits; idx++)
+		mult *= 10;
+
+	// printf("mult=%u\n", mult) ;
+	uint32_t wholeNum = (uint32_t) dbl;
+	uint32_t decimalNum = (uint32_t) ((dbl - wholeNum) * mult);
+
+	//*******************************************
+	//	convert integer portion
+	//*******************************************
+	char tbfr[40];
+	idx = 0;
+	while (wholeNum != 0) {
+		tbfr[idx++] = '0' + (wholeNum % 10);
+		wholeNum /= 10;
+	}
+	// printf("%.3f: whole=%s, dec=%d\n", dbl, tbfr, decimalNum) ;
+	if (idx == 0) {
+		*output++ = '0';
+	} else {
+		while (idx > 0) {
+			*output++ = tbfr[idx-1];	//lint !e771
+			idx--;
+		}
+	}
+	if (dec_digits > 0) {
+		*output++ = '.';
+
+		//*******************************************
+		//	convert fractional portion
+		//*******************************************
+		idx = 0;
+		while (decimalNum != 0) {
+			tbfr[idx++] = '0' + (decimalNum % 10);
+			decimalNum /= 10;
+		}
+		//	pad the decimal portion with 0s as necessary;
+		//	We wouldn't want to report 3.093 as 3.93, would we??
+		while (idx < dec_digits) {
+			tbfr[idx++] = '0';
+		}
+		// printf("decimal=%s\n", tbfr) ;
+		if (idx == 0) {
+			*output++ = '0';
+		} else {
+			while (idx > 0) {
+				*output++ = tbfr[idx-1];
+				idx--;
+			}
+		}
+	}
+	*output = 0;
+
+	// prepare output
+	output = (outbfr == 0) ? local_bfr : *outbfr;
+	return strlen(output);
+}
+
 static int UART_print(char **out, int *varg)
 {
 	register int width, pad;
@@ -361,6 +460,10 @@ static int UART_print(char **out, int *varg)
 			}
 			if( *format == 'd' ) {
 				pc += UART_printi (out, *varg++, 10, 1, width, pad, 'a');
+				continue;
+			}
+			if( *format == 'f' ) {
+				pc += UART_printfloat (out, *varg++, 2);
 				continue;
 			}
 			if( *format == 'x' ) {

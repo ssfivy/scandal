@@ -11,7 +11,7 @@
 #ifndef __UART_H 
 #define __UART_H
 
-//#if CONFIG_ENABLE_DRIVER_UART==1
+#include <scandal/types.h>
 
 #define RS485_ENABLED		0
 #define TX_INTERRUPT		0		/* 0 if TX uses polling, 1 interrupt driven. */
@@ -47,10 +47,10 @@
 #define RS485_OINV		(0x1<<5)
 
 void ModemInit( void );
-void UARTInit(uint32_t Baudrate);
+void UART_Init_11xx(uint32_t baudrate);
 void UART_IRQHandler(void);
 void UARTSend(uint8_t *BufferPtr, uint32_t Length);
-int UART_printf(const char *format, ...);
+void UART_putchar(char c);
 
 //#endif
 #endif /* end __UART_H */

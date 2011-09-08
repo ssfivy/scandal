@@ -225,7 +225,7 @@ u08 scandal_send_ws_drive_command(uint32_t identifier, float first, float second
 	msg.data[6] = ws_packet.data_u8[6];
 	msg.data[7] = ws_packet.data_u8[7];
 
-	can_send_std_msg(&msg, 0);
+	can_send_msg(&msg, 0);
 
 	return NO_ERR;
 
@@ -248,7 +248,7 @@ u08 scandal_send_ws_id(uint32_t identifier, const char *str, int len) {
 	msg.data[6] = 0;
 	msg.data[7] = 0;
 
-	can_send_std_msg(&msg, 0);
+	can_send_msg(&msg, 0);
 
 	return NO_ERR;
 

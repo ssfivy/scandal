@@ -28,12 +28,12 @@
 #include <scandal/engine.h>
 #include <scandal/types.h>
 #include <scandal/timer.h>
-#include <scandal/led.h>
 #include <scandal/error.h>
 #include <scandal/eeprom.h>
 #include <scandal/devices.h>
 #include <scandal/message.h>
 #include <scandal/uart.h>
+#include <scandal/utils.h>
 
 #include <project/scandal_config.h>
 
@@ -453,7 +453,8 @@ u08	scandal_handle_command(can_msg* msg){
 	return NO_ERR;
 }  
 
+/* TODO: Actually do something with wave sculptor messages
+ */
 u08	scandal_handle_ws_message(can_msg* msg){
-//	UART_PrintfProgStr("WS Message!\n\r");
-	return;
+	return 0;
 }

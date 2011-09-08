@@ -3,10 +3,6 @@
 
 #include <scandal/types.h>
 
-void PIOINT0_IRQHandler(void);
-void PIOINT1_IRQHandler(void);
-void PIOINT2_IRQHandler(void);
-void PIOINT3_IRQHandler(void);
 void GPIO_Init(void);
 void GPIO_SetInterrupt(uint32_t portNum, uint32_t bitPosi, uint32_t sense,
 						uint32_t single, uint32_t event);

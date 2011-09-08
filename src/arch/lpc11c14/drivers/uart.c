@@ -148,8 +148,11 @@ void ModemInit( void )
 ** Returned value:		None
 ** 
 *****************************************************************************/
-void UART_Init(uint32_t baudrate)
-{
+void UART_Init(uint32_t baudrate) {
+	UART_Init_11xx(baudrate);
+}
+
+void UART_Init_11xx(uint32_t baudrate) {
   uint32_t Fdiv;
   uint32_t regVal;
 
@@ -235,3 +238,9 @@ void UART_putchar(char c) {
 	uint8_t c1 = c;
 	UARTSend(&c1, 1);
 }
+
+/* Scandal UART_ReceiveByte */
+u08  UART_ReceiveByte(void) {
+
+}
+

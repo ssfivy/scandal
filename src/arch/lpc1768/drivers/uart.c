@@ -23,21 +23,9 @@
  */
 
 /* Includes ------------------------------------------------------------------- */
-#include "lpc17xx_uart.h"
-#include "lpc17xx_clkpwr.h"
-
-/* If this source file built with example, the LPC17xx FW library configuration
- * file in each example directory ("lpc17xx_libcfg.h") must be included,
- * otherwise the default FW library configuration file must be included instead
- */
-#ifdef __BUILD_WITH_EXAMPLE__
-#include "lpc17xx_libcfg.h"
-#else
-#include "lpc17xx_libcfg_default.h"
-#endif /* __BUILD_WITH_EXAMPLE__ */
-
-
-#ifdef _UART
+#include <arch/uart.h>
+#include <arch/clkpwr.h>
+#include <scandal/types.h>
 
 /* Private Functions ---------------------------------------------------------- */
 
@@ -183,7 +171,7 @@ static Status uart_set_divisors(LPC_UART_TypeDef *UARTx, uint32_t baudrate)
 *                    specified UART peripheral.
  * @return 		None
  *********************************************************************/
-void UART_Init(LPC_UART_TypeDef *UARTx, UART_CFG_Type *UART_ConfigStruct)
+void UART_Init_17xx(LPC_UART_TypeDef *UARTx, UART_CFG_Type *UART_ConfigStruct)
 {
 	uint32_t tmp;
 
@@ -458,7 +446,7 @@ void UART_ConfigStructInit(UART_CFG_Type *UART_InitStruct)
  * @param[in]	Data	Data to transmit (must be 8-bit long)
  * @return 		None
  **********************************************************************/
-void UART_SendByte(LPC_UART_TypeDef* UARTx, uint8_t Data)
+void UART_SendByte_17xx(LPC_UART_TypeDef* UARTx, uint8_t Data)
 {
 	CHECK_PARAM(PARAM_UARTx(UARTx));
 
@@ -473,7 +461,6 @@ void UART_SendByte(LPC_UART_TypeDef* UARTx, uint8_t Data)
 
 }
 
-
 /*********************************************************************//**
  * @brief		Receive a single data from UART peripheral
  * @param[in]	UARTx	UART peripheral selected, should be:
@@ -483,7 +470,7 @@ void UART_SendByte(LPC_UART_TypeDef* UARTx, uint8_t Data)
  * 				- LPC_UART3: UART3 peripheral
  * @return 		Data received
  **********************************************************************/
-uint8_t UART_ReceiveByte(LPC_UART_TypeDef* UARTx)
+uint8_t UART_ReceiveByte_17xx(LPC_UART_TypeDef* UARTx)
 {
 	CHECK_PARAM(PARAM_UARTx(UARTx));
 
@@ -535,7 +522,7 @@ uint32_t UART_Send(LPC_UART_TypeDef *UARTx, uint8_t *txbuf,
 			if(timeOut == 0) break;
 			fifo_cnt = UART_TX_FIFO_SIZE;
 			while (fifo_cnt && bToSend){
-				UART_SendByte(UARTx, (*pChar++));
+				UART_SendByte_17xx(UARTx, (*pChar++));
 				fifo_cnt--;
 				bToSend--;
 				bSent++;
@@ -551,7 +538,7 @@ uint32_t UART_Send(LPC_UART_TypeDef *UARTx, uint8_t *txbuf,
 			}
 			fifo_cnt = UART_TX_FIFO_SIZE;
 			while (fifo_cnt && bToSend) {
-				UART_SendByte(UARTx, (*pChar++));
+				UART_SendByte_17xx(UARTx, (*pChar++));
 				bToSend--;
 				fifo_cnt--;
 				bSent++;
@@ -598,7 +585,7 @@ uint32_t UART_Receive(LPC_UART_TypeDef *UARTx, uint8_t *rxbuf, \
 			// Time out!
 			if(timeOut == 0) break;
 			// Get data from the buffer
-			(*pChar++) = UART_ReceiveByte(UARTx);
+			(*pChar++) = UART_ReceiveByte_17xx(UARTx);
 			bToRecv--;
 			bRecv++;
 		}
@@ -610,7 +597,7 @@ uint32_t UART_Receive(LPC_UART_TypeDef *UARTx, uint8_t *rxbuf, \
 			if (!(UARTx->LSR & UART_LSR_RDR)) {
 				break;
 			} else {
-				(*pChar++) = UART_ReceiveByte(UARTx);
+				(*pChar++) = UART_ReceiveByte_17xx(UARTx);
 				bRecv++;
 				bToRecv--;
 			}
@@ -1353,14 +1340,26 @@ uint32_t UART_RS485SendData(LPC_UART1_TypeDef *UARTx, uint8_t *pData, uint32_t s
 
 #endif /* _UART1 */
 
-#endif /* _UART */
+/* Scandal Functions ---------------------------------------------------------- */
 
-/**
- * @}
- */
+/* The scandal UART_Init will default to UART0 on 17xx */
+void UART_Init(uint32_t baudrate) {
+	UART_CFG_Type UARTConfigStruct; //declare config struct
+	UART_ConfigStructInit(&UARTConfigStruct); //set default configs
+	UARTConfigStruct.Baud_rate = baudrate; //set baud rate
+	UART_Init_17xx((LPC_UART_TypeDef *) LPC_UART1, &UARTConfigStruct); // init registers
+}
 
-/**
- * @}
- */
-/* --------------------------------- End Of File ------------------------------ */
+/* The scandal UART_ReceiveByte will default to UART0 on 17xx */
+u08 UART_ReceiveByte(void) {
+	return UART_ReceiveByte_17xx((LPC_UART_TypeDef *) LPC_UART0);
+}
 
+/* The scandal UART_SendByte will default to UART0 on 17xx */
+void UART_SendByte(u08 data) {
+	UART_SendByte_17xx((LPC_UART_TypeDef *) LPC_UART0, data);
+}
+
+void UART_putchar(char c) {
+	UART_SendByte_17xx((LPC_UART_TypeDef *) LPC_UART0, (int)c);
+}

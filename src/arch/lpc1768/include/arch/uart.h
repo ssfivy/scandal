@@ -28,8 +28,8 @@
 #define __LPC17XX_UART_H
 
 /* Includes ------------------------------------------------------------------- */
-#include "LPC17xx.h"
-#include "lpc_types.h"
+#include <cmsis/LPC17xx.h>
+#include <arch/types.h>
 
 
 #ifdef __cplusplus
@@ -575,13 +575,13 @@ typedef struct {
  * @{
  */
 /* UART Init/DeInit functions --------------------------------------------------*/
-void UART_Init(LPC_UART_TypeDef *UARTx, UART_CFG_Type *UART_ConfigStruct);
+void UART_Init_17xx(LPC_UART_TypeDef *UARTx, UART_CFG_Type *UART_ConfigStruct);
 void UART_DeInit(LPC_UART_TypeDef* UARTx);
 void UART_ConfigStructInit(UART_CFG_Type *UART_InitStruct);
 
 /* UART Send/Receive functions -------------------------------------------------*/
-void UART_SendByte(LPC_UART_TypeDef* UARTx, uint8_t Data);
-uint8_t UART_ReceiveByte(LPC_UART_TypeDef* UARTx);
+void UART_SendByte_17xx(LPC_UART_TypeDef* UARTx, uint8_t Data);
+uint8_t UART_ReceiveByte_17xx(LPC_UART_TypeDef* UARTx);
 uint32_t UART_Send(LPC_UART_TypeDef *UARTx, uint8_t *txbuf,
 		uint32_t buflen, TRANSFER_BLOCK_Type flag);
 uint32_t UART_Receive(LPC_UART_TypeDef *UARTx, uint8_t *rxbuf, \
@@ -634,11 +634,7 @@ void UART_IrDAPulseDivConfig(LPC_UART_TypeDef *UARTx, UART_IrDA_PULSE_Type Pulse
 }
 #endif
 
+/* for Scandal's built in printf functions */
+void UART_putchar(char c);
 
 #endif /* __LPC17XX_UART_H */
-
-/**
- * @}
- */
-
-/* --------------------------------- End Of File ------------------------------ */

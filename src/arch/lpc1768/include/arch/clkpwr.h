@@ -28,8 +28,8 @@
 #define LPC17XX_CLKPWR_H_
 
 /* Includes ------------------------------------------------------------------- */
-#include "LPC17xx.h"
-#include "lpc_types.h"
+#include <cmsis/LPC17xx.h>
+#include <arch/types.h>
 
 #ifdef __cplusplus
 extern "C"

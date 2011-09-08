@@ -17,35 +17,16 @@
  * use without further testing or modification.
  **********************************************************************/
 
-/* Peripheral group ----------------------------------------------------------- */
-/** @addtogroup CAN
- * @{
- */
-
 /* Includes ------------------------------------------------------------------- */
-#include "lpc17xx_can.h"
-#include "lpc17xx_clkpwr.h"
+#include <arch/can.h>
+#include <arch/clkpwr.h>
 
-/* If this source file built with example, the LPC17xx FW library configuration
- * file in each example directory ("lpc17xx_libcfg.h") must be included,
- * otherwise the default FW library configuration file must be included instead
- */
-#ifdef __BUILD_WITH_EXAMPLE__
-#include "lpc17xx_libcfg.h"
-#else
-#include "lpc17xx_libcfg_default.h"
-#endif /* __BUILD_WITH_EXAMPLE__ */
-
-
-#ifdef _CAN
+#include <scandal/can.h>
+#include <scandal/error.h>
+#include <scandal/timer.h>
 
 /* Private Variables ---------------------------------------------------------- */
-/** @defgroup CAN_Private_Variables CAN Private Variables
- * @{
- */
-
 FunctionalState FULLCAN_ENABLE;
-
 
 /* Counts number of filters (CAN message objects) used */
 uint16_t CANAF_FullCAN_cnt = 0;
@@ -55,9 +36,6 @@ uint16_t CANAF_ext_cnt = 0;
 uint16_t CANAF_gext_cnt = 0;
 
 /* End of Private Variables ----------------------------------------------------*/
-/**
- * @}
- */
 
 /* Private Variables ---------------------------------------------------------- */
 static void can_SetBaudrate (LPC_CAN_TypeDef *CANx, uint32_t baudrate);
@@ -1884,14 +1862,51 @@ uint32_t CAN_FullCANPendGetStatus(LPC_CANAF_TypeDef* CANAFx, FullCAN_IC_Type typ
 	return CANAFx->FCANIC1;
 }
 /* End of Public Variables ---------------------------------------------------------- */
-/**
- * @}
+
+/* Scandal wrappers
+ * *****************
+ * for reference:
+ * typedef struct can_mg {
+ *   u32 id;
+ *   u08 data[CAN_MSG_MAXSIZE];
+ *   u08 length;
+ * } can_msg;
  */
 
-#endif /* _CAN */
+/* Scandal wrapper for init */
+void init_can(void) {
+}
 
-/**
- * @}
+/* Get a message from the CAN controller. */
+u08 can_get_msg(can_msg* msg) {
+	return NO_MSG_ERR;
+}
+
+/* Send a message using the CAN controller */
+u08 can_send_msg(can_msg *msg, u08 priority) {
+	return NO_ERR;
+}
+
+/* Send a standard CAN message
+ * TODO!
  */
+u08 can_send_std_msg(can_msg* msg, u08 priority) {
+	return NO_ERR;
+}
 
-/* --------------------------------- End Of File ------------------------------ */
+/* Register for a message type. */
+u08 can_register_id(u32 mask, u32 data, u08 priority) {
+	return NO_MSG_ERR;
+}
+
+/* does nothing yet */
+u08  can_baud_rate(u08 mode) {
+	return 0;
+}
+
+/* this is not used on LPC1768 */
+void can_poll(void) {}
+
+/* *******************
+ * End Scandal wrappers
+ */

@@ -44,11 +44,7 @@ extern void UART_PrintfProgStr  (u08* pBuf);
 extern void UART_PrintfEndOfLine(void); 
 extern void UART_Printfu08      (u08 Data); 
 extern void UART_Printfu16      (u16 Data); 
-//<<<<<<< scandal_uart.h
-extern void UART_Init           (void); 
-//=======
-//extern int UART_Init           (void); 
-//>>>>>>> 1.15
+extern void UART_Init           (uint32_t baudrate); 
 extern u08  UART_CheckReceived	(void);
 extern u08  UART_is_received	(void);
 extern void UART_Flush          (void);

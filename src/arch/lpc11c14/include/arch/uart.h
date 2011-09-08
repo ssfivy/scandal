@@ -47,11 +47,10 @@
 #define RS485_OINV		(0x1<<5)
 
 void ModemInit( void );
-void UART_Init(uint32_t Baudrate);
+void UART_Init_11xx(uint32_t baudrate);
 void UART_IRQHandler(void);
 void UARTSend(uint8_t *BufferPtr, uint32_t Length);
 void UART_putchar(char c);
-int UART_printf(const char *format, ...) __attribute__ ((format (printf, 1, 2)));
 
 //#endif
 #endif /* end __UART_H */

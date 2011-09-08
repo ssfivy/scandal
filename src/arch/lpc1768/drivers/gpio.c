@@ -17,26 +17,8 @@
  * use without further testing or modification.
  **********************************************************************/
 
-/* Peripheral group ----------------------------------------------------------- */
-/** @addtogroup GPIO
- * @{
- */
-
 /* Includes ------------------------------------------------------------------- */
-#include "lpc17xx_gpio.h"
-
-/* If this source file built with example, the LPC17xx FW library configuration
- * file in each example directory ("lpc17xx_libcfg.h") must be included,
- * otherwise the default FW library configuration file must be included instead
- */
-#ifdef __BUILD_WITH_EXAMPLE__
-#include "lpc17xx_libcfg.h"
-#else
-#include "lpc17xx_libcfg_default.h"
-#endif /* __BUILD_WITH_EXAMPLE__ */
-
-
-#ifdef _GPIO
+#include <arch/gpio.h>
 
 /* Private Functions ---------------------------------------------------------- */
 
@@ -736,14 +718,12 @@ uint8_t FIO_ByteReadValue(uint8_t portNum, uint8_t byteNum)
 	return (0);
 }
 
-/**
- * @}
- */
 
-#endif /* _GPIO */
+void GPIOSetValue( uint32_t portNum, uint32_t bitPosi, uint32_t bitVal ) {
+}
 
-/**
- * @}
- */
+uint32_t GPIOGetValue( uint32_t portNum, uint32_t bitPosi) {
+}
 
-/* --------------------------------- End Of File ------------------------------ */
+void GPIOToggleValue(uint32_t portNum, uint32_t bitPosi) {
+}

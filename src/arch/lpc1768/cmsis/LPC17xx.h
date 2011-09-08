@@ -26,6 +26,8 @@
 #ifndef __LPC17xx_H__
 #define __LPC17xx_H__
 
+#define CHECK_PARAM(expr)
+
 /*
  * ==========================================================================
  * ---------- Interrupt Number Definition -----------------------------------
@@ -100,8 +102,8 @@ typedef enum IRQn
 #define __Vendor_SysTickConfig    0         /*!< Set to 1 if different SysTick Config is used     */
 
 
-#include "core_cm3.h"                       /* Cortex-M3 processor and core peripherals           */
-#include "system_LPC17xx.h"                 /* System Header                                      */
+#include <cmsis/core_cm3.h>                       /* Cortex-M3 processor and core peripherals           */
+#include <project/system_LPC17xx.h>                 /* System Header                                      */
 
 
 /******************************************************************************/

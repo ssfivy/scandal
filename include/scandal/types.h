@@ -81,7 +81,22 @@ typedef uint64_t       u64;
 
 #else
 #ifdef lpc11c14
-#include <arch/type.h>
+#include <arch/types.h>
+
+typedef uint8_t        u08;
+typedef int8_t         s08;
+typedef uint16_t       u16;
+typedef int16_t        s16;
+typedef uint32_t       u32;
+typedef int32_t        s32;
+typedef int64_t        s64;
+typedef uint64_t       u64;
+
+#define AVAILABLE_64
+
+#else
+#ifdef lpc1768
+#include <arch/types.h>
 
 typedef uint8_t        u08;
 typedef int8_t         s08;
@@ -108,6 +123,7 @@ typedef          long  s32;
 typedef int64_t        s64;
 typedef uint64_t       u64;
 
+#endif
 #endif
 #endif
 #endif

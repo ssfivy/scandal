@@ -27,8 +27,8 @@
 #define __LPC17XX_TIMER_H_
 
 /* Includes ------------------------------------------------------------------- */
-#include "LPC17xx.h"
-#include "lpc_types.h"
+#include <cmsis/LPC17xx.h>
+#include <arch/types.h>
 
 #ifdef __cplusplus
 extern "C"

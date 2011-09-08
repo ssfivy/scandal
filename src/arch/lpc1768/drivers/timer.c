@@ -23,28 +23,17 @@
  */
 
 /* Includes ------------------------------------------------------------------- */
-#include "lpc17xx_timer.h"
-#include "lpc17xx_clkpwr.h"
-#include "lpc17xx_pinsel.h"
+#include <arch/timer.h>
+#include <arch/clkpwr.h>
+#include <arch/pinsel.h>
 
-/* If this source file built with example, the LPC17xx FW library configuration
- * file in each example directory ("lpc17xx_libcfg.h") must be included,
- * otherwise the default FW library configuration file must be included instead
- */
-#ifdef __BUILD_WITH_EXAMPLE__
-#include "lpc17xx_libcfg.h"
-#else
-#include "lpc17xx_libcfg_default.h"
-#endif /* __BUILD_WITH_EXAMPLE__ */
-
-#ifdef _TIM
+#include <scandal/timer.h>
 
 /* Private Functions ---------------------------------------------------------- */
 
 static uint32_t getPClock (uint32_t timernum);
 static uint32_t converUSecToVal (uint32_t timernum, uint32_t usec);
 static uint32_t converPtrToTimeNum (LPC_TIM_TypeDef *TIMx);
-
 
 /*********************************************************************//**
  * @brief 		Get peripheral clock of each timer controller
@@ -578,14 +567,23 @@ uint32_t TIM_GetCaptureValue(LPC_TIM_TypeDef *TIMx, TIM_COUNTER_INPUT_OPT Captur
 		return TIMx->CR1;
 }
 
-/**
- * @}
+/* Scandal wrappers
+ * *****************/
+
+void sc_init_timer(void) {
+
+}
+
+void sc_set_timer(sc_time_t time) {
+
+}
+
+sc_time_t sc_get_timer(void) {
+
+}
+
+/* *******************
+ * End Scandal wrappers
  */
 
-#endif /* _TIMER */
 
-/**
- * @}
- */
-
-/* --------------------------------- End Of File ------------------------------ */

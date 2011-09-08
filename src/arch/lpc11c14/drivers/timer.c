@@ -45,26 +45,6 @@ volatile uint32_t timer32_1_counter = 0;
 volatile uint32_t timer32_1_capture = 0;
 #endif //CONFIG_TIMER32_DEFAULT_TIMER32_1_IRQHANDLER
 
-/* Scandal wrappers
- * *****************/
-
-void sc_init_timer(void) {
-	init_timer32(0,  (SystemCoreClock/1000-1));
-	enable_timer32(0); // Enabling the timer
-}
-
-void sc_set_timer(sc_time_t time) {
-	timer32_0_counter = (uint32_t)time;
-}
-
-sc_time_t sc_get_timer(void) {
-	return (sc_time_t)timer32_0_counter;
-}
-
-/* *******************
- * End Scandal wrappers
- */
-
 
 /*****************************************************************************
 ** Function name:		delay32Ms
@@ -502,6 +482,22 @@ void setMatch_timer32PWM (uint8_t timer_num, uint8_t match_nr, uint32_t value)
 }
 #endif
 
-/******************************************************************************
-**                            End Of File
-******************************************************************************/
+/* Scandal wrappers
+ * *****************/
+
+void sc_init_timer(void) {
+	init_timer32(0,  (SystemCoreClock/1000-1));
+	enable_timer32(0); // Enabling the timer
+}
+
+void sc_set_timer(sc_time_t time) {
+	timer32_0_counter = (uint32_t)time;
+}
+
+sc_time_t sc_get_timer(void) {
+	return (sc_time_t)timer32_0_counter;
+}
+
+/* *******************
+ * End Scandal wrappers
+ */

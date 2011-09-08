@@ -4,14 +4,13 @@
 #include <string.h>
 #include <stdarg.h>
 
-#define putchar(c) UART_putchar(c)
-
 static void UART_printchar(char **str, int c) {
 	if (str) {
 		**str = c;
 		++(*str);
-	} else
+	} else {
 		(void)UART_putchar(c);
+	}
 }
 
 #define PAD_RIGHT 1

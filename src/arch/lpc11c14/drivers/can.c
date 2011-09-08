@@ -122,14 +122,10 @@ u08 can_get_msg(can_msg* msg) {
 
 /* Send a message using the CAN controller */
 u08 can_send_msg(can_msg *msg, u08 priority) {
-	return CAN_Send((uint16_t)priority, msg);
-}
-
-/* Send a standard CAN message
- * TODO!
- */
-u08 can_send_std_msg(can_msg* msg, u08 priority) {
-	return NO_ERR;
+	if (msg->ext == CAN_STD_MSG)
+		return NO_MSG_ERR;
+	else if(msg->ext == CAN_EXT_MSG)
+		return CAN_Send((uint16_t)priority, msg);
 }
 
 /* Register for a message type. Currently, each message that we want to

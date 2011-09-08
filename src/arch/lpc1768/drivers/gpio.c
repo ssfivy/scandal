@@ -180,7 +180,7 @@ void GPIO_SetDir(uint8_t portNum, uint32_t bitValue, uint8_t dir)
  * - For all remaining bits that are not activated in bitValue (value '0')
  * will not be effected by this function.
  **********************************************************************/
-void GPIO_SetValue(uint8_t portNum, uint32_t bitValue)
+void GPIO_SetValue(uint8_t portNum, uint32_t bitValue, uint32_t bitPosi)
 {
 	LPC_GPIO_TypeDef *pGPIO = GPIO_GetPointer(portNum);
 
@@ -315,9 +315,9 @@ void FIO_SetDir(uint8_t portNum, uint32_t bitValue, uint8_t dir)
 /**
  * @brief The same with GPIO_SetValue()
  */
-void FIO_SetValue(uint8_t portNum, uint32_t bitValue)
+void FIO_SetValue(uint8_t portNum, uint32_t bitValue, uint32_t bitPosi)
 {
-	GPIO_SetValue(portNum, bitValue);
+	GPIO_SetValue(portNum, bitValue, bitPosi);
 }
 
 /**
@@ -718,12 +718,9 @@ uint8_t FIO_ByteReadValue(uint8_t portNum, uint8_t byteNum)
 	return (0);
 }
 
-
-void GPIOSetValue( uint32_t portNum, uint32_t bitPosi, uint32_t bitVal ) {
+uint32_t GPIO_GetValue( uint32_t portNum, uint32_t bitPosi) {
+	return 0;
 }
 
-uint32_t GPIOGetValue( uint32_t portNum, uint32_t bitPosi) {
-}
-
-void GPIOToggleValue(uint32_t portNum, uint32_t bitPosi) {
+void GPIO_ToggleValue(uint32_t portNum, uint32_t bitPosi) {
 }

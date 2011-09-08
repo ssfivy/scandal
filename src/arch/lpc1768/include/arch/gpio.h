@@ -116,16 +116,17 @@ typedef struct {
 
 /* GPIO style ------------------------------- */
 void GPIO_SetDir(uint8_t portNum, uint32_t bitValue, uint8_t dir);
-void GPIO_SetValue(uint8_t portNum, uint32_t bitValue);
+void GPIO_SetValue(uint8_t portNum, uint32_t bitValue, uint32_t bitPosi);
 void GPIO_ClearValue(uint8_t portNum, uint32_t bitValue);
 uint32_t GPIO_ReadValue(uint8_t portNum);
 void GPIO_IntCmd(uint8_t portNum, uint32_t bitValue, uint8_t edgeState);
 FunctionalState GPIO_GetIntStatus(uint8_t portNum, uint32_t pinNum, uint8_t edgeState);
 void GPIO_ClearInt(uint8_t portNum, uint32_t bitValue);
+void GPIO_ToggleValue( uint32_t portNum, uint32_t bitPosi);
 
 /* FIO (word-accessible) style ------------------------------- */
 void FIO_SetDir(uint8_t portNum, uint32_t bitValue, uint8_t dir);
-void FIO_SetValue(uint8_t portNum, uint32_t bitValue);
+void FIO_SetValue(uint8_t portNum, uint32_t bitValue, uint32_t bitPosi);
 void FIO_ClearValue(uint8_t portNum, uint32_t bitValue);
 uint32_t FIO_ReadValue(uint8_t portNum);
 void FIO_SetMask(uint8_t portNum, uint32_t bitValue, uint8_t maskValue);
@@ -158,8 +159,3 @@ uint8_t FIO_ByteReadValue(uint8_t portNum, uint8_t byteNum);
 
 #endif /* LPC17XX_GPIO_H_ */
 
-/**
- * @}
- */
-
-/* --------------------------------- End Of File ------------------------------ */

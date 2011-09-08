@@ -655,7 +655,7 @@ void UART_ForceBreak(LPC_UART_TypeDef* UARTx)
  *********************************************************************/
 void UART_IntConfig(LPC_UART_TypeDef *UARTx, UART_INT_Type UARTIntCfg, FunctionalState NewState)
 {
-	uint32_t tmp;
+	uint32_t tmp = 0;
 
 	CHECK_PARAM(PARAM_UARTx(UARTx));
 	CHECK_PARAM(PARAM_FUNCTIONALSTATE(NewState));

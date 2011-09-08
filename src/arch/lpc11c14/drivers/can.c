@@ -29,7 +29,7 @@
 
 #include <arch/can.h>
 #include <arch/gpio.h>
-#include <arch/timer32.h>
+#include <arch/timer.h>
 
 #ifdef CAN_UART_DEBUG
 #warning CAN_UART debugging is enabled. If you need the UART for something else, you need to disable this in project_config.h.

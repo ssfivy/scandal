@@ -579,7 +579,7 @@ void sc_set_timer(sc_time_t time) {
 }
 
 sc_time_t sc_get_timer(void) {
-
+	return 0;
 }
 
 /* *******************

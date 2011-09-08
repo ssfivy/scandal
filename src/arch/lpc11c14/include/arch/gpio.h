@@ -32,18 +32,18 @@ void PIOINT0_IRQHandler(void);
 void PIOINT1_IRQHandler(void);
 void PIOINT2_IRQHandler(void);
 void PIOINT3_IRQHandler(void);
-void GPIOInit( void );
-void GPIOSetInterrupt( uint32_t portNum, uint32_t bitPosi, uint32_t sense,
+void GPIO_Init( void );
+void GPIO_SetInterrupt( uint32_t portNum, uint32_t bitPosi, uint32_t sense,
 		uint32_t single, uint32_t event );
 
-void GPIOIntEnable( uint32_t portNum, uint32_t bitPosi );
-void GPIOIntDisable( uint32_t portNum, uint32_t bitPosi );
-uint32_t GPIOIntStatus( uint32_t portNum, uint32_t bitPosi );
-void GPIOIntClear( uint32_t portNum, uint32_t bitPosi );
-void GPIOSetValue( uint32_t portNum, uint32_t bitPosi, uint32_t bitVal );
-void GPIOToggleValue( uint32_t portNum, uint32_t bitPosi);
-uint32_t GPIOGetValue( uint32_t portNum, uint32_t bitPosi);
-void GPIOSetDir( uint32_t portNum, uint32_t bitPosi, uint32_t dir );
+void GPIO_IntEnable( uint32_t portNum, uint32_t bitPosi );
+void GPIO_IntDisable( uint32_t portNum, uint32_t bitPosi );
+uint32_t GPIO_IntStatus( uint32_t portNum, uint32_t bitPosi );
+void GPIO_IntClear( uint32_t portNum, uint32_t bitPosi );
+void GPIO_SetValue( uint32_t portNum, uint32_t bitPosi, uint32_t bitVal );
+void GPIO_ToggleValue( uint32_t portNum, uint32_t bitPosi);
+uint32_t GPIO_GetValue( uint32_t portNum, uint32_t bitPosi);
+void GPIO_SetDir( uint32_t portNum, uint32_t bitPosi, uint32_t dir );
 #endif
 #endif /* end __GPIO_H */
 

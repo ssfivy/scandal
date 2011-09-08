@@ -241,6 +241,6 @@ void UART_putchar(char c) {
 
 /* Scandal UART_ReceiveByte */
 u08  UART_ReceiveByte(void) {
-
+	return 0;
 }
 

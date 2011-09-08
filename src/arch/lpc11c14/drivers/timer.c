@@ -24,7 +24,7 @@
 #include <scandal/timer.h>
 
 #if CONFIG_ENABLE_DRIVER_TIMER32==1
-#include <arch/timer32.h>
+#include <arch/timer.h>
 
 /* ===================
  * CodeRed - Modified file to extract out interrupt handler related code,

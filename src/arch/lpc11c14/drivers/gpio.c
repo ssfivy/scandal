@@ -21,24 +21,13 @@
 ****************************************************************************/
 #include <project/driver_config.h>
 
-#if CONFIG_ENABLE_DRIVER_GPIO==1
-
 #include <arch/gpio.h>
 
 #if CONFIG_GPIO_DEFAULT_PIOINT0_IRQHANDLER==1
 volatile uint32_t gpio0_counter = 0;
 volatile uint32_t p0_1_counter  = 0;
-/*****************************************************************************
-** Function name:		PIOINT0_IRQHandler
-**
-** Descriptions:		Use one GPIO pin(port0 pin1) as interrupt source
-**
-** parameters:			None
-** Returned value:		None
-** 
-*****************************************************************************/
-void PIOINT0_IRQHandler(void)
-{
+
+void PIOINT0_IRQHandler(void) {
   uint32_t regVal;
 
   gpio0_counter++;
@@ -55,17 +44,8 @@ void PIOINT0_IRQHandler(void)
 #if CONFIG_GPIO_DEFAULT_PIOINT1_IRQHANDLER==1
 volatile uint32_t gpio1_counter = 0;
 volatile uint32_t p1_1_counter  = 0;
-/*****************************************************************************
-** Function name:		PIOINT1_IRQHandler
-**
-** Descriptions:		Use one GPIO pin(port1 pin1) as interrupt source
-**
-** parameters:			None
-** Returned value:		None
-** 
-*****************************************************************************/
-void PIOINT1_IRQHandler(void)
-{
+
+void PIOINT1_IRQHandler(void) {
   uint32_t regVal;
 
   gpio1_counter++;
@@ -82,17 +62,8 @@ void PIOINT1_IRQHandler(void)
 #if CONFIG_GPIO_DEFAULT_PIOINT2_IRQHANDLER==1
 volatile uint32_t gpio2_counter = 0;
 volatile uint32_t p2_1_counter  = 0;
-/*****************************************************************************
-** Function name:		PIOINT2_IRQHandler
-**
-** Descriptions:		Use one GPIO pin(port2 pin1) as interrupt source
-**
-** parameters:			None
-** Returned value:		None
-** 
-*****************************************************************************/
-void PIOINT2_IRQHandler(void)
-{
+
+void PIOINT2_IRQHandler(void) {
   uint32_t regVal;
 
   gpio2_counter++;
@@ -109,17 +80,8 @@ void PIOINT2_IRQHandler(void)
 #if CONFIG_GPIO_DEFAULT_PIOINT3_IRQHANDLER==1
 volatile uint32_t gpio3_counter = 0;
 volatile uint32_t p3_1_counter  = 0;
-/*****************************************************************************
-** Function name:		PIOINT3_IRQHandler
-**
-** Descriptions:		Use one GPIO pin(port3 pin1) as interrupt source
-**
-** parameters:			None
-** Returned value:		None
-** 
-*****************************************************************************/
-void PIOINT3_IRQHandler(void)
-{
+
+void PIOINT3_IRQHandler(void) {
   uint32_t regVal;
 
   gpio3_counter++;
@@ -133,21 +95,7 @@ void PIOINT3_IRQHandler(void)
 }
 #endif //#if CONFIG_GPIO_DEFAULT_PIOINT3_IRQHANDLER==1
 
-
-/*****************************************************************************
-** Function name:		GPIOInit
-**
-** Descriptions:		Initialize GPIO, install the
-**						GPIO interrupt handler
-**
-** parameters:			None
-** Returned value:		true or false, return false if the VIC table
-**						is full and GPIO interrupt handler can be
-**						installed.
-** 
-*****************************************************************************/
-void GPIOInit( void )
-{
+void GPIO_Init( void ) {
   /* Enable AHB clock to the GPIO domain. */
   LPC_SYSCON->SYSAHBCLKCTRL |= (1<<6);
 
@@ -184,7 +132,7 @@ void GPIOInit( void )
 ** Returned value:		None
 ** 
 *****************************************************************************/
-void GPIOSetInterrupt( uint32_t portNum, uint32_t bitPosi, uint32_t sense,
+void GPIO_SetInterrupt( uint32_t portNum, uint32_t bitPosi, uint32_t sense,
 			uint32_t single, uint32_t event )
 {
   switch ( portNum )
@@ -263,17 +211,7 @@ void GPIOSetInterrupt( uint32_t portNum, uint32_t bitPosi, uint32_t sense,
   return;
 }
 
-/*****************************************************************************
-** Function name:		GPIOIntEnable
-**
-** Descriptions:		Enable Interrupt Mask for a port pin.
-**
-** parameters:			port num, bit position
-** Returned value:		None
-** 
-*****************************************************************************/
-void GPIOIntEnable( uint32_t portNum, uint32_t bitPosi )
-{
+void GPIO_IntEnable( uint32_t portNum, uint32_t bitPosi ) {
   switch ( portNum )
   {
 	case PORT0:
@@ -294,17 +232,7 @@ void GPIOIntEnable( uint32_t portNum, uint32_t bitPosi )
   return;
 }
 
-/*****************************************************************************
-** Function name:		GPIOIntDisable
-**
-** Descriptions:		Disable Interrupt Mask for a port pin.
-**
-** parameters:			port num, bit position
-** Returned value:		None
-** 
-*****************************************************************************/
-void GPIOIntDisable( uint32_t portNum, uint32_t bitPosi )
-{
+void GPIO_IntDisable( uint32_t portNum, uint32_t bitPosi ) {
   switch ( portNum )
   {
 	case PORT0:
@@ -325,17 +253,7 @@ void GPIOIntDisable( uint32_t portNum, uint32_t bitPosi )
   return;
 }
 
-/*****************************************************************************
-** Function name:		GPIOIntStatus
-**
-** Descriptions:		Get Interrupt status for a port pin.
-**
-** parameters:			port num, bit position
-** Returned value:		None
-** 
-*****************************************************************************/
-uint32_t GPIOIntStatus( uint32_t portNum, uint32_t bitPosi )
-{
+uint32_t GPIOIntStatus( uint32_t portNum, uint32_t bitPosi ) {
   uint32_t regVal = 0;
 
   switch ( portNum )
@@ -362,17 +280,7 @@ uint32_t GPIOIntStatus( uint32_t portNum, uint32_t bitPosi )
   return ( regVal );
 }
 
-/*****************************************************************************
-** Function name:		GPIOIntClear
-**
-** Descriptions:		Clear Interrupt for a port pin.
-**
-** parameters:			port num, bit position
-** Returned value:		None
-** 
-*****************************************************************************/
-void GPIOIntClear( uint32_t portNum, uint32_t bitPosi )
-{
+void GPIO_IntClear( uint32_t portNum, uint32_t bitPosi ) {
   switch ( portNum )
   {
 	case PORT0:
@@ -393,120 +301,21 @@ void GPIOIntClear( uint32_t portNum, uint32_t bitPosi )
   return;
 }
 
-/*****************************************************************************
-** Function name:		GPIOSetValue
-**
-** Descriptions:		Set/clear a bitvalue in a specific bit position
-**						in GPIO portX(X is the port number.)
-**
-** parameters:			port num, bit position, bit value
-** Returned value:		None
-**
-*****************************************************************************/
-void GPIOSetValue( uint32_t portNum, uint32_t bitPosi, uint32_t bitVal ) {
-  LPC_GPIO[portNum]->MASKED_ACCESS[(1<<bitPosi)] = (bitVal<<bitPosi);
+void GPIO_SetValue( uint32_t portNum, uint32_t bitPosi, uint32_t bitVal ) {
+	LPC_GPIO[portNum]->MASKED_ACCESS[(1<<bitPosi)] = (bitVal<<bitPosi);
 }
 
-uint32_t GPIOGetValue( uint32_t portNum, uint32_t bitPosi) {
-  return LPC_GPIO[portNum]->MASKED_ACCESS[(1<<bitPosi)];
+uint32_t GPIO_GetValue( uint32_t portNum, uint32_t bitPosi) {
+	return LPC_GPIO[portNum]->MASKED_ACCESS[(1<<bitPosi)];
 }
 
-void GPIOToggleValue(uint32_t portNum, uint32_t bitPosi) {
+void GPIO_ToggleValue(uint32_t portNum, uint32_t bitPosi) {
 	LPC_GPIO[portNum]->MASKED_ACCESS[(1<<bitPosi)] ^= (1<<bitPosi);
 }
 
-/*****************************************************************************
-** Function name:		GPIOSetDir
-**
-** Descriptions:		Set the direction in GPIO port
-**
-** parameters:			port num, bit position, direction (1 out, 0 input)
-** Returned value:		None
-**
-*****************************************************************************/
-void GPIOSetDir( uint32_t portNum, uint32_t bitPosi, uint32_t dir )
-{
-  if(dir)
-	LPC_GPIO[portNum]->DIR |= 1<<bitPosi;
-  else
-	LPC_GPIO[portNum]->DIR &= ~(1<<bitPosi);
+void GPIO_SetDir( uint32_t portNum, uint32_t bitPosi, uint32_t dir ) {
+	if(dir)
+		LPC_GPIO[portNum]->DIR |= 1<<bitPosi;
+	else
+		LPC_GPIO[portNum]->DIR &= ~(1<<bitPosi);
 }
-#endif
-
-/******************************************************************************
-**               Functions added from the microbuilder code base
-******************************************************************************/
-
-/**************************************************************************/
-/*! 
-Software License Agreement (BSD License)
-
-Copyright (c) 2010, microBuilder SARL
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-1. Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright
-notice, this list of conditions and the following disclaimer in the
-documentation and/or other materials provided with the distribution.
-3. Neither the name of the copyright holders nor the
-names of its contributors may be used to endorse or promote products
-derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
-EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-/**************************************************************************/
-/* useful functions but need to be edited to work with CMSIS
-void gpioSetPullup (volatile uint32_t *ioconReg, gpioPullupMode_t mode)
-{
-	
-	// ToDo: Disable interrupts while we are doing this?
-	
-	*ioconReg &= ~(IOCON_COMMON_MODE_MASK);
-	*ioconReg |= mode;
-	
-	// ToDo: Re-enable interrupts?
-}
-
-uint32_t gpioGetValue (uint32_t portNum, uint32_t bitPos)
-{
-	
-	uint32_t value = 0;
-	
-	switch (portNum)
-	{
-		case 0:
-			value = (GPIO_GPIO0DATA & (1 << bitPos)) ? 1 : 0;
-			break;
-		case 1:
-			value = (GPIO_GPIO1DATA & (1 << bitPos)) ? 1 : 0;
-			break;
-		case 2:
-			value = (GPIO_GPIO2DATA & (1 << bitPos)) ? 1 : 0;
-			break;
-		case 3:
-			value = (GPIO_GPIO3DATA & (1 << bitPos)) ? 1 : 0;
-			break;
-		default:
-			break;
-	}
-	
-	return value;
-}
-
-*/
-
-/******************************************************************************
-**                            End Of File
-******************************************************************************/

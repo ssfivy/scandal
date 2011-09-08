@@ -17,32 +17,11 @@
  * use without further testing or modification.
  **********************************************************************/
 
-/* Peripheral group ----------------------------------------------------------- */
-/** @addtogroup SPI
- * @{
- */
-
 /* Includes ------------------------------------------------------------------- */
-#include "lpc17xx_spi.h"
-#include "lpc17xx_clkpwr.h"
-
-/* If this source file built with example, the LPC17xx FW library configuration
- * file in each example directory ("lpc17xx_libcfg.h") must be included,
- * otherwise the default FW library configuration file must be included instead
- */
-#ifdef __BUILD_WITH_EXAMPLE__
-#include "lpc17xx_libcfg.h"
-#else
-#include "lpc17xx_libcfg_default.h"
-#endif /* __BUILD_WITH_EXAMPLE__ */
-
-#ifdef _SPI
-
+#include <arch/spi.h>
+#include <arch/clkpwr.h>
 
 /* Public Functions ----------------------------------------------------------- */
-/** @addtogroup SPI_Public_Functions
- * @{
- */
 
 /*********************************************************************//**
  * @brief 		Setup clock rate for SPI device
@@ -416,16 +395,3 @@ FlagStatus SPI_CheckStatus (uint32_t inputSPIStatus,  uint8_t SPIStatus)
 
 	return ((inputSPIStatus & SPIStatus) ? SET : RESET);
 }
-
-
-/**
- * @}
- */
-
-#endif /* _SPI */
-
-/**
- * @}
- */
-
-/* --------------------------------- End Of File ------------------------------ */

@@ -17,21 +17,11 @@
  * use without further testing or modification.
  **********************************************************************/
 
-/* Peripheral group ----------------------------------------------------------- */
-/** @addtogroup SSP
- * @{
- */
-
 /* Includes ------------------------------------------------------------------- */
 #include <arch/ssp.h>
 #include <arch/clkpwr.h>
 
-#ifdef _SSP
-
 /* Public Functions ----------------------------------------------------------- */
-/** @addtogroup SSP_Public_Functions
- * @{
- */
 static void setSSPclock (LPC_SSP_TypeDef *SSPx, uint32_t target_clock);
 
 /*********************************************************************//**
@@ -327,10 +317,10 @@ uint16_t SSP_ReceiveData(LPC_SSP_TypeDef* SSPx)
 int32_t SSP_ReadWrite (LPC_SSP_TypeDef *SSPx, SSP_DATA_SETUP_Type *dataCfg, \
 						SSP_TRANSFER_Type xfType)
 {
-	uint8_t *rdata8;
-    uint8_t *wdata8;
-	uint16_t *rdata16;
-    uint16_t *wdata16;
+	uint8_t *rdata8 = NULL;
+    uint8_t *wdata8 = NULL;
+	uint16_t *rdata16 = NULL;
+    uint16_t *wdata16 = NULL;
     uint32_t stat;
     uint32_t tmp;
     int32_t dataword;
@@ -338,7 +328,6 @@ int32_t SSP_ReadWrite (LPC_SSP_TypeDef *SSPx, SSP_DATA_SETUP_Type *dataCfg, \
     dataCfg->rx_cnt = 0;
     dataCfg->tx_cnt = 0;
     dataCfg->status = 0;
-
 
 	/* Clear all remaining data in RX FIFO */
 	while (SSPx->SR & SSP_SR_RNE){
@@ -655,16 +644,4 @@ void SSP_DMACmd(LPC_SSP_TypeDef *SSPx, uint32_t DMAMode, FunctionalState NewStat
 		SSPx->DMACR &= (~DMAMode) & SSP_DMA_BITMASK;
 	}
 }
-
-/**
- * @}
- */
-
-#endif /* _SSP */
-
-/**
- * @}
- */
-
-/* --------------------------------- End Of File ------------------------------ */
 

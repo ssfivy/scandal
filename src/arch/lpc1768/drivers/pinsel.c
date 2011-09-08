@@ -18,13 +18,8 @@
  * use without further testing or modification.
  **********************************************************************/
 
-/* Peripheral group ----------------------------------------------------------- */
-/** @addtogroup PINSEL
- * @{
- */
-
 /* Includes ------------------------------------------------------------------- */
-#include "lpc17xx_pinsel.h"
+#include <arch/pinsel.h>
 
 /* Public Functions ----------------------------------------------------------- */
 
@@ -294,13 +289,3 @@ void PINSEL_ConfigPin(PINSEL_CFG_Type *PinCfg)
 	set_OpenDrainMode(PinCfg->Portnum, PinCfg->Pinnum, PinCfg->OpenDrain);
 }
 
-
-/**
- * @}
- */
-
-/**
- * @}
- */
-
-/* --------------------------------- End Of File ------------------------------ */

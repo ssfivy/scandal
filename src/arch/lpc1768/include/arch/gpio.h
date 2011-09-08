@@ -18,12 +18,6 @@
  * use without further testing or modification.
  **************************************************************************/
 
-/* Peripheral group ----------------------------------------------------------- */
-/** @defgroup GPIO GPIO
- * @ingroup LPC1700CMSIS_FwLib_Drivers
- * @{
- */
-
 #ifndef LPC17XX_GPIO_H_
 #define LPC17XX_GPIO_H_
 
@@ -115,6 +109,7 @@ typedef struct {
  */
 
 /* GPIO style ------------------------------- */
+void GPIO_Init(void);
 void GPIO_SetDir(uint8_t portNum, uint32_t bitValue, uint8_t dir);
 void GPIO_SetValue(uint8_t portNum, uint32_t bitValue, uint32_t bitPosi);
 void GPIO_ClearValue(uint8_t portNum, uint32_t bitValue);
@@ -147,11 +142,6 @@ void FIO_ByteSetMask(uint8_t portNum, uint8_t byteNum, uint8_t bitValue, uint8_t
 void FIO_ByteSetValue(uint8_t portNum, uint8_t byteNum, uint8_t bitValue);
 void FIO_ByteClearValue(uint8_t portNum, uint8_t byteNum, uint8_t bitValue);
 uint8_t FIO_ByteReadValue(uint8_t portNum, uint8_t byteNum);
-
-/**
- * @}
- */
-
 
 #ifdef __cplusplus
 }

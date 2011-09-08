@@ -18,19 +18,10 @@
  * use without further testing or modification.
  **********************************************************************/
 
-/* Peripheral group ----------------------------------------------------------- */
-/** @addtogroup CLKPWR
- * @{
- */
-
 /* Includes ------------------------------------------------------------------- */
 #include <arch/clkpwr.h>
 
-
 /* Public Functions ----------------------------------------------------------- */
-/** @addtogroup CLKPWR_Public_Functions
- * @{
- */
 
 /*********************************************************************//**
  * @brief 		Set value of each Peripheral Clock Selection

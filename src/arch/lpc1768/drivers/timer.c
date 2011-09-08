@@ -17,11 +17,6 @@
  * use without further testing or modification.
  **********************************************************************/
 
-/* Peripheral group ----------------------------------------------------------- */
-/** @addtogroup TIM
- * @{
- */
-
 /* Includes ------------------------------------------------------------------- */
 #include <arch/timer.h>
 #include <arch/clkpwr.h>

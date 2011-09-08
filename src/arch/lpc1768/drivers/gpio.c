@@ -718,6 +718,10 @@ uint8_t FIO_ByteReadValue(uint8_t portNum, uint8_t byteNum)
 	return (0);
 }
 
+void GPIO_Init(void) {
+
+}
+
 uint32_t GPIO_GetValue( uint32_t portNum, uint32_t bitPosi) {
 	return 0;
 }

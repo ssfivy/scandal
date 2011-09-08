@@ -18,12 +18,6 @@
  * use without further testing or modification.
  **************************************************************************/
 
-/* Peripheral group ----------------------------------------------------------- */
-/** @defgroup CLKPWR CLKPWR
- * @ingroup LPC1700CMSIS_FwLib_Drivers
- * @{
- */
-
 #ifndef LPC17XX_CLKPWR_H_
 #define LPC17XX_CLKPWR_H_
 

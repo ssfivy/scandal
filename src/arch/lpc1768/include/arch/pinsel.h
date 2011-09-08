@@ -18,12 +18,6 @@
  * use without further testing or modification.
  **************************************************************************/
 
-/* Peripheral group ----------------------------------------------------------- */
-/** @defgroup PINSEL PINSEL
- * @ingroup LPC1700CMSIS_FwLib_Drivers
- * @{
- */
-
 #ifndef LPC17XX_PINSEL_H_
 #define LPC17XX_PINSEL_H_
 
@@ -37,9 +31,6 @@ extern "C"
 #endif
 
 /* Public Macros -------------------------------------------------------------- */
-/** @defgroup PINSEL_Public_Macros PINSEL Public Macros
- * @{
- */
 
 /*********************************************************************//**
  *!< Macros define for PORT Selection
@@ -157,35 +148,15 @@ typedef struct
 						- PINSEL_PINMODE_OPENDRAIN: Pin is in the open drain mode */
 } PINSEL_CFG_Type;
 
-/**
- * @}
- */
-
-
 /* Public Functions ----------------------------------------------------------- */
-/** @defgroup PINSEL_Public_Functions PINSEL Public Functions
- * @{
- */
 
 void PINSEL_ConfigPin(PINSEL_CFG_Type *PinCfg);
 void PINSEL_ConfigTraceFunc (FunctionalState NewState);
 void PINSEL_SetI2C0Pins(uint8_t i2cPinMode, FunctionalState filterSlewRateEnable);
-
-
-/**
- * @}
- */
-
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* LPC17XX_PINSEL_H_ */
-
-/**
- * @}
- */
-
-/* --------------------------------- End Of File ------------------------------ */
 

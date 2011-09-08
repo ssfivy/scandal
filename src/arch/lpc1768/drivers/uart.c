@@ -17,11 +17,6 @@
  * use without further testing or modification.
  **********************************************************************/
 
-/* Peripheral group ----------------------------------------------------------- */
-/** @addtogroup UART
- * @{
- */
-
 /* Includes ------------------------------------------------------------------- */
 #include <arch/uart.h>
 #include <arch/clkpwr.h>

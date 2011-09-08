@@ -18,12 +18,6 @@
  * use without further testing or modification.
  **************************************************************************/
 
-/* Peripheral group ----------------------------------------------------------- */
-/** @defgroup SPI SPI
- * @ingroup LPC1700CMSIS_FwLib_Drivers
- * @{
- */
-
 #ifndef LPC17XX_SPI_H_
 #define LPC17XX_SPI_H_
 
@@ -31,16 +25,12 @@
 #include "LPC17xx.h"
 #include "lpc_types.h"
 
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
 /* Public Macros -------------------------------------------------------------- */
-/** @defgroup SPI_Public_Macros SPI Public Macros
- * @{
- */
 
 /*********************************************************************//**
  * SPI configuration parameter defines
@@ -274,9 +264,6 @@ typedef struct {
 
 
 /* Public Functions ----------------------------------------------------------- */
-/** @defgroup SPI_Public_Functions SPI Public Functions
- * @{
- */
 
 /* SPI Init/DeInit functions ---------*/
 void SPI_Init(LPC_SPI_TypeDef *SPIx, SPI_CFG_Type *SPI_ConfigStruct);
@@ -299,18 +286,8 @@ uint8_t SPI_GetDataSize (LPC_SPI_TypeDef *SPIx);
 uint32_t SPI_GetStatus(LPC_SPI_TypeDef *SPIx);
 FlagStatus SPI_CheckStatus (uint32_t inputSPIStatus,  uint8_t SPIStatus);
 
-/**
- * @}
- */
-
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* LPC17XX_SPI_H_ */
-
-/**
- * @}
- */
-
-/* --------------------------------- End Of File ------------------------------ */

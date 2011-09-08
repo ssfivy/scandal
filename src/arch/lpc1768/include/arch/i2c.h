@@ -18,12 +18,6 @@
  * use without further testing or modification.
  **************************************************************************/
 
-/* Peripheral group ----------------------------------------------------------- */
-/** @defgroup I2C I2C
- * @ingroup LPC1700CMSIS_FwLib_Drivers
- * @{
- */
-
 #ifndef LPC17XX_I2C_H_
 #define LPC17XX_I2C_H_
 
@@ -358,20 +352,8 @@ void I2C_IntCmd (LPC_I2C_TypeDef *I2Cx, Bool NewState);
 void I2C_MasterHandler (LPC_I2C_TypeDef *I2Cx);
 void I2C_SlaveHandler (LPC_I2C_TypeDef *I2Cx);
 
-
-/**
- * @}
- */
-
-
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* LPC17XX_I2C_H_ */
-
-/**
- * @}
- */
-
-/* --------------------------------- End Of File ------------------------------ */

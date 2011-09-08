@@ -17,12 +17,6 @@
  * use without further testing or modification.
  **********************************************************************/
 
-/* Peripheral group ----------------------------------------------------------- */
-/** @defgroup TIM TIM
- * @ingroup LPC1700CMSIS_FwLib_Drivers
- * @{
- */
-
 #ifndef __LPC17XX_TIMER_H_
 #define __LPC17XX_TIMER_H_
 
@@ -36,11 +30,7 @@ extern "C"
 #endif
 
 /* Private Macros ------------------------------------------------------------- */
-/** @defgroup TIM_Private_Macros TIM Private Macros
- * @{
- */
 
-/* --------------------- BIT DEFINITIONS -------------------------------------- */
 /**********************************************************************
 ** Interrupt information
 **********************************************************************/
@@ -295,9 +285,7 @@ typedef struct {
 
 
 /* Public Functions ----------------------------------------------------------- */
-/** @defgroup TIM_Public_Functions TIM Public Functions
- * @{
- */
+
 /* Init/DeInit TIM functions -----------*/
 void TIM_Init(LPC_TIM_TypeDef *TIMx, TIM_MODE_OPT TimerCounterMode, void *TIM_ConfigStruct);
 void TIM_DeInit(LPC_TIM_TypeDef *TIMx);
@@ -319,17 +307,8 @@ void TIM_Cmd(LPC_TIM_TypeDef *TIMx, FunctionalState NewState);
 uint32_t TIM_GetCaptureValue(LPC_TIM_TypeDef *TIMx, TIM_COUNTER_INPUT_OPT CaptureChannel);
 void TIM_ResetCounter(LPC_TIM_TypeDef *TIMx);
 
-/**
- * @}
- */
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* __LPC17XX_TIMER_H_ */
-
-/**
- * @}
- */
-
-/* --------------------------------- End Of File ------------------------------ */

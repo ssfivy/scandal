@@ -18,12 +18,6 @@
  * use without further testing or modification.
  **************************************************************************/
 
-/* Peripheral group ----------------------------------------------------------- */
-/** @defgroup SSP SSP
- * @ingroup LPC1700CMSIS_FwLib_Drivers
- * @{
- */
-
 #ifndef LPC17XX_SSP_H_
 #define LPC17XX_SSP_H_
 
@@ -31,16 +25,12 @@
 #include <cmsis/LPC17xx.h>
 #include <arch/types.h>
 
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
 /* Public Macros -------------------------------------------------------------- */
-/** @defgroup SSP_Public_Macros SSP Public Macros
- * @{
- */
 
 /*********************************************************************//**
  * SSP configuration parameter defines
@@ -442,19 +432,8 @@ int32_t SSP_ReadWrite (LPC_SSP_TypeDef *SSPx, SSP_DATA_SETUP_Type *dataCfg, \
 void SSP_IntConfig(LPC_SSP_TypeDef *SSPx, uint32_t IntType, FunctionalState NewState);
 void SSP_ClearIntPending(LPC_SSP_TypeDef *SSPx, uint32_t IntType);
 
-
-/**
- * @}
- */
-
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* LPC17XX_SSP_H_ */
-
-/**
- * @}
- */
-
-/* --------------------------------- End Of File ------------------------------ */

@@ -20,23 +20,13 @@
  * use without further testing or modification.
  **************************************************************************/
 
-/* Type group ----------------------------------------------------------- */
-/** @defgroup LPC_Types LPC_Types
- * @ingroup LPC1700CMSIS_FwLib_Drivers
- * @{
- */
-
 #ifndef LPC_TYPES_H
 #define LPC_TYPES_H
 
 /* Includes ------------------------------------------------------------------- */
 #include <stdint.h>
 
-
 /* Public Types --------------------------------------------------------------- */
-/** @defgroup LPC_Types_Public_Types LPC_Types Public Types
- * @{
- */
 
 /**
  * @brief Boolean Type definition
@@ -182,15 +172,4 @@ typedef Bool BOOL_16;
 /** 8 bit boolean type */
 typedef Bool BOOL_8;
 
-/**
- * @}
- */
-
-
 #endif /* LPC_TYPES_H */
-
-/**
- * @}
- */
-
-/* --------------------------------- End Of File ------------------------------ */

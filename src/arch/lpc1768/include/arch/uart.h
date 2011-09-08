@@ -18,19 +18,12 @@
  * use without further testing or modification.
  **************************************************************************/
 
-/* Peripheral group ----------------------------------------------------------- */
-/** @defgroup UART UART
- * @ingroup LPC1700CMSIS_FwLib_Drivers
- * @{
- */
-
 #ifndef __LPC17XX_UART_H
 #define __LPC17XX_UART_H
 
 /* Includes ------------------------------------------------------------------- */
 #include <cmsis/LPC17xx.h>
 #include <arch/types.h>
-
 
 #ifdef __cplusplus
 extern "C"
@@ -625,10 +618,6 @@ uint32_t UART_RS485SendData(LPC_UART1_TypeDef *UARTx, uint8_t *pData, uint32_t s
 void UART_IrDAInvtInputCmd(LPC_UART_TypeDef* UARTx, FunctionalState NewState);
 void UART_IrDACmd(LPC_UART_TypeDef* UARTx, FunctionalState NewState);
 void UART_IrDAPulseDivConfig(LPC_UART_TypeDef *UARTx, UART_IrDA_PULSE_Type PulseDiv);
-/**
- * @}
- */
-
 
 #ifdef __cplusplus
 }

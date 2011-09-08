@@ -28,8 +28,8 @@
 #define LPC17XX_ADC_H_
 
 /* Includes ------------------------------------------------------------------- */
-#include "LPC17xx.h"
-#include "lpc_types.h"
+#include <cmsis/LPC17xx.h>
+#include <arch/types.h>
 
 
 #ifdef __cplusplus
@@ -278,11 +278,4 @@ FlagStatus	ADC_GlobalGetStatus(LPC_ADC_TypeDef *ADCx, uint32_t StatusType);
 }
 #endif
 
-
 #endif /* LPC17XX_ADC_H_ */
-
-/**
- * @}
- */
-
-/* --------------------------------- End Of File ------------------------------ */

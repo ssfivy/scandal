@@ -1875,6 +1875,7 @@ uint32_t CAN_FullCANPendGetStatus(LPC_CANAF_TypeDef* CANAFx, FullCAN_IC_Type typ
 
 /* Scandal wrapper for init */
 void init_can(void) {
+
 }
 
 /* Get a message from the CAN controller. */

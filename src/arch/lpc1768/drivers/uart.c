@@ -1342,19 +1342,19 @@ void UART_Init(uint32_t baudrate) {
 	UART_CFG_Type UARTConfigStruct; //declare config struct
 	UART_ConfigStructInit(&UARTConfigStruct); //set default configs
 	UARTConfigStruct.Baud_rate = baudrate; //set baud rate
-	UART_Init_17xx((LPC_UART_TypeDef *) LPC_UART1, &UARTConfigStruct); // init registers
+	UART_Init_17xx(LPC_UART0, &UARTConfigStruct); // init registers
 }
 
 /* The scandal UART_ReceiveByte will default to UART0 on 17xx */
 u08 UART_ReceiveByte(void) {
-	return UART_ReceiveByte_17xx((LPC_UART_TypeDef *) LPC_UART0);
+	return UART_ReceiveByte_17xx(LPC_UART0);
 }
 
 /* The scandal UART_SendByte will default to UART0 on 17xx */
 void UART_SendByte(u08 data) {
-	UART_SendByte_17xx((LPC_UART_TypeDef *) LPC_UART0, data);
+	UART_SendByte_17xx(LPC_UART0, data);
 }
 
 void UART_putchar(char c) {
-	UART_SendByte_17xx((LPC_UART_TypeDef *) LPC_UART0, (int)c);
+	UART_SendByte_17xx(LPC_UART0, (int)c);
 }

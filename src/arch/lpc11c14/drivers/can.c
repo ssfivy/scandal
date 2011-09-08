@@ -60,121 +60,6 @@ uint32_t CANStatusLog[100];
 uint32_t CANStatusLogCount = 0;
 #endif
 
-/* Scandal wrappers
- * *****************
- * for reference:
- * typedef struct can_mg {
- *   u32 id;
- *   u08 data[CAN_MSG_MAXSIZE];
- *   u08 length;
- * } can_msg;
- */
-
-/* Scandal wrapper for init */
-void init_can(void) {
-	CAN_Init(BITRATE125K16MHZ);
-}
-
-/* Get a message from the CAN controller. */
-u08 can_get_msg(can_msg* msg) {
-	int i;
-	uint8_t can_data[CAN_MSG_MAXSIZE/2];
-	uint8_t can_timestamp[CAN_MSG_MAXSIZE/2];
-	uint16_t priority;
-	uint16_t msg_type;
-	uint16_t node_address;
-	uint16_t channel_num;
-
-	for(i = 0; i < MSG_OBJ_MAX; i++) {
-		if (CANRxDone[i] == TRUE) {
-			CAN_decode_packet(i, (int32_t*)(&can_data), (uint32_t*)(&can_timestamp), &priority, &msg_type, &node_address, &channel_num);
-
-			msg->id = can_buff[i].id;
-			msg->length= CAN_MSG_MAXSIZE;
-			/* ordering is important! */
-			msg->data[7] = can_timestamp[0];
-			msg->data[6] = can_timestamp[1];
-			msg->data[5] = can_timestamp[2];
-			msg->data[4] = can_timestamp[3];
-			msg->data[3] = can_data[0];
-			msg->data[2] = can_data[1];
-			msg->data[1] = can_data[2];
-			msg->data[0] = can_data[3];
-
-#ifdef CAN_UART_DEBUG
-			UART_printf("got a can message...\n\r");
-			UART_printf(" id is               %d (0x%x)\n\r", can_buff[i].id, can_buff[i].id);
-			UART_printf(" priority is         %d\n\r", priority);
-			UART_printf(" node_address is     %d\n\r", node_address);
-			UART_printf(" message type is     %d\n\r", msg_type);
-			UART_printf(" channel_num is      %d\n\r", channel_num);
-			UART_printf(" data value is:      %d (0x%x)\n\r", *((uint32_t*)&msg->data[0]), *((uint32_t*)&msg->data[0]));
-			UART_printf(" timestamp value is: %d (0x%x)\n\r", *((uint32_t*)&msg->data[4]), *((uint32_t*)&msg->data[4]));
-			for(n = 0; n < 8; n++)
-				UART_printf("msg->data[%d] = %d (0x%x)\n\r", n, msg->data[n], msg->data[n]);
-#endif
-
-			return NO_ERR;
-		}
-	}
-	return NO_MSG_ERR;
-}
-
-/* Send a message using the CAN controller */
-u08 can_send_msg(can_msg *msg, u08 priority) {
-	if (msg->ext == CAN_STD_MSG)
-		return NO_MSG_ERR;
-	else if(msg->ext == CAN_EXT_MSG)
-		return CAN_Send((uint16_t)priority, msg);
-}
-
-/* Register for a message type. Currently, each message that we want to
- * register for is given a specific message buffer. This limits the maximum
- * number of in channels to be 21 - 4 = 17. (the 4 comes from the 4 types of
- * messages that scandal registers for by default). Look in scandal/engine.c
- * for where this function is called to see why. At the moment, I don't think
- * there are any nodes with large numbers of in channels. If we need to deal
- * with this, it can be done in the future */
-u08 can_register_id(u32 mask, u32 data, u08 priority) {
-	int i;
-
-	NVIC_DisableIRQ(CAN_IRQn);
-	LPC_CAN->CNTL &= ~(CTRL_IE|CTRL_SIE|CTRL_EIE);
-
-	for(i = 0; i < RECV_BUFF_DIVIDE; i++) {
-		/* if we have run out of recv buffers, error out */
-		if (i == RECV_BUFF_DIVIDE-1) {
-			NVIC_EnableIRQ(CAN_IRQn);
-			LPC_CAN->CNTL |= (CTRL_IE|CTRL_SIE|CTRL_EIE);
-			return NO_ERR;
-
-		/* find a free buffer and set up a filter */
-		} else if (!recv_buf_used[i]) {
-			CAN_set_up_filter(i, mask, data);
-			recv_buf_used[i] = 1;
-			NVIC_EnableIRQ(CAN_IRQn);
-			LPC_CAN->CNTL |= (CTRL_IE|CTRL_SIE|CTRL_EIE);
-#ifdef CAN_UART_DEBUG
-			UART_printf("registering for a message type %d (0x%x)\n\r", data, data);
-#endif
-			return NO_ERR;
-		}
-	}
-	return NO_MSG_ERR;
-}
-
-/* does nothing yet */
-u08  can_baud_rate(u08 mode) {
-	return 0;
-}
-
-/* this is not used on LPC11C14 */
-void can_poll(void) {}
-
-/* *******************
- * End Scandal wrappers
- */
-
 /* Get a message out of the buffer and break it into bits */
 void CAN_decode_packet(uint8_t msg_num, int32_t *data, uint32_t *timestamp,
 	uint16_t *priority, uint16_t *type, uint16_t *node_address, uint16_t *channel_num) {
@@ -438,3 +323,118 @@ int CAN_Send(uint16_t Pri, can_msg *msg) {
 
 	return NO_ERR;
 }
+
+/* Scandal wrappers
+ * *****************
+ * for reference:
+ * typedef struct can_mg {
+ *   u32 id;
+ *   u08 data[CAN_MSG_MAXSIZE];
+ *   u08 length;
+ * } can_msg;
+ */
+
+/* Scandal wrapper for init */
+void init_can(void) {
+	CAN_Init(BITRATE125K16MHZ);
+}
+
+/* Get a message from the CAN controller. */
+u08 can_get_msg(can_msg* msg) {
+	int i;
+	uint8_t can_data[CAN_MSG_MAXSIZE/2];
+	uint8_t can_timestamp[CAN_MSG_MAXSIZE/2];
+	uint16_t priority;
+	uint16_t msg_type;
+	uint16_t node_address;
+	uint16_t channel_num;
+
+	for(i = 0; i < MSG_OBJ_MAX; i++) {
+		if (CANRxDone[i] == TRUE) {
+			CAN_decode_packet(i, (int32_t*)(&can_data), (uint32_t*)(&can_timestamp), &priority, &msg_type, &node_address, &channel_num);
+
+			msg->id = can_buff[i].id;
+			msg->length= CAN_MSG_MAXSIZE;
+			/* ordering is important! */
+			msg->data[7] = can_timestamp[0];
+			msg->data[6] = can_timestamp[1];
+			msg->data[5] = can_timestamp[2];
+			msg->data[4] = can_timestamp[3];
+			msg->data[3] = can_data[0];
+			msg->data[2] = can_data[1];
+			msg->data[1] = can_data[2];
+			msg->data[0] = can_data[3];
+
+#ifdef CAN_UART_DEBUG
+			UART_printf("got a can message...\n\r");
+			UART_printf(" id is               %d (0x%x)\n\r", can_buff[i].id, can_buff[i].id);
+			UART_printf(" priority is         %d\n\r", priority);
+			UART_printf(" node_address is     %d\n\r", node_address);
+			UART_printf(" message type is     %d\n\r", msg_type);
+			UART_printf(" channel_num is      %d\n\r", channel_num);
+			UART_printf(" data value is:      %d (0x%x)\n\r", *((uint32_t*)&msg->data[0]), *((uint32_t*)&msg->data[0]));
+			UART_printf(" timestamp value is: %d (0x%x)\n\r", *((uint32_t*)&msg->data[4]), *((uint32_t*)&msg->data[4]));
+			for(n = 0; n < 8; n++)
+				UART_printf("msg->data[%d] = %d (0x%x)\n\r", n, msg->data[n], msg->data[n]);
+#endif
+
+			return NO_ERR;
+		}
+	}
+	return NO_MSG_ERR;
+}
+
+/* Send a message using the CAN controller */
+u08 can_send_msg(can_msg *msg, u08 priority) {
+	if (msg->ext == CAN_STD_MSG)
+		return NO_MSG_ERR;
+	else if(msg->ext == CAN_EXT_MSG)
+		return CAN_Send((uint16_t)priority, msg);
+}
+
+/* Register for a message type. Currently, each message that we want to
+ * register for is given a specific message buffer. This limits the maximum
+ * number of in channels to be 21 - 4 = 17. (the 4 comes from the 4 types of
+ * messages that scandal registers for by default). Look in scandal/engine.c
+ * for where this function is called to see why. At the moment, I don't think
+ * there are any nodes with large numbers of in channels. If we need to deal
+ * with this, it can be done in the future */
+u08 can_register_id(u32 mask, u32 data, u08 priority) {
+	int i;
+
+	NVIC_DisableIRQ(CAN_IRQn);
+	LPC_CAN->CNTL &= ~(CTRL_IE|CTRL_SIE|CTRL_EIE);
+
+	for(i = 0; i < RECV_BUFF_DIVIDE; i++) {
+		/* if we have run out of recv buffers, error out */
+		if (i == RECV_BUFF_DIVIDE-1) {
+			NVIC_EnableIRQ(CAN_IRQn);
+			LPC_CAN->CNTL |= (CTRL_IE|CTRL_SIE|CTRL_EIE);
+			return NO_ERR;
+
+		/* find a free buffer and set up a filter */
+		} else if (!recv_buf_used[i]) {
+			CAN_set_up_filter(i, mask, data);
+			recv_buf_used[i] = 1;
+			NVIC_EnableIRQ(CAN_IRQn);
+			LPC_CAN->CNTL |= (CTRL_IE|CTRL_SIE|CTRL_EIE);
+#ifdef CAN_UART_DEBUG
+			UART_printf("registering for a message type %d (0x%x)\n\r", data, data);
+#endif
+			return NO_ERR;
+		}
+	}
+	return NO_MSG_ERR;
+}
+
+/* does nothing yet */
+u08  can_baud_rate(u08 mode) {
+	return 0;
+}
+
+/* this is not used on LPC11C14 */
+void can_poll(void) {}
+
+/* *******************
+ * End Scandal wrappers
+ */

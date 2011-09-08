@@ -25,16 +25,7 @@
 #include <cmsis/LPC17xx.h>
 #include <arch/types.h>
 
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 /* Public Macros -------------------------------------------------------------- */
-/** @defgroup GPIO_Public_Macros GPIO Public Macros
- * @{
- */
 
 /** Fast GPIO port 0 byte accessible definition */
 #define GPIO0_Byte	((GPIO_Byte_TypeDef *)(LPC_GPIO0_BASE))
@@ -98,15 +89,7 @@ typedef struct {
 	__O  uint16_t FIOCLRU;		/**< FIO clear register upper halfword part */
 } GPIO_HalfWord_TypeDef;
 
-/**
- * @}
- */
-
-
 /* Public Functions ----------------------------------------------------------- */
-/** @defgroup GPIO_Public_Functions GPIO Public Functions
- * @{
- */
 
 /* GPIO style ------------------------------- */
 void GPIO_Init(void);
@@ -118,34 +101,6 @@ void GPIO_IntCmd(uint8_t portNum, uint32_t bitValue, uint8_t edgeState);
 FunctionalState GPIO_GetIntStatus(uint8_t portNum, uint32_t pinNum, uint8_t edgeState);
 void GPIO_ClearInt(uint8_t portNum, uint32_t bitValue);
 void GPIO_ToggleValue( uint32_t portNum, uint32_t bitPosi);
-
-/* FIO (word-accessible) style ------------------------------- */
-void FIO_SetDir(uint8_t portNum, uint32_t bitValue, uint8_t dir);
-void FIO_SetValue(uint8_t portNum, uint32_t bitValue, uint32_t bitPosi);
-void FIO_ClearValue(uint8_t portNum, uint32_t bitValue);
-uint32_t FIO_ReadValue(uint8_t portNum);
-void FIO_SetMask(uint8_t portNum, uint32_t bitValue, uint8_t maskValue);
-void FIO_IntCmd(uint8_t portNum, uint32_t bitValue, uint8_t edgeState);
-FunctionalState FIO_GetIntStatus(uint8_t portNum, uint32_t pinNum, uint8_t edgeState);
-void FIO_ClearInt(uint8_t portNum, uint32_t pinNum);
-
-/* FIO (halfword-accessible) style ------------------------------- */
-void FIO_HalfWordSetDir(uint8_t portNum, uint8_t halfwordNum, uint16_t bitValue, uint8_t dir);
-void FIO_HalfWordSetMask(uint8_t portNum, uint8_t halfwordNum, uint16_t bitValue, uint8_t maskValue);
-void FIO_HalfWordSetValue(uint8_t portNum, uint8_t halfwordNum, uint16_t bitValue);
-void FIO_HalfWordClearValue(uint8_t portNum, uint8_t halfwordNum, uint16_t bitValue);
-uint16_t FIO_HalfWordReadValue(uint8_t portNum, uint8_t halfwordNum);
-
-/* FIO (byte-accessible) style ------------------------------- */
-void FIO_ByteSetDir(uint8_t portNum, uint8_t byteNum, uint8_t bitValue, uint8_t dir);
-void FIO_ByteSetMask(uint8_t portNum, uint8_t byteNum, uint8_t bitValue, uint8_t maskValue);
-void FIO_ByteSetValue(uint8_t portNum, uint8_t byteNum, uint8_t bitValue);
-void FIO_ByteClearValue(uint8_t portNum, uint8_t byteNum, uint8_t bitValue);
-uint8_t FIO_ByteReadValue(uint8_t portNum, uint8_t byteNum);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* LPC17XX_GPIO_H_ */
 

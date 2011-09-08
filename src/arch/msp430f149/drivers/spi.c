@@ -29,14 +29,12 @@
 
 #include <project/spi_devices.h>
 #include <scandal/spi.h>
-#include <scandal/led.h>
-
-/* Initialize the SPI driver */         
+#include <scandal/leds.h>
 
 /* Local variables */ 
 u08 spi_selected_device; 
 
-/*! Initialise the SPI driver to the default values */ 
+/* Initialise the SPI driver to the default values */ 
 u08 init_spi(){
   ME2 |= USPIE1;
   
@@ -51,7 +49,7 @@ u08 init_spi(){
   return(0); 
 }  
 
-/*! Select a particular device */ 
+/* Select a particular device */ 
 u08 spi_select_device(u08	device){  
   if(spi_selected_device != SPI_DEVICE_NONE) 
     return(1); 
@@ -68,13 +66,17 @@ u08 spi_select_device(u08	device){
   return(0); 
 } 
 
-/*! Deselect all devices */ 
+/* Deselect all devices */ 
 void spi_deselect_all(){ 
   DISABLE_MCP2510();
   spi_selected_device = SPI_DEVICE_NONE; 
 } 
 
-/*! Perform an SPI read/write */ 
+/* Perform an SPI read/write
+ * The LEDs are going to tell us whether there were any timeout
+ * errors on the SPI bus. This also allows the node to keep going
+ * even if there was an SPI error. This assumes that the SPI slave
+ * device will not be in a crazy state afterwards. */
 u08 spi_transfer(u08 out_data){ 
 	u08	value; 
 

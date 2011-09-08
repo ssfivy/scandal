@@ -1,11 +1,11 @@
 /* --------------------------------------------------------------------------                                 
     MCP2515 Driver
     File name: mcp2510.c
-    Author: David Snowdon, David Favaloro
+    Author: David Snowdon, David Favaloro, Etienne Le Sueur
     Description: Part of the USBCAN program
 
     Copyright (C) David Snowdon, 2002. 
-    
+
     Date: 25-04-2002
    -------------------------------------------------------------------------- */
 
@@ -33,7 +33,6 @@
 #include <scandal/can.h>
 #include <scandal/spi.h>
 #include <scandal/error.h>
-#include <scandal/led.h>
 
 /* project/spi_devices.h must #define MCP2510 in order for this to compile.
    MCP2510 is the identifier of the SPI device to be used with spi_select() */
@@ -180,7 +179,15 @@ u08 can_get_msg(can_msg* msg){
 
 	return(NO_ERR);
 #else
-	return(MCP2510_receive_message(&(msg->id), msg->data, &(msg->length), &(msg->ext)));
+	switch(msg->ext) {
+	 case CAN_STD_MSG:
+		return MCP2510_transmit_std_message(msg->id, msg->data, msg->length, (msg->id >> 21) & 0xFF);
+		break;
+
+	 case CAN_EXT_MSG:
+		return MCP2510_transmit_message(msg->id, msg->data, msg->length, (msg->id >> 21) & 0xFF);
+		break;
+	}
 #endif
 }
 
@@ -194,10 +201,6 @@ u08 can_send_msg(can_msg* msg, u08 priority){
 #else
   return(MCP2510_transmit_message(msg->id, msg->data, msg->length, priority));
 #endif
-}
-
-u08 can_send_std_msg(can_msg* msg, u08 priority) {
-	return(MCP2510_transmit_std_message(msg->id, msg->data, msg->length, priority));
 }
 
 #if CAN_TX_BUFFER_SIZE > 0
@@ -222,7 +225,7 @@ u08 enqueue_message(can_msg* msg){
 
 u08 send_queued_messages(void){
 	can_msg* msg;
-	u08 err;
+	u08 err = NO_ERR;
 
 	if(tx_num_msgs <= 0)
 		return (NO_MSG_ERR);
@@ -230,7 +233,17 @@ u08 send_queued_messages(void){
 	msg = &(cantxbuf[tx_buf_start]);
 
 	disable_can_interrupt();
-	err = MCP2510_transmit_message(msg->id, msg->data, msg->length, (msg->id >> 21) & 0xFF);
+
+	switch(msg->ext) {
+	 case CAN_STD_MSG:
+		err = MCP2510_transmit_std_message(msg->id, msg->data, msg->length, (msg->id >> 21) & 0xFF);
+		break;
+
+	 case CAN_EXT_MSG:
+		err = MCP2510_transmit_message(msg->id, msg->data, msg->length, (msg->id >> 21) & 0xFF);
+		break;
+	}
+
 	enable_can_interrupt();
 
 	if(err == NO_ERR){

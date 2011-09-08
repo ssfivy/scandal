@@ -390,6 +390,8 @@ u08 can_send_msg(can_msg *msg, u08 priority) {
 		return NO_MSG_ERR;
 	else if(msg->ext == CAN_EXT_MSG)
 		return CAN_Send((uint16_t)priority, msg);
+	else
+		return NO_MSG_ERR;
 }
 
 /* Register for a message type. Currently, each message that we want to

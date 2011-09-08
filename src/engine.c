@@ -28,7 +28,6 @@
 #include <scandal/engine.h>
 #include <scandal/types.h>
 #include <scandal/timer.h>
-#include <scandal/led.h>
 #include <scandal/error.h>
 #include <scandal/eeprom.h>
 #include <scandal/devices.h>

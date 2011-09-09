@@ -264,7 +264,7 @@ char *UART_readline_double_buffer(struct UART_buffer_descriptor *desc_1, struct 
 
 	/* check if we have a full line. */
 	for (i = 0; i <= current_buffer->write_pos; i++) {
-		if (current_buffer->buf[i] == '\r') {
+		if (current_buffer->buf[i] == '\n') {
 			/* make it into a real string so we can printf it */
 			current_buffer->buf[current_buffer->write_pos+1] = '\0';
 			line_read = 1;

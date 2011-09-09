@@ -40,7 +40,7 @@
 #include <scandal/error.h>
 #include <scandal/timer.h>
 
-#define RECV_BUFF_DIVIDE 20 /* this gives 0-21 as recv buffers and 21-32 as tx buffers */
+#define RECV_BUFF_DIVIDE 20 /* this gives 0-20 as recv buffers and 21-32 as tx buffers */
 
 uint8_t recv_buf_used[MSG_OBJ_MAX]; /* this will be used to determine if a recv buffer is available */
 
@@ -247,21 +247,18 @@ void CAN_Init( uint32_t baud ) {
 }
 
 /* Returns true of the buffer is BUSY so move on to the next buffer */
-uint8_t BufferCheck(uint8_t ToCheck) {
+uint8_t buffer_free(uint8_t msg_num) {
 	uint32_t BufferStatus = (((LPC_CAN->TXREQ2) & (0x0000FFFF)) << 16) | ((LPC_CAN->TXREQ1) & (0x0000FFFF));
 
 	/* Return value to be 1 or 0 depending on if the buffer is free or not */
-	return (((uint8_t) (BufferStatus >> (ToCheck -1))) & 0x01);
+	return ((((uint8_t) (BufferStatus >> (msg_num-1))) & 0x01) == 0);
 }
 
 /* Send a message */
 int CAN_Send(uint16_t Pri, can_msg *msg) {
 	uint32_t tx_addr = 0x1FFFFFFF & msg->id;
 	uint8_t  length = 8;
-	uint8_t  BufferPos; //Buffer Position (Counter variable to see if the buffer position is BUSY
-	uint8_t  BufferOffset = 21; //The offset from which the buffer will start counting (Assumed 21 through 32)
-	uint8_t  BufferFree; //Status of the buffer being checked, 1 indicates busy
-	uint32_t timeout = 10000;
+	int i;
 
 	/* Data is stored in can_msg->data[0-4], timestamp is stored in can_msg->data[4-7] */
 	uint32_t can_data;
@@ -289,39 +286,16 @@ int CAN_Send(uint16_t Pri, can_msg *msg) {
 	LPC_CAN->IF1_DB2 = ((can_timestamp & 0xFFFF0000) >> 16);
 	LPC_CAN->IF1_CMDMSK = WR|MASK|ARB|CTRL|TREQ|DATAA|DATAB;
 
-	//Buffers=(((LPC_CAN->TXREQ2) & (0x0000FFFF)) << 16) | ((LPC_CAN->TXREQ1) & (0x0000FFFF));
-	//BufferStat = BufferCheck(21);
-
-	BufferPos = 0;
-	BufferFree = BufferCheck (BufferPos+BufferOffset);
-
-	/* Spins here while BufferFree=1 (Current buffer is busy) and timeout hasn't expired.
-	 * We shouldn't wait forever. If something is wrong, we need to tell someone. */
-	while (BufferFree && timeout-- > 0) {
-		BufferPos++;
-
-		if (BufferPos < 12) { //Buffer Position should either be
-			BufferFree = BufferCheck (BufferPos+BufferOffset);
-		} else {
-			BufferFree = 1; //Force exit of the loop
+	for(i = RECV_BUFF_DIVIDE+1; i < MSG_OBJ_MAX; i++) {
+		if (buffer_free(i)) {
+			LPC_CAN->IF1_CMDREQ = i;
+			while ( LPC_CAN->IF1_CMDREQ & IFCREQ_BUSY )
+				; /* Waits until IF1 transfer thingy has done its duties */
+			return NO_ERR;
 		}
 	}
 
-	if (timeout == 0)
-		return NO_MSG_ERR;
-
-	if ((BufferPos+BufferOffset) <= MSG_OBJ_MAX) { //Make sure we haven't gone beyond the maximum buffer size we're allowed to use.
-		LPC_CAN->IF1_CMDREQ = (BufferPos+BufferOffset);
-	} else {
-		//Return some sort of error as all the buffers were full, maybe test by having an LED initially OFF
-		//and turning it on here
-	}
-
-	while ( LPC_CAN->IF1_CMDREQ & IFCREQ_BUSY ) {
-		; /* Waits untill IF1 transfer thingy has done its duties */
-	}
-
-	return NO_ERR;
+	return NO_MSG_ERR;
 }
 
 /* Scandal wrappers
@@ -408,7 +382,7 @@ u08 can_register_id(u32 mask, u32 data, u08 priority) {
 	NVIC_DisableIRQ(CAN_IRQn);
 	LPC_CAN->CNTL &= ~(CTRL_IE|CTRL_SIE|CTRL_EIE);
 
-	for(i = 0; i < RECV_BUFF_DIVIDE; i++) {
+	for(i = 0; i <= RECV_BUFF_DIVIDE; i++) {
 		/* if we have run out of recv buffers, error out */
 		if (i == RECV_BUFF_DIVIDE-1) {
 			NVIC_EnableIRQ(CAN_IRQn);

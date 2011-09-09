@@ -47,7 +47,7 @@ typedef struct {
 	uint32_t	data[4];
 } message_object;
 
-#define MSG_OBJ_MAX			0x0020
+#define MSG_OBJ_MAX			32
 #define DLC_MAX				8
 
 #define RX_MSG_ID			0x100

@@ -79,6 +79,7 @@ u08 scandal_init(void){
 		determine if this is first run or not */
 
 	sc_read_conf(&my_config);
+
 	if(my_config.version != SCANDAL_VERSION)
 		do_first_run();
 

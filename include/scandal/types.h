@@ -82,7 +82,6 @@ typedef uint64_t       u64;
 #else
 #if defined(lpc11c14) || defined(lpc1768)
 #include <arch/types.h>
-
 typedef uint8_t        u08;
 typedef int8_t         s08;
 typedef uint16_t       u16;

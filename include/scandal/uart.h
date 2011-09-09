@@ -62,6 +62,22 @@ extern void UART_ClearReceive   (void);
 #define EOL           UART_PrintfEndOfLine 
 
 
+/* New buffer managed UART stuff */
+
+#define UART_BUFFER_OVERFLOW -1
+#define UART_NO_LINE -2
+
+struct UART_buffer_descriptor {
+	char *buf;
+	uint32_t size;
+	uint32_t write_pos;
+	uint8_t overflow;
+};
+
+char *UART_readline_double_buffer(struct UART_buffer_descriptor *desc_1, struct UART_buffer_descriptor *desc_2);
+void UART_init_double_buffer(struct UART_buffer_descriptor *desc_1, char *buf_1, uint32_t size_1,
+	struct UART_buffer_descriptor *desc_2, char *buf_2, uint32_t size_2);
+
 /* Utilities */
 void print_hex(u08 byte);
 void print_string(u08*	buf);

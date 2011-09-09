@@ -15,7 +15,6 @@
 
 #define RS485_ENABLED		0
 #define TX_INTERRUPT		0		/* 0 if TX uses polling, 1 interrupt driven. */
-#define MODEM_TEST			0
 
 #define IER_RBR		0x01
 #define IER_THRE	0x02
@@ -46,13 +45,10 @@
 #define RS485_DCTRL		(0x1<<4)
 #define RS485_OINV		(0x1<<5)
 
-void ModemInit( void );
 void UART_Init_11xx(uint32_t baudrate);
-void UART_IRQHandler(void);
-void UARTSend(uint8_t *BufferPtr, uint32_t Length);
+void UART_Send(uint8_t *BufferPtr, uint32_t Length);
 void UART_putchar(char c);
 
-//#endif
 #endif /* end __UART_H */
 /*****************************************************************************
 **                            End Of File

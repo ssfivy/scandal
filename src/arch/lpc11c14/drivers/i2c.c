@@ -20,8 +20,7 @@
 ****************************************************************************/
 #include <project/driver_config.h>
 
-#if CONFIG_ENABLE_DRIVER_I2C==1
-#include <arch/type.h>
+#include <arch/types.h>
 #include <arch/i2c.h>
 
 volatile uint32_t I2CMasterState = I2C_IDLE;
@@ -318,9 +317,4 @@ uint32_t I2CEngine( void )
 
   return ( I2CMasterState );
 }
-#endif
-
-/******************************************************************************
-**                            End Of File
-******************************************************************************/
 

@@ -28,7 +28,6 @@
 #include <scandal/engine.h>
 #include <scandal/types.h>
 #include <scandal/timer.h>
-#include <scandal/led.h>
 #include <scandal/error.h>
 #include <scandal/eeprom.h>
 #include <scandal/devices.h>
@@ -80,6 +79,7 @@ u08 scandal_init(void){
 		determine if this is first run or not */
 
 	sc_read_conf(&my_config);
+
 	if(my_config.version != SCANDAL_VERSION)
 		do_first_run();
 

@@ -61,8 +61,6 @@
 #define TYPE_OFFSET		        18
 #define MSG_TYPE(msg)                   ((msg->id >> TYPE_OFFSET) & ((1<<TYPE_BITS) - 1))
 
-
-
 /* Channel messages */
 #define CHANNEL_SOURCE_ADDR_BITS	8
 #define CHANNEL_SOURCE_ADDR_OFFSET	10
@@ -83,9 +81,6 @@
 					 (((u32)(msg)->data[6] & 0xFF) << 8) |\
 					 (((u32)(msg)->data[7] & 0xFF) << 0)))
 
-
-
-
 /* Configuration messages (both user and scandal) */
 #define CONFIG_NODE_ADDR_BITS	        8
 #define CONFIG_NODE_ADDR_OFFSET	        10
@@ -96,8 +91,6 @@
 #define CONFIG_PARAM_OFFSET	        0
 #define CONFIG_MSG_PARAM(msg)           ((msg->id >> CONFIG_PARAM_OFFSET) &\
 					 ((1<<CONFIG_PARAM_BITS) - 1))
-
-
 
 /* Heartbeat messages */
 #define HEARTBEAT_NODE_ADDR_BITS	8
@@ -126,7 +119,6 @@
 					     (((u32)msg->data[5] & 0xFF) << 16) |\
 					     (((u32)msg->data[6] & 0xFF) << 8) |\
 					     (((u32)msg->data[7] & 0xFF) << 0))
-
 
 /*
 Heartbeat consists of the following:
@@ -267,23 +259,22 @@ static inline u32 scandal_mk_timesync_id(u08 priority){
 }
 
 /* Function prototypes */
-u08 			scandal_send_heartbeat(u32 status);
-u08             scandal_send_channel_with_timestamp(u08 priority, u16 chan_num, 
-						u32 value, sc_time_t timestamp);
-u08 			scandal_send_scandal_error(u08 err);
-u08 			scandal_send_user_error(u08 err);
-u08             scandal_send_reset(u08 priority, u08 node);
-u08             scandal_send_user_config(u08 priority, u08 node, u08 param, u32 value1, u32 value2);
-u08             scandal_send_timesync(u08 priority, u08 node, uint64_t newtime);
-u08             scandal_send_ws_drive_command(uint32_t identifier, float first, float second);
-u08             scandal_send_ws_id(uint32_t identifier, const char *str, int len);
+u08 scandal_send_heartbeat(u32 status);
+u08 scandal_send_channel_with_timestamp(u08 priority, u16 chan_num,
+		u32 value, sc_time_t timestamp);
+u08 scandal_send_scandal_error(u08 err);
+u08 scandal_send_user_error(u08 err);
+u08 scandal_send_reset(u08 priority, u08 node);
+u08 scandal_send_user_config(u08 priority, u08 node, u08 param, u32 value1, u32 value2);
+u08 scandal_send_timesync(u08 priority, u08 node, uint64_t newtime);
+u08 scandal_send_ws_drive_command(uint32_t identifier, float first, float second);
+u08 scandal_send_ws_id(uint32_t identifier, const char *str, int len);
 
 /* More static inline functions */ 
 
-static inline u08 
-scandal_send_channel(u08 pri, u16 chan_num, u32 value){
-  sc_time_t timestamp = scandal_get_realtime32(); 
-  return scandal_send_channel_with_timestamp(pri, chan_num, value, timestamp); 
+static inline u08 scandal_send_channel(u08 pri, u16 chan_num, u32 value){
+	sc_time_t timestamp = scandal_get_realtime32(); 
+	return scandal_send_channel_with_timestamp(pri, chan_num, value, timestamp); 
 }
 
 #endif

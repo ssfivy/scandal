@@ -318,7 +318,7 @@ u08 can_register_id(u32 mask, u32 data, u08 priority){
 	}
 
 	buf[0] = (fil2_data >> 3);
-	buf[1] = (fil2_data << 5) & (0xE);
+	buf[1] = ((fil2_data << 5) & (0xE)) | ((u32)0<<EXIDE);
 	MCP2510_write(RXF2SIDH, buf, 2);
 
 	buf[0] = (fil2_mask >> 3);
@@ -428,7 +428,7 @@ u08 MCP2510_transmit_std_message(u32 id, u08 *buf, u08 size, u08 priority) {
 	unsigned char sid_h;
 
 	value = MCP2510_read_status();
-	if((value & (1<<2)) != 0) /* If the buffer is pending a transmission, return BUF_FULL_ERR */
+	if((value & (1<<4)) != 0) /* If the buffer is pending a transmission, return BUF_FULL_ERR */
 		return BUF_FULL_ERR;
 
 	/* In order to comply with the CAN standard, the size (DLC) must
@@ -440,18 +440,18 @@ u08 MCP2510_transmit_std_message(u32 id, u08 *buf, u08 size, u08 priority) {
 	sid_h = (id >> 3) & 0xFF; // the id should be 11 bits. Take the high 8
 	sid_l = ((id & 0x7) << 5) | (0<<EXIDE); // take the last 3 bits, and make sure that it is set to STD.
 
-	MCP2510_write(TXB0SIDH, &sid_h, 1);
-	MCP2510_write(TXB0SIDL, &sid_l, 1);
+	MCP2510_write(TXB1SIDH, &sid_h, 1);
+	MCP2510_write(TXB1SIDL, &sid_l, 1);
 
 	/* Load the data */
-	MCP2510_write(TXB0D0, buf, size);
+	MCP2510_write(TXB1D0, buf, size);
 
 	/* Set the size byte */
-	MCP2510_write(TXB0DLC, &size, 1);
+	MCP2510_write(TXB1DLC, &size, 1);
 
 	/* Set the priority and flag the buffer to be transmitted */
-	MCP2510_bit_modify(TXB0CTRL, TXBNCTRL_TXP_MASK, priority);
-	MCP2510_RTS(0x01);
+	MCP2510_bit_modify(TXB1CTRL, TXBNCTRL_TXP_MASK, priority);
+	MCP2510_RTS(0x02);
 
 	return(NO_ERR);
 }
@@ -527,9 +527,8 @@ u08 MCP2510_receive_message(u32* id, u08* buf, u08* length, u08 *ext){
 		/* Read length number of bytes from the recieve buffer */
 		MCP2510_read(RXB0D0, buf, *length);
 
-
-	/* The function below clears the receive interrupt in a manner that should
-		work around the silicon bug detailed in errata item 6 */
+		/* The function below clears the receive interrupt in a manner that should
+		 * work around the silicon bug detailed in errata item 6 */
 		careful_clear_receive_interrupt(trRX0IF);
 
 		return NO_ERR;
@@ -537,6 +536,9 @@ u08 MCP2510_receive_message(u32* id, u08* buf, u08* length, u08 *ext){
 
 	/* if we receive an interrupt for RXBUF1, it will be a standard tritium message */
 	if(value & (1<<STATUS_RX1IF)) { /* Valid message recieved */
+		toggle_red_led();
+		scandal_delay(1);
+
 		/* Make sure we haven't suffered an overflow error */
 		MCP2510_read(EFLG, buf, 1);
 

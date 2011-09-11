@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------- */
 #include <arch/ssp.h>
 #include <arch/clkpwr.h>
+#include "project/libcfg.h"
 
 /* Public Functions ----------------------------------------------------------- */
 static void setSSPclock (LPC_SSP_TypeDef *SSPx, uint32_t target_clock);

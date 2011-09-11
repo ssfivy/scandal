@@ -26,7 +26,7 @@
 #ifndef __LPC17xx_H__
 #define __LPC17xx_H__
 
-#define CHECK_PARAM(expr)
+//#define CHECK_PARAM(expr)
 
 /*
  * ==========================================================================

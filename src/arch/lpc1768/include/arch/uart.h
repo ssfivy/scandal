@@ -24,6 +24,7 @@
 /* Includes ------------------------------------------------------------------- */
 #include <cmsis/LPC17xx.h>
 #include <arch/types.h>
+#include "project/libcfg.h"
 
 #ifdef __cplusplus
 extern "C"

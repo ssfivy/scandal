@@ -50,9 +50,8 @@
 /** Fast GPIO port 4 half-word accessible definition */
 #define GPIO4_HalfWord	((GPIO_HalfWord_TypeDef *)(LPC_GPIO4_BASE))
 
-/**
- * @}
- */
+//converts bit number into 32-bit patten
+#define BIT(x) (1<<x)
 
 /* Public Types --------------------------------------------------------------- */
 /** @defgroup GPIO_Public_Types GPIO Public Types
@@ -91,16 +90,18 @@ typedef struct {
 
 /* Public Functions ----------------------------------------------------------- */
 
-/* GPIO style ------------------------------- */
+/* Scandal GPIO style ------------------------------- */
 void GPIO_Init(void);
-void GPIO_SetDir(uint8_t portNum, uint32_t bitValue, uint8_t dir);
-void GPIO_SetValue(uint8_t portNum, uint32_t bitValue, uint32_t bitPosi);
-void GPIO_ClearValue(uint8_t portNum, uint32_t bitValue);
-uint32_t GPIO_ReadValue(uint8_t portNum);
+void GPIO_SetDir(uint8_t portNum, uint8_t bitPosi, uint8_t dir);
+void GPIO_SetValue(uint8_t portNum, uint8_t bitPosi, uint8_t bitValue);
+uint8_t GPIO_ReadValue(uint8_t portNum, uint8_t bitPosi);
+void GPIO_ToggleValue( uint8_t portNum, uint8_t bitPosi);
+
+
+/* GPIO Interupts, still using CMSIS style */
 void GPIO_IntCmd(uint8_t portNum, uint32_t bitValue, uint8_t edgeState);
 FunctionalState GPIO_GetIntStatus(uint8_t portNum, uint32_t pinNum, uint8_t edgeState);
 void GPIO_ClearInt(uint8_t portNum, uint32_t bitValue);
-void GPIO_ToggleValue( uint32_t portNum, uint32_t bitPosi);
 
 #endif /* LPC17XX_GPIO_H_ */
 

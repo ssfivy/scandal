@@ -21,7 +21,7 @@
 #define DEBUG_FRMWRK_H_
 
 //#include <stdarg.h>
-#include "lpc17xx_uart.h"
+#include <arch/uart.h>
 
 #define USED_UART_DEBUG_PORT	0
 

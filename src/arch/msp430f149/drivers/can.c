@@ -260,7 +260,7 @@ u08 buffer_received(void){
 	u08 	pos, err=NO_ERR;
 	can_msg* msg;
 
-	while(err == NO_ERR){
+	while(err == NO_ERR) {
 		/* Copy a received message out of mail box 0 */
 		if(rx_num_msgs >= CAN_RX_BUFFER_SIZE){
 			disable_can_interrupt();
@@ -268,14 +268,14 @@ u08 buffer_received(void){
 			careful_clear_receive_interrupt(trRX1IF);
 			enable_can_interrupt();
 			return BUF_FULL_ERR;
-		}else{
+		} else {
 			disable_can_interrupt();
 			pos = (rx_buf_start + rx_num_msgs) & CAN_RX_BUFFER_MASK;
 			msg = (can_msg*)&(canrxbuf[pos]);
-	
+
 			err = MCP2510_receive_message(&(msg->id), msg->data, &(msg->length), &(msg->ext));
 
-			if(err == NO_ERR){
+			if(err == NO_ERR) {
 				rx_num_msgs++;
 			}
 			enable_can_interrupt();
@@ -289,56 +289,64 @@ u08 buffer_received(void){
 /* Register an message ID we want to receive
  * On the MCP2515, there are limited filters. So when we register for a new ID, we should just
  * make the filter a superposition of the previous and new filters. */
-u08 can_register_id(u32 mask, u32 data, u08 priority){
+u08 can_register_id(u32 mask, u32 data, u08 priority, u08 ext){
 	u08 buf[4];
 	u32 data_diff;
 
 	/* we need to be in configuration mode to modify these registers */
 	MCP2510_set_mode(MCP2510_CONFIGURATION_MODE);
 
-	/* set up the filters for rxbuf0, the EXT buffer for scandal messages */
-	data_diff = data ^ fil1_data; /* The bits which are different will be 1, the bits that aren't will be 0 */
+	switch (ext) {
+	 case CAN_EXT_MSG:
+		/* set up the filters for rxbuf0, the EXT buffer for scandal messages */
+		data_diff = data ^ fil1_data; /* The bits which are different will be 1, the bits that aren't will be 0 */
 
-	/* If fil1_mask is its original value, set fil1_mask the requested value */
-	if(fil1_mask == 0xFFFFFFFF){
-		fil1_data = data;
-		fil1_mask = mask;
-	}else{
-		fil1_mask = (fil1_mask & mask) & (~data_diff);
-		fil1_data = data & fil1_mask;
+		/* If fil1_mask is its original value, set fil1_mask the requested value */
+		if(fil1_mask == 0xFFFFFFFF) {
+			fil1_data = data;
+			fil1_mask = mask;
+		} else {
+			fil1_mask = (fil1_mask & mask) & (~data_diff);
+			fil1_data = data & fil1_mask;
+		}
+
+		buf[0] = fil1_data >> 21;
+		buf[1] = (((fil1_data >> 18) & 0x07) << 5) | ((u32)1<<EXIDE) | ((fil1_data >> 16) & 0x03);
+		buf[2] = ((fil1_data >> 8) & 0xFF);
+		buf[3] = ((fil1_data >> 0) & 0xFF);
+		MCP2510_write(RXF1SIDH, buf, 4);
+
+		buf[0] = fil1_mask >> 21;
+		buf[1] = (((fil1_mask >> 18) & 0x07) << 5) | ((u32)1<<EXIDE) | ((fil1_mask >> 16) & 0x03);
+		buf[2] = ((fil1_mask >> 8) & 0xFF);
+		buf[3] = ((fil1_mask >> 0) & 0xFF);
+		MCP2510_write(RXM0SIDH, buf, 4);
+
+		break;
+
+	 case CAN_STD_MSG:
+		/* set up the filters for rxbuf1, the STD buffer for tritium messages */
+		data_diff = data ^ fil1_data; /* The bits which are different will be 1, the bits that aren't will be 0 */
+
+		/* If fil1_mask is its original value, set fil1_mask the requested value */
+		if (fil2_mask == 0xFFFFFFFF) {
+			fil2_data = data;
+			fil2_mask = mask;
+		} else {
+			fil2_mask = (fil2_mask & mask) & (~data_diff);
+			fil2_data = data & fil2_mask;
+		}
+
+		buf[0] = (fil2_data >> 3);
+		buf[1] = ((fil2_data << 5) & (0xE)) | ((u32)0<<EXIDE);
+		MCP2510_write(RXF2SIDH, buf, 2);
+
+		buf[0] = (fil2_mask >> 3);
+		buf[1] = (fil2_mask << 5) & (0xE);
+		MCP2510_write(RXM1SIDH, buf, 2);
+
+		break;
 	}
-
-	buf[0] = fil1_data >> 21;
-	buf[1] = (((fil1_data >> 18) & 0x07) << 5) | ((u32)1<<EXIDE) | ((fil1_data >> 16) & 0x03);
-	buf[2] = ((fil1_data >> 8) & 0xFF);
-	buf[3] = ((fil1_data >> 0) & 0xFF);
-	MCP2510_write(RXF1SIDH, buf, 4);
-
-	buf[0] = fil1_mask >> 21;
-	buf[1] = (((fil1_mask >> 18) & 0x07) << 5) | ((u32)1<<EXIDE) | ((fil1_mask >> 16) & 0x03);
-	buf[2] = ((fil1_mask >> 8) & 0xFF);
-	buf[3] = ((fil1_mask >> 0) & 0xFF);
-	MCP2510_write(RXM0SIDH, buf, 4);
-
-	/* set up the filters for rxbuf1, the STD buffer for tritium messages */
-	data_diff = data ^ fil1_data; /* The bits which are different will be 1, the bits that aren't will be 0 */
-
-	/* If fil1_mask is its original value, set fil1_mask the requested value */
-	if(fil2_mask == 0xFFFFFFFF){
-		fil2_data = data;
-		fil2_mask = mask;
-	}else{
-		fil2_mask = (fil2_mask & mask) & (~data_diff);
-		fil2_data = data & fil2_mask;
-	}
-
-	buf[0] = (fil2_data >> 3);
-	buf[1] = ((fil2_data << 5) & (0xE)) | ((u32)0<<EXIDE);
-	MCP2510_write(RXF2SIDH, buf, 2);
-
-	buf[0] = (fil2_mask >> 3);
-	buf[1] = (fil2_mask << 5) & (0xE);
-	MCP2510_write(RXM1SIDH, buf, 2);
 
 	/* go back into normal mode */
 	MCP2510_set_mode(MCP2510_NORMAL_MODE);
@@ -551,9 +559,6 @@ u08 MCP2510_receive_message(u32* id, u08* buf, u08* length, u08 *ext){
 
 	/* if we receive an interrupt for RXBUF1, it will be a standard tritium message */
 	if(value & (1<<STATUS_RX1IF)) { /* Valid message recieved */
-		toggle_red_led();
-		scandal_delay(1);
-
 		/* Make sure we haven't suffered an overflow error */
 		MCP2510_read(EFLG, buf, 1);
 

@@ -18,7 +18,6 @@
 #include <scandal/types.h>
 #include <scandal/can.h>
 
-void scandal_reset_node(void);
 void scandal_user_do_first_run(void);
 u08 scandal_user_do_config(u08 param, s32 value, s32 value2);
 u08 scandal_user_handle_message(can_msg *msg);

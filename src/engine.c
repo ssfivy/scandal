@@ -34,6 +34,8 @@
 #include <scandal/message.h>
 #include <scandal/uart.h>
 #include <scandal/utils.h>
+#include <scandal/tritium.h>
+#include <scandal/system.h>
 
 #include <project/scandal_config.h>
 
@@ -95,28 +97,29 @@ u08 scandal_init(void){
 								my_config.ins[i].source_num);
 		can_register_id(0x03FFFFFF,
 				id,
-				0);
+				0,
+				CAN_EXT_MSG);
 	}
 
 	/* Register for my config messages */
 	can_register_id(0x03FFFF00,
 			scandal_mk_config_id( 0, scandal_get_addr(), 0),
-			0);  
+			0, CAN_EXT_MSG);
 			
 	/* Register for user config messages */
 	can_register_id(0x03FFFF00,
 			scandal_mk_user_config_id( 0, scandal_get_addr(), 0),
-			0);
+			0, CAN_EXT_MSG);
 
 	/* Register for timesync messages */ 
 	can_register_id(0x03FFFF00, 
 			scandal_mk_timesync_id(CRITICAL_PRIORITY), 
-			0); 
+			0, CAN_EXT_MSG); 
 
 	/* Register for command messages */ 
 	can_register_id(0x03FFFF00, 
 			scandal_mk_command_id(CRITICAL_PRIORITY, scandal_get_addr(), 0), 
-			0); 
+			0, CAN_EXT_MSG); 
 
 	heartbeat_timer = 0;
 
@@ -398,7 +401,7 @@ u08	scandal_handle_config(can_msg* msg){
 		break;
 	}
 
-	scandal_reset_node();
+	system_reset();
 	return NO_ERR;
 }
 
@@ -412,7 +415,7 @@ u08 scandal_handle_reset(can_msg* msg){
 	dest_node = (u08)((msg->id >> RESET_NODE_ADDR_OFFSET) & 0xFF);
 
 	if(dest_node == scandal_get_addr())
-		scandal_reset_node();				/* Should not return from this */
+		system_reset();				/* Should not return from this */
 
 	return NO_ERR;
 }
@@ -457,5 +460,12 @@ u08	scandal_handle_command(can_msg* msg){
 /* TODO: Actually do something with wave sculptor messages
  */
 u08	scandal_handle_ws_message(can_msg* msg){
-	return 0;
+	switch(msg->id) {
+	 case MC_BASE:
+		UART_printf("Got a tritium base message %c%c%c%c\r\n", msg->data[0], msg->data[1], msg->data[2], msg->data[3]);
+		break;
+	 case MC_BASE+1:
+		UART_printf("Got a tritium status message\r\n", msg->data[0], msg->data[1], msg->data[2], msg->data[3]);
+		break;
+	}
 }

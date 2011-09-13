@@ -23,7 +23,6 @@
 
 #include <scandal/timer.h>
 
-#if CONFIG_ENABLE_DRIVER_TIMER32==1
 #include <arch/timer.h>
 
 /* ===================
@@ -480,7 +479,6 @@ void setMatch_timer32PWM (uint8_t timer_num, uint8_t match_nr, uint32_t value)
 	}
 
 }
-#endif
 
 /* Scandal wrappers
  * *****************/

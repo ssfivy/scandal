@@ -53,6 +53,22 @@ typedef union _group_16 {
 #define DC_RESET		0x03
 #define DC_SWITCH		0x04
 
+#define MC_BASE					0x400
+#define MC_STATUS				MC_BASE+1
+#define MC_BUS					MC_BASE+2
+#define MC_VELOCITY				MC_BASE+3
+#define MC_PHASE				MC_BASE+4
+#define MC_MOTOR_VOLTAGE_VECTOR	MC_BASE+5
+#define MC_MOTOR_CURRENT_VECTOR	MC_BASE+6
+#define MC_MOTOR_BACKEMF_VECTOR	MC_BASE+7
+#define MC_MOTOR_15V_1V65		MC_BASE+8
+#define MC_MOTOR_2V5_1V2		MC_BASE+9
+#define MC_FAN_SPEED			MC_BASE+10
+#define MC_HEATSINK_MOTOR_TEMP	MC_BASE+11
+#define MC_AIR_IN_CPU_TEMP		MC_BASE+12
+#define MC_AIR_OUT_CAP_TEMP		MC_BASE+13
+#define MC_ODOMETER_BUSAMPHOURS	MC_BASE+14
+
 // Status values (for message reception)
 #define CAN_ERROR		0xFFFF
 #define CAN_MERROR		0xFFFE

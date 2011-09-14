@@ -47,11 +47,11 @@ typedef union _group_16 {
 } group_16;
 
 // Driver controls CAN base address and packet offsets
-#define DC_CAN_BASE		0x0500
-#define DC_DRIVE		0x01
-#define DC_POWER		0x02
-#define DC_RESET		0x03
-#define DC_SWITCH		0x04
+#define DC_BASE					0x0500
+#define DC_DRIVE				DC_BASE+1
+#define DC_POWER				DC_BASE+2
+#define DC_RESET				DC_BASE+3
+#define DC_SWITCH				DC_BASE+4
 
 #define MC_BASE					0x400
 #define MC_STATUS				MC_BASE+1

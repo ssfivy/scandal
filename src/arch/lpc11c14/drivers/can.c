@@ -291,8 +291,29 @@ int CAN_Send(uint16_t Pri, can_msg *msg) {
 	for(i = RECV_BUFF_DIVIDE+1; i < MSG_OBJ_MAX; i++) {
 
 		if (buffer_free(i)) {
-			/* set the length DLC field and set the transmission request bit */
-			LPC_CAN->IF1_MCTRL = UMSK | TXRQ | EOB | (length & DLC_MASK);
+			/* we're sending an extended message */
+			if (msg->ext == CAN_EXT_MSG) {
+				tx_addr = ID_EXT_MASK & msg->id;
+
+				LPC_CAN->IF1_ARB1 = tx_addr & 0x0000FFFF;
+				/* extended, outgoing */
+				LPC_CAN->IF1_ARB2 = ID_MTD | ((tx_addr >> 16) & 0x00001FFF);
+
+				/* Mxtd: 1, Mdir: 1, Mask is 0x7FF */
+				LPC_CAN->IF1_MSK2 = MASK_MXTD | MASK_MDIR | (ID_EXT_MASK >> 16);
+				LPC_CAN->IF1_MSK1 = ID_EXT_MASK & 0x0000FFFF;
+
+			/* we're sending a standard message */
+			} else if (msg->ext == CAN_STD_MSG) {
+				tx_addr = msg->id & ID_STD_MASK;
+
+				LPC_CAN->IF1_ARB2 = (tx_addr << 2) & 0x00001FFF;
+				LPC_CAN->IF1_ARB2 &= ~ID_MTD;
+
+				/* Mxtd: 0, Mdir: 1, Mask is 0x7FF */
+				LPC_CAN->IF1_MSK2 = MASK_MDIR | (ID_STD_MASK << 2);
+				LPC_CAN->IF1_MSK1 = 0x0000;
+			}
 
 			/* put the data in the buffer register */
 			LPC_CAN->IF1_DA1 = can_data & 0x0000FFFF;
@@ -302,33 +323,16 @@ int CAN_Send(uint16_t Pri, can_msg *msg) {
 			LPC_CAN->IF1_DB1 = can_timestamp & 0x0000FFFF;
 			LPC_CAN->IF1_DB2 = ((can_timestamp & 0xFFFF0000) >> 16);
 
-			/* we're sending an extended message */
-			if (msg->ext == CAN_EXT_MSG) {
-				tx_addr = ID_EXT_MASK & msg->id;
+			LPC_CAN->IF1_ARB2 |= ID_DIR | ID_MVAL;
 
-				LPC_CAN->IF1_ARB1 = tx_addr & 0x0000FFFF;
-				/* message is now valid, extended, outgoing */
-				LPC_CAN->IF1_ARB2 = ID_MVAL | ID_MTD | ID_DIR | (tx_addr >> 16);
+			/* set the length DLC field and set the transmission request bit */
+			LPC_CAN->IF1_MCTRL = UMSK | TXRQ | EOB | (length & DLC_MASK);
 
-				/* extended message, outgoing, Mask is 0x7FF */
-				LPC_CAN->IF1_MSK1 = ID_EXT_MASK & 0x0000FFFF;
-				LPC_CAN->IF1_MSK2 = MASK_MXTD | MASK_MDIR | (ID_EXT_MASK >> 16);
 
-			/* we're sending a standard message */
-			} else if (msg->ext == CAN_STD_MSG) {
-				tx_addr = ID_STD_MASK & msg->id;
-
-				LPC_CAN->IF1_ARB1 = tx_addr & 0x0000FFFF;
-				/* message is now valid, direction outgoing */
-				LPC_CAN->IF1_ARB2 = ID_MVAL | ID_DIR | (tx_addr >> 16);
-
-				/* direction outgoing, Mask is 0x7FF */
-				LPC_CAN->IF1_MSK1 = ID_STD_MASK & 0x0000FFFF;
-				LPC_CAN->IF1_MSK2 = MASK_MDIR | (ID_STD_MASK >> 16);
-			}
+			UART_printf("arb2 : 0x%x\r\n", LPC_CAN->IF1_ARB2);
 
 			/* write the message object */
-			LPC_CAN->IF1_CMDMSK = WR | MASK | ARB | CTRL | TREQ | DATAA | DATAB;
+			LPC_CAN->IF1_CMDMSK = WR | MASK | ARB | CTRL | DATAA | DATAB;
 
 			LPC_CAN->IF1_CMDREQ = i;
 

@@ -34,7 +34,7 @@
 #include <scandal/message.h>
 #include <scandal/uart.h>
 #include <scandal/utils.h>
-#include <scandal/tritium.h>
+#include <scandal/wavesculptor.h>
 #include <scandal/system.h>
 
 #include <project/scandal_config.h>
@@ -57,7 +57,6 @@ inline u08      scandal_handle_reset(can_msg* msg);
 inline u08      scandal_handle_user_config(can_msg* msg);
 inline u08      scandal_handle_command(can_msg* msg);
 inline u08      scandal_handle_timesync(can_msg* msg);
-inline u08      scandal_handle_ws_message(can_msg* msg);
 
 void            set_channel_mb(u16 chan_num, s32 m, s32 b);
 void            retrieve_channel_mb(u16 chan_num);
@@ -455,17 +454,4 @@ u08	scandal_handle_command(can_msg* msg){
 	}
 
 	return NO_ERR;
-}  
-
-/* TODO: Actually do something with wave sculptor messages
- */
-u08	scandal_handle_ws_message(can_msg* msg){
-	switch(msg->id) {
-	 case MC_BASE:
-		UART_printf("Got a tritium base message %c%c%c%c\r\n", msg->data[0], msg->data[1], msg->data[2], msg->data[3]);
-		break;
-	 case MC_BASE+1:
-		UART_printf("Got a tritium status message\r\n", msg->data[0], msg->data[1], msg->data[2], msg->data[3]);
-		break;
-	}
 }

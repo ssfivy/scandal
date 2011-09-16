@@ -54,6 +54,9 @@
 #define CAN_EXT_MSG 1
 #define CAN_STD_MSG 0
 
+#define CAN_ID_STD_MASK 0x07FF
+#define CAN_ID_EXT_MASK 0x1FFFFFFF
+
 /* Types */
 typedef struct can_mg {
   u32 id;

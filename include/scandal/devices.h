@@ -674,10 +674,6 @@
 		#define STEERINGWHEEL_LCD_MSG				8
 		#define STEERINGWHEEL_PRECHARGE_STAT			9
 		#define STEERINGWHEEL_NUM_IN_CHANNELS			10
-	
-		
-
-
 
 /* GPS Barometer interface */
 	/* Out Channels */
@@ -694,7 +690,9 @@
                 #define GPSBAROMETER_PRESSURE_16                            10
                 #define GPSBAROMETER_B_OPERATION_STATUS                     11 
                 #define GPSBAROMETER_B_STATUS                               12
-                #define GPSBAROMETER_NUM_OUT_CHANNELS                       13
+                #define GPSBAROMETER_GGA_PARSE_ERROR_COUNT                  13
+                #define GPSBAROMETER_FIX                                    14
+                #define GPSBAROMETER_NUM_OUT_CHANNELS                       15
 
 	/* In Channels */
                 #define GPSBAROMETER_NUM_IN_CHANNELS                        0

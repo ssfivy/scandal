@@ -64,7 +64,7 @@ void ADC_IRQHandler (void)
 	}
 	LPC_ADC->CR &= 0xF8FFFFFF;	/* stop ADC now */
 	ADCIntDone = 1;
-	return;	
+	return;
   }
     
   if ( regVal & ADC_ADINT )
@@ -118,7 +118,7 @@ void ADCInit( uint32_t ADC_Clk )
   {
 	ADCValue[i] = 0x0;
   }
-  /* Unlike some other pings, for ADC test, all the pins need
+  /* Unlike some other pins, for ADC test, all the pins need
   to set to analog mode. Bit 7 needs to be cleared according 
   to design team. */
   LPC_IOCON->R_PIO0_11 &= ~0x8F; /*  ADC I/O config */

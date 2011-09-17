@@ -375,7 +375,17 @@ int CAN_Send(uint16_t Pri, can_msg *msg) {
 
 /* Scandal wrapper for init */
 void init_can(void) {
-	CAN_Init(BITRATE50K16MHZ);
+
+	int scandal_can_baud = DEFAULT_BAUD;
+
+	switch(SystemCoreClock) {
+	 case 4000000:
+		CAN_Init(BITRATE50K4MHZ); break;
+	 case 8000000:
+		CAN_Init(BITRATE50K8MHZ); break;
+	 case 16000000:
+		CAN_Init(BITRATE50K16MHZ); break;
+	}
 }
 
 /* Get a message from the CAN controller. */

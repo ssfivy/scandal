@@ -21,9 +21,14 @@
 #include <arch/timer.h>
 #include <arch/clkpwr.h>
 #include <arch/pinsel.h>
+#include <project/libcfg.h>
+
+
 
 #include <scandal/timer.h>
-#include <scandal/leds.h>
+//#include <scandal/leds.h>
+#include <project/led.h>
+
 /* Private Functions ---------------------------------------------------------- */
 
 static uint32_t getPClock (uint32_t timernum);
@@ -309,6 +314,7 @@ void TIM_Init(LPC_TIM_TypeDef *TIMx, TIM_MODE_OPT TimerCounterMode, void *TIM_Co
 	TIMx->PR =0;
 	TIMx->TCR |= (1<<1); //Reset Counter
 	TIMx->TCR &= ~(1<<1); //release reset
+red_led(1);
 	if (TimerCounterMode == TIM_TIMER_MODE )
 	{
 		pTimeCfg = (TIM_TIMERCFG_Type *)TIM_ConfigStruct;
@@ -318,6 +324,7 @@ void TIM_Init(LPC_TIM_TypeDef *TIMx, TIM_MODE_OPT TimerCounterMode, void *TIM_Co
 		}
 		else
 		{
+			//This thing does not work, use TICKVAL - irving
 			TIMx->PR   = converUSecToVal (converPtrToTimeNum(TIMx),pTimeCfg->PrescaleValue)-1;
 		}
 	}

@@ -12,7 +12,7 @@ void			scandal_register_ws_base_callback(ws_base_callback cb);
 typedef			void (*ws_bus_callback)(float bus_current, float bus_voltage, uint32_t time);
 void			scandal_register_ws_bus_callback(ws_bus_callback cb);
 
-typedef			void (*ws_velocity_callback)(float vehicle_velocity, float motor_rpm uint32_t time);
+typedef			void (*ws_velocity_callback)(float vehicle_velocity, float motor_rpm, uint32_t time);
 void			scandal_register_ws_velocity_callback(ws_velocity_callback cb);
 
 typedef			void (*ws_temp_callback)(float hs_temp, float motor_temp, uint32_t time);

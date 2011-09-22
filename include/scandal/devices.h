@@ -557,7 +557,8 @@
 #define CURRENTINT_NUM_OUT_CHANNELS                                     6
 
 /* In Channels */ 
-#define CURRENTINT_NUM_IN_CHANNELS                                      0
+#define CURRENTINT_RESET_INTEGRATION				1
+#define CURRENTINT_NUM_IN_CHANNELS                                      1
 
 /* MSPOnewire */ 
 /* Out Channels */ 

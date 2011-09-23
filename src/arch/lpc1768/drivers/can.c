@@ -1896,7 +1896,7 @@ u08 can_send_std_msg(can_msg* msg, u08 priority) {
 }
 
 /* Register for a message type. */
-u08 can_register_id(u32 mask, u32 data, u08 priority) {
+u08 can_register_id(u32 mask, u32 data, u08 priority, u08 ext) {
 	return NO_MSG_ERR;
 }
 

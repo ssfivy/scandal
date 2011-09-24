@@ -375,7 +375,7 @@ int CAN_Send(uint16_t Pri, can_msg *msg) {
 
 /* Scandal wrapper for init */
 void init_can(void) {
-	CAN_Init(BITRATE50K16MHZ);
+	CAN_Init(BITRATE50K4MHZ);
 }
 
 /* Get a message from the CAN controller. */

@@ -139,6 +139,8 @@ void GPIO_SetFunction(uint32_t port, uint32_t bit, uint32_t func) {
 		 case 11:
 			LPC_IOCON->R_PIO0_11 &= ~0x07;
 			LPC_IOCON->R_PIO0_11 |= (func+1);
+			if (func == GPIO_FUNC1) /* ADC Mode, set to analog */
+				LPC_IOCON->R_PIO0_11 &= ~(0x80);
 			break;
 		}
 		break;
@@ -148,14 +150,20 @@ void GPIO_SetFunction(uint32_t port, uint32_t bit, uint32_t func) {
 		 case 0:
 			LPC_IOCON->R_PIO1_0 &= ~0x07;
 			LPC_IOCON->R_PIO1_0 |= (func+1);
+			if (func == GPIO_FUNC1) /* ADC Mode, set to analog */
+				LPC_IOCON->R_PIO1_0 &= ~(0x80);
 			break;
 		 case 1:
 			LPC_IOCON->R_PIO1_1 &= ~0x07;
 			LPC_IOCON->R_PIO1_1 |= (func+1);
+			if (func == GPIO_FUNC1) /* ADC Mode, set to analog */
+				LPC_IOCON->R_PIO1_1 &= ~(0x80);
 			break;
 		 case 2:
 			LPC_IOCON->R_PIO1_2 &= ~0x07;
 			LPC_IOCON->R_PIO1_2 |= (func+1);
+			if (func == GPIO_FUNC1) /* ADC Mode, set to analog */
+				LPC_IOCON->R_PIO1_2 &= ~(0x80);
 			break;
 		 case 3:
 			/* this is TMS, it's used for programming */
@@ -163,6 +171,8 @@ void GPIO_SetFunction(uint32_t port, uint32_t bit, uint32_t func) {
 		 case 4:
 			LPC_IOCON->PIO1_4 &= ~0x07;
 			LPC_IOCON->PIO1_4 |= func;
+			if (func == GPIO_FUNC1) /* ADC Mode, set to analog */
+				LPC_IOCON->PIO1_4 &= ~(0x80);
 			break;
 		 case 5:
 			LPC_IOCON->PIO1_5 &= ~0x07;
@@ -187,10 +197,14 @@ void GPIO_SetFunction(uint32_t port, uint32_t bit, uint32_t func) {
 		 case 10:
 			LPC_IOCON->PIO1_10 &= ~0x07;
 			LPC_IOCON->PIO1_10 |= func;
+			if (func == GPIO_FUNC1) /* ADC Mode, set to analog */
+				LPC_IOCON->PIO1_10 &= ~(0x80);
 			break;
 		 case 11:
 			LPC_IOCON->PIO1_11 &= ~0x07;
 			LPC_IOCON->PIO1_11 |= func;
+			if (func == GPIO_FUNC1) /* ADC Mode, set to analog */
+				LPC_IOCON->PIO1_11 &= ~(0x80);
 			break;
 		}
 		break;

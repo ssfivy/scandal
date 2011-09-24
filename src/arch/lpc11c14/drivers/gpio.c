@@ -95,12 +95,211 @@ void PIOINT3_IRQHandler(void) {
 }
 #endif //#if CONFIG_GPIO_DEFAULT_PIOINT3_IRQHANDLER==1
 
+void GPIO_SetFunction(uint32_t port, uint32_t bit, uint32_t func) {
+
+	/* for the specified port and pin, first set the function bits to 0 and then
+	 * to the function we actually want */
+
+	/* this chip is retarded. every IOCON register has different meanings for the
+	 * bits. I'm starting to hate this chip */
+
+	switch (port) {
+	 case 0:
+		switch (bit) {
+		 case 0:
+			/* this is the reset pin, we can't use it */
+			return;
+			LPC_IOCON->RESET_PIO0_0 &= ~0x07;
+			LPC_IOCON->RESET_PIO0_0 |= (func+1);
+			break;
+		 case 1:
+			LPC_IOCON->PIO0_1 &= ~0x07;
+			LPC_IOCON->PIO0_1 |= func;
+			break;
+		 case 2:
+			LPC_IOCON->PIO0_2 &= ~0x07;
+			LPC_IOCON->PIO0_2 |= func;
+			break;
+		 case 3:
+			LPC_IOCON->PIO0_3 &= ~0x07;
+			LPC_IOCON->PIO0_3 |= func;
+			break;
+		 case 4:
+			LPC_IOCON->PIO0_4 &= ~0x07;
+			LPC_IOCON->PIO0_4 |= func;
+			break;
+		 case 5:
+			LPC_IOCON->PIO0_5 &= ~0x07;
+			LPC_IOCON->PIO0_5 |= func;
+			break;
+		 case 6:
+			LPC_IOCON->PIO0_6 &= ~0x07;
+			LPC_IOCON->PIO0_6 |= func;
+			break;
+		 case 7:
+			LPC_IOCON->PIO0_7 &= ~0x07;
+			LPC_IOCON->PIO0_7 |= func;
+			break;
+		 case 8:
+			LPC_IOCON->PIO0_8 &= ~0x07;
+			LPC_IOCON->PIO0_8 |= func;
+			break;
+		 case 9:
+			/* this is TDO, it's used for programming */
+			return;
+		 case 10:
+			/* this is TCLK, it's used for programming */
+			return;
+		 case 11:
+			LPC_IOCON->R_PIO0_11 &= ~0x07;
+			LPC_IOCON->R_PIO0_11 |= (func+1);
+			break;
+		}
+		break;
+
+	 case 1:
+		switch (bit) {
+		 case 0:
+			LPC_IOCON->R_PIO1_0 &= ~0x07;
+			LPC_IOCON->R_PIO1_0 |= (func+1);
+			break;
+		 case 1:
+			LPC_IOCON->R_PIO1_1 &= ~0x07;
+			LPC_IOCON->R_PIO1_1 |= (func+1);
+			break;
+		 case 2:
+			LPC_IOCON->R_PIO1_2 &= ~0x07;
+			LPC_IOCON->R_PIO1_2 |= (func+1);
+			break;
+		 case 3:
+			/* this is TMS, it's used for programming */
+			return;
+		 case 4:
+			LPC_IOCON->PIO1_4 &= ~0x07;
+			LPC_IOCON->PIO1_4 |= func;
+			break;
+		 case 5:
+			LPC_IOCON->PIO1_5 &= ~0x07;
+			LPC_IOCON->PIO1_5 |= func;
+			break;
+		 case 6:
+			LPC_IOCON->PIO1_6 &= ~0x07;
+			LPC_IOCON->PIO1_6 |= func;
+			break;
+		 case 7:
+			LPC_IOCON->PIO1_7 &= ~0x07;
+			LPC_IOCON->PIO1_7 |= func;
+			break;
+		 case 8:
+			LPC_IOCON->PIO1_8 &= ~0x07;
+			LPC_IOCON->PIO1_8 |= func;
+			break;
+		 case 9:
+			LPC_IOCON->PIO1_9 &= ~0x07;
+			LPC_IOCON->PIO1_9 |= func;
+			break;
+		 case 10:
+			LPC_IOCON->PIO1_10 &= ~0x07;
+			LPC_IOCON->PIO1_10 |= func;
+			break;
+		 case 11:
+			LPC_IOCON->PIO1_11 &= ~0x07;
+			LPC_IOCON->PIO1_11 |= func;
+			break;
+		}
+		break;
+
+	 case 2:
+		switch (bit) {
+		 case 0:
+			/* this is used for programming */
+			return;
+			LPC_IOCON->PIO2_0 &= ~0x07;
+			LPC_IOCON->PIO2_0 |= func;
+			break;
+		 case 1:
+			LPC_IOCON->PIO2_1 &= ~0x07;
+			LPC_IOCON->PIO2_1 |= func;
+			break;
+		 case 2:
+			LPC_IOCON->PIO2_2 &= ~0x07;
+			LPC_IOCON->PIO2_2 |= func;
+			break;
+		 case 3:
+			LPC_IOCON->PIO2_3 &= ~0x07;
+			LPC_IOCON->PIO2_3 |= func;
+			break;
+		 case 4:
+			LPC_IOCON->PIO2_4 &= ~0x07;
+			LPC_IOCON->PIO2_4 |= func;
+			break;
+		 case 5:
+			LPC_IOCON->PIO2_5 &= ~0x07;
+			LPC_IOCON->PIO2_5 |= func;
+			break;
+		 case 6:
+			LPC_IOCON->PIO2_6 &= ~0x07;
+			LPC_IOCON->PIO2_6 |= func;
+			break;
+		 case 7:
+			LPC_IOCON->PIO2_7 &= ~0x07;
+			LPC_IOCON->PIO2_7 |= func;
+			break;
+		 case 8:
+			LPC_IOCON->PIO2_8 &= ~0x07;
+			LPC_IOCON->PIO2_8 |= func;
+			break;
+		 case 9:
+			LPC_IOCON->PIO2_9 &= ~0x07;
+			LPC_IOCON->PIO2_9 |= func;
+			break;
+		 case 10:
+			LPC_IOCON->PIO2_10 &= ~0x07;
+			LPC_IOCON->PIO2_10 |= func;
+			break;
+		 case 11:
+			LPC_IOCON->PIO2_11 &= ~0x07;
+			LPC_IOCON->PIO2_11 |= func;
+			break;
+		}
+		break;
+
+	 case 3:
+		switch (bit) {
+		 case 0:
+			LPC_IOCON->PIO3_0 &= ~0x07;
+			LPC_IOCON->PIO3_0 |= func;
+			break;
+		 case 1:
+			LPC_IOCON->PIO3_1 &= ~0x07;
+			LPC_IOCON->PIO3_1 |= func;
+			break;
+		 case 2:
+			LPC_IOCON->PIO3_2 &= ~0x07;
+			LPC_IOCON->PIO3_2 |= func;
+			break;
+		 case 3:
+			LPC_IOCON->PIO3_3 &= ~0x07;
+			LPC_IOCON->PIO3_3 |= func;
+			break;
+		 case 4:
+			LPC_IOCON->PIO3_4 &= ~0x07;
+			LPC_IOCON->PIO3_4 |= func;
+			break;
+		 case 5:
+			LPC_IOCON->PIO3_5 &= ~0x07;
+			LPC_IOCON->PIO3_5 |= func;
+			break;
+		}
+		break;
+	}
+}
+
 void GPIO_Init( void ) {
   /* Enable AHB clock to the GPIO domain. */
   LPC_SYSCON->SYSAHBCLKCTRL |= (1<<6);
 
 #ifdef __JTAG_DISABLED  
-  LPC_IOCON->R_PIO1_1  &= ~0x07;
   LPC_IOCON->R_PIO1_1  |= 0x01;
 #endif
 

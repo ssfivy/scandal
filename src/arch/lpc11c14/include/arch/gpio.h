@@ -26,6 +26,12 @@
 #define PORT2		2
 #define PORT3		3
 
+typedef enum gpio_function {
+	GPIO_PIO,
+	GPIO_FUNC1,
+	GPIO_FUNC2
+} gpio_function_t;
+
 static LPC_GPIO_TypeDef (* const LPC_GPIO[4]) = { LPC_GPIO0, LPC_GPIO1, LPC_GPIO2, LPC_GPIO3 };
 
 void PIOINT0_IRQHandler(void);
@@ -44,6 +50,7 @@ void GPIO_SetValue( uint32_t portNum, uint32_t bitPosi, uint32_t bitVal );
 void GPIO_ToggleValue( uint32_t portNum, uint32_t bitPosi);
 uint32_t GPIO_GetValue( uint32_t portNum, uint32_t bitPosi);
 void GPIO_SetDir( uint32_t portNum, uint32_t bitPosi, uint32_t dir );
+void GPIO_SetFunction(uint32_t port, uint32_t bit, uint32_t func);
 
 #endif
 #endif /* end __GPIO_H */

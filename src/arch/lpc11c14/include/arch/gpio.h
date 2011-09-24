@@ -19,7 +19,9 @@
 ****************************************************************************/
 #ifndef __GPIO_H 
 #define __GPIO_H
-#if CONFIG_ENABLE_DRIVER_GPIO==1
+
+#include <arch/types.h>
+#include <cmsis/LPC11xx.h>
 
 #define PORT0		0
 #define PORT1		1
@@ -32,12 +34,26 @@ typedef enum gpio_function {
 	GPIO_FUNC2
 } gpio_function_t;
 
+#define GPIO_INTERRUPT_SENSE_LEVEL    1
+#define GPIO_INTERRUPT_SENSE_EDGE     0
+#define GPIO_INTERRUPT_SINGLE_EDGE    0
+#define GPIO_INTERRUPT_DOUBLE_EDGE    1
+#define GPIO_INTERRUPT_EVENT_NONE     0
+#define GPIO_INTERRUPT_EVENT_RISING   0
+#define GPIO_INTERRUPT_EVENT_FALLING  0
+
+
+typedef	void (*GPIO_InterruptHandler)();
+void 	GPIO_RegisterInterruptHandler(uint32_t port, uint32_t bit, uint32_t sense, 
+			uint32_t single, uint32_t event, GPIO_InterruptHandler handler);
+
 static LPC_GPIO_TypeDef (* const LPC_GPIO[4]) = { LPC_GPIO0, LPC_GPIO1, LPC_GPIO2, LPC_GPIO3 };
 
 void PIOINT0_IRQHandler(void);
 void PIOINT1_IRQHandler(void);
 void PIOINT2_IRQHandler(void);
 void PIOINT3_IRQHandler(void);
+
 void GPIO_Init( void );
 void GPIO_SetInterrupt( uint32_t portNum, uint32_t bitPosi, uint32_t sense,
 		uint32_t single, uint32_t event );
@@ -52,11 +68,4 @@ uint32_t GPIO_GetValue( uint32_t portNum, uint32_t bitPosi);
 void GPIO_SetDir( uint32_t portNum, uint32_t bitPosi, uint32_t dir );
 void GPIO_SetFunction(uint32_t port, uint32_t bit, uint32_t func);
 
-#endif
 #endif /* end __GPIO_H */
-
-
-
-/*****************************************************************************
-**                            End Of File
-******************************************************************************/

@@ -260,6 +260,7 @@ void init_timer32(uint8_t timer_num, uint32_t TimerInterval)
 	LPC_TMR32B0->CCR = (0x1<<0)|(0x1<<2);
 #endif
 #endif
+
     LPC_TMR32B0->MCR = 3;			/* Interrupt and Reset on MR0 */
 
 #if CONFIG_TIMER32_DEFAULT_TIMER32_0_IRQHANDLER==1

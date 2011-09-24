@@ -20,80 +20,66 @@
  * use without further testing or modification.
 ****************************************************************************/
 #include <project/driver_config.h>
-
 #include <arch/gpio.h>
 
-#if CONFIG_GPIO_DEFAULT_PIOINT0_IRQHANDLER==1
-volatile uint32_t gpio0_counter = 0;
-volatile uint32_t p0_1_counter  = 0;
+#define NUM_PORTS 4
+#define MAX_NUM_HANDLERS 12
+
+/* predefinitions */
+void GPIO_IntClear(uint32_t portNum, uint32_t bitPosi);
+
+static GPIO_InterruptHandler interrupt_handlers[NUM_PORTS][MAX_NUM_HANDLERS];
 
 void PIOINT0_IRQHandler(void) {
-  uint32_t regVal;
-
-  gpio0_counter++;
-  regVal = GPIOIntStatus( PORT0, 1 );
-  if ( regVal )
-  {
-	p0_1_counter++;
-	GPIOIntClear( PORT0, 1 );
-  }		
-  return;
+	int i;
+	for(i = 0; i < MAX_NUM_HANDLERS; i++) {
+		if(GPIO_IntStatus(PORT0, i) && interrupt_handlers[PORT0][i] != 0) {
+			GPIO_InterruptHandler handler = interrupt_handlers[PORT0][i];
+			handler();
+		}
+	}
 }
-#endif
-
-#if CONFIG_GPIO_DEFAULT_PIOINT1_IRQHANDLER==1
-volatile uint32_t gpio1_counter = 0;
-volatile uint32_t p1_1_counter  = 0;
 
 void PIOINT1_IRQHandler(void) {
-  uint32_t regVal;
-
-  gpio1_counter++;
-  regVal = GPIOIntStatus( PORT1, 1 );
-  if ( regVal )
-  {
-	p1_1_counter++;
-	GPIOIntClear( PORT1, 1 );
-  }		
-  return;
+	int i;
+	for(i = 0; i < MAX_NUM_HANDLERS; i++) {
+		if(GPIO_IntStatus(PORT1, i) && interrupt_handlers[PORT1][i] != 0) {
+			GPIO_InterruptHandler handler = interrupt_handlers[PORT1][i];
+			handler();
+		}
+	}
 }
-#endif
-
-#if CONFIG_GPIO_DEFAULT_PIOINT2_IRQHANDLER==1
-volatile uint32_t gpio2_counter = 0;
-volatile uint32_t p2_1_counter  = 0;
 
 void PIOINT2_IRQHandler(void) {
-  uint32_t regVal;
-
-  gpio2_counter++;
-  regVal = GPIOIntStatus( PORT2, 1 );
-  if ( regVal )
-  {
-	p2_1_counter++;
-	GPIOIntClear( PORT2, 1 );
-  }		
-  return;
+	int i;
+	for(i = 0; i < MAX_NUM_HANDLERS; i++) {
+		if(GPIO_IntStatus(PORT2, i) && interrupt_handlers[PORT2][i] != 0) {
+			GPIO_InterruptHandler handler = interrupt_handlers[PORT2][i];
+			handler();
+		}
+	}
 }
-#endif
-
-#if CONFIG_GPIO_DEFAULT_PIOINT3_IRQHANDLER==1
-volatile uint32_t gpio3_counter = 0;
-volatile uint32_t p3_1_counter  = 0;
 
 void PIOINT3_IRQHandler(void) {
-  uint32_t regVal;
+	int i;
 
-  gpio3_counter++;
-  regVal = GPIOIntStatus( PORT3, 1 );
-  if ( regVal )
-  {
-	p3_1_counter++;
-	GPIOIntClear( PORT3, 1 );
-  }		
-  return;
+	for(i = 0; i < MAX_NUM_HANDLERS; i++) {
+		if(GPIO_IntStatus(PORT3, i) && interrupt_handlers[PORT3][i] != 0) {
+			GPIO_InterruptHandler handler = interrupt_handlers[PORT3][i];
+			handler();
+		}
+	}
 }
-#endif //#if CONFIG_GPIO_DEFAULT_PIOINT3_IRQHANDLER==1
+
+void GPIO_RegisterInterruptHandler(uint32_t port, uint32_t bit, uint32_t sense, 
+		uint32_t single, uint32_t event, GPIO_InterruptHandler handler) {
+	if (port < NUM_PORTS /* we only have 4 ports available */
+		&& bit < MAX_NUM_HANDLERS /* there are a max of 12 bits on the ports */) {
+		interrupt_handlers[port][bit] = handler;
+		GPIO_SetInterrupt(port, bit, sense, single, event);
+		GPIO_IntEnable(port, bit);
+	}
+}
 
 void GPIO_SetFunction(uint32_t port, uint32_t bit, uint32_t func) {
 
@@ -296,27 +282,17 @@ void GPIO_SetFunction(uint32_t port, uint32_t bit, uint32_t func) {
 }
 
 void GPIO_Init( void ) {
-  /* Enable AHB clock to the GPIO domain. */
-  LPC_SYSCON->SYSAHBCLKCTRL |= (1<<6);
+	/* Enable AHB clock to the GPIO domain. */
+	LPC_SYSCON->SYSAHBCLKCTRL |= (1<<6);
 
 #ifdef __JTAG_DISABLED  
-  LPC_IOCON->R_PIO1_1  |= 0x01;
+	LPC_IOCON->R_PIO1_1  |= 0x01;
 #endif
 
-  /* Set up NVIC when I/O pins are configured as external interrupts. */
-#if CONFIG_GPIO_DEFAULT_PIOINT0_IRQHANDLER==1
-  NVIC_EnableIRQ(EINT0_IRQn);
-#endif
-#if CONFIG_GPIO_DEFAULT_PIOINT1_IRQHANDLER==1
-  NVIC_EnableIRQ(EINT1_IRQn);
-#endif
-#if CONFIG_GPIO_DEFAULT_PIOINT2_IRQHANDLER==1
-  NVIC_EnableIRQ(EINT2_IRQn);
-#endif
-#if CONFIG_GPIO_DEFAULT_PIOINT3_IRQHANDLER==1
-  NVIC_EnableIRQ(EINT3_IRQn);
-#endif
-  return;
+	NVIC_EnableIRQ(EINT0_IRQn);
+	NVIC_EnableIRQ(EINT1_IRQn);
+	NVIC_EnableIRQ(EINT2_IRQn);
+	NVIC_EnableIRQ(EINT3_IRQn);
 }
 
 /*****************************************************************************
@@ -332,172 +308,156 @@ void GPIO_Init( void ) {
 ** 
 *****************************************************************************/
 void GPIO_SetInterrupt( uint32_t portNum, uint32_t bitPosi, uint32_t sense,
-			uint32_t single, uint32_t event )
-{
-  switch ( portNum )
-  {
-	case PORT0:
-	  if ( sense == 0 )
-	  {
-		LPC_GPIO0->IS &= ~(0x1<<bitPosi);
-		/* single or double only applies when sense is 0(edge trigger). */
-		if ( single == 0 )
-		  LPC_GPIO0->IBE &= ~(0x1<<bitPosi);
-		else
-		  LPC_GPIO0->IBE |= (0x1<<bitPosi);
-	  }
-	  else
-	  	LPC_GPIO0->IS |= (0x1<<bitPosi);
-	  if ( event == 0 )
-		LPC_GPIO0->IEV &= ~(0x1<<bitPosi);
-	  else
-		LPC_GPIO0->IEV |= (0x1<<bitPosi);
-	break;
- 	case PORT1:
-	  if ( sense == 0 )
-	  {
-		LPC_GPIO1->IS &= ~(0x1<<bitPosi);
-		/* single or double only applies when sense is 0(edge trigger). */
-		if ( single == 0 )
-		  LPC_GPIO1->IBE &= ~(0x1<<bitPosi);
-		else
-		  LPC_GPIO1->IBE |= (0x1<<bitPosi);
-	  }
-	  else
-	  	LPC_GPIO1->IS |= (0x1<<bitPosi);
-	  if ( event == 0 )
-		LPC_GPIO1->IEV &= ~(0x1<<bitPosi);
-	  else
-		LPC_GPIO1->IEV |= (0x1<<bitPosi);  
-	break;
-	case PORT2:
-	  if ( sense == 0 )
-	  {
-		LPC_GPIO2->IS &= ~(0x1<<bitPosi);
-		/* single or double only applies when sense is 0(edge trigger). */
-		if ( single == 0 )
-		  LPC_GPIO2->IBE &= ~(0x1<<bitPosi);
-		else
-		  LPC_GPIO2->IBE |= (0x1<<bitPosi);
-	  }
-	  else
-	  	LPC_GPIO2->IS |= (0x1<<bitPosi);
-	  if ( event == 0 )
-		LPC_GPIO2->IEV &= ~(0x1<<bitPosi);
-	  else
-		LPC_GPIO2->IEV |= (0x1<<bitPosi);  
-	break;
-	case PORT3:
-	  if ( sense == 0 )
-	  {
-		LPC_GPIO3->IS &= ~(0x1<<bitPosi);
-		/* single or double only applies when sense is 0(edge trigger). */
-		if ( single == 0 )
-		  LPC_GPIO3->IBE &= ~(0x1<<bitPosi);
-		else
-		  LPC_GPIO3->IBE |= (0x1<<bitPosi);
-	  }
-	  else
-	  	LPC_GPIO3->IS |= (0x1<<bitPosi);
-	  if ( event == 0 )
-		LPC_GPIO3->IEV &= ~(0x1<<bitPosi);
-	  else
-		LPC_GPIO3->IEV |= (0x1<<bitPosi);	  
-	break;
-	default:
-	  break;
-  }
-  return;
+			uint32_t single, uint32_t event ) {
+
+	switch ( portNum ) {
+	 case PORT0:
+		if ( sense == 0 ) {
+			LPC_GPIO0->IS &= ~(0x1<<bitPosi);
+			/* single or double only applies when sense is 0(edge trigger). */
+			if ( single == 0 )
+				LPC_GPIO0->IBE &= ~(0x1<<bitPosi);
+			else
+				LPC_GPIO0->IBE |= (0x1<<bitPosi);
+
+		} else {
+			LPC_GPIO0->IS |= (0x1<<bitPosi);
+
+			if ( event == 0 )
+				LPC_GPIO0->IEV &= ~(0x1<<bitPosi);
+			else
+				LPC_GPIO0->IEV |= (0x1<<bitPosi);
+		}
+		break;
+
+	 case PORT1:
+		if ( sense == 0 ) {
+			LPC_GPIO1->IS &= ~(0x1<<bitPosi);
+			/* single or double only applies when sense is 0(edge trigger). */
+			if ( single == 0 )
+				LPC_GPIO1->IBE &= ~(0x1<<bitPosi);
+			else
+				LPC_GPIO1->IBE |= (0x1<<bitPosi);
+		} else {
+			LPC_GPIO1->IS |= (0x1<<bitPosi);
+			if ( event == 0 )
+				LPC_GPIO1->IEV &= ~(0x1<<bitPosi);
+			else
+				LPC_GPIO1->IEV |= (0x1<<bitPosi);
+		}
+		break;
+
+	 case PORT2:
+		if ( sense == 0 ) {
+			LPC_GPIO2->IS &= ~(0x1<<bitPosi);
+			/* single or double only applies when sense is 0(edge trigger). */
+			if ( single == 0 )
+				LPC_GPIO2->IBE &= ~(0x1<<bitPosi);
+			else
+				LPC_GPIO2->IBE |= (0x1<<bitPosi);
+		} else {
+			LPC_GPIO2->IS |= (0x1<<bitPosi);
+			if ( event == 0 )
+				LPC_GPIO2->IEV &= ~(0x1<<bitPosi);
+			else
+				LPC_GPIO2->IEV |= (0x1<<bitPosi);  
+		}
+		break;
+
+	 case PORT3:
+		if ( sense == 0 ) {
+			LPC_GPIO3->IS &= ~(0x1<<bitPosi);
+			/* single or double only applies when sense is 0(edge trigger). */
+			if ( single == 0 )
+				LPC_GPIO3->IBE &= ~(0x1<<bitPosi);
+			else
+				LPC_GPIO3->IBE |= (0x1<<bitPosi);
+		} else {
+			LPC_GPIO3->IS |= (0x1<<bitPosi);
+			if ( event == 0 )
+				LPC_GPIO3->IEV &= ~(0x1<<bitPosi);
+			else
+				LPC_GPIO3->IEV |= (0x1<<bitPosi);
+		}
+		break;
+	}
 }
 
 void GPIO_IntEnable( uint32_t portNum, uint32_t bitPosi ) {
-  switch ( portNum )
-  {
-	case PORT0:
-	  LPC_GPIO0->IE |= (0x1<<bitPosi); 
-	break;
- 	case PORT1:
-	  LPC_GPIO1->IE |= (0x1<<bitPosi);	
-	break;
-	case PORT2:
-	  LPC_GPIO2->IE |= (0x1<<bitPosi);	    
-	break;
-	case PORT3:
-	  LPC_GPIO3->IE |= (0x1<<bitPosi);	    
-	break;
-	default:
-	  break;
-  }
-  return;
+	switch ( portNum ) {
+	 case PORT0:
+		LPC_GPIO0->IE |= (0x1<<bitPosi);
+		break;
+	 case PORT1:
+		LPC_GPIO1->IE |= (0x1<<bitPosi);
+		break;
+	 case PORT2:
+		LPC_GPIO2->IE |= (0x1<<bitPosi);
+		break;
+	 case PORT3:
+		LPC_GPIO3->IE |= (0x1<<bitPosi);
+		break;
+	}
 }
 
 void GPIO_IntDisable( uint32_t portNum, uint32_t bitPosi ) {
-  switch ( portNum )
-  {
-	case PORT0:
-	  LPC_GPIO0->IE &= ~(0x1<<bitPosi); 
-	break;
- 	case PORT1:
-	  LPC_GPIO1->IE &= ~(0x1<<bitPosi);	
-	break;
-	case PORT2:
-	  LPC_GPIO2->IE &= ~(0x1<<bitPosi);	    
-	break;
-	case PORT3:
-	  LPC_GPIO3->IE &= ~(0x1<<bitPosi);	    
-	break;
-	default:
-	  break;
+	switch ( portNum ) {
+	 case PORT0:
+		LPC_GPIO0->IE &= ~(0x1<<bitPosi);
+		break;
+	 case PORT1:
+		LPC_GPIO1->IE &= ~(0x1<<bitPosi);
+		break;
+	 case PORT2:
+		LPC_GPIO2->IE &= ~(0x1<<bitPosi);
+		break;
+	 case PORT3:
+		LPC_GPIO3->IE &= ~(0x1<<bitPosi);
+		break;
   }
   return;
 }
 
-uint32_t GPIOIntStatus( uint32_t portNum, uint32_t bitPosi ) {
-  uint32_t regVal = 0;
+uint32_t GPIO_IntStatus( uint32_t portNum, uint32_t bitPosi ) {
+	uint32_t regVal = 0;
 
-  switch ( portNum )
-  {
-	case PORT0:
-	  if ( LPC_GPIO0->MIS & (0x1<<bitPosi) )
-		regVal = 1;
-	break;
- 	case PORT1:
-	  if ( LPC_GPIO1->MIS & (0x1<<bitPosi) )
-		regVal = 1;	
-	break;
+	switch ( portNum ) {
+	 case PORT0:
+		if ( LPC_GPIO0->MIS & (0x1<<bitPosi) )
+			regVal = 1;
+		break;
+	 case PORT1:
+		if ( LPC_GPIO1->MIS & (0x1<<bitPosi) )
+			regVal = 1;
+		break;
 	case PORT2:
-	  if ( LPC_GPIO2->MIS & (0x1<<bitPosi) )
-		regVal = 1;		    
-	break;
+		if ( LPC_GPIO2->MIS & (0x1<<bitPosi) )
+			regVal = 1;
+		break;
 	case PORT3:
-	  if ( LPC_GPIO3->MIS & (0x1<<bitPosi) )
-		regVal = 1;		    
-	break;
-	default:
-	  break;
-  }
-  return ( regVal );
+		if ( LPC_GPIO3->MIS & (0x1<<bitPosi) )
+			regVal = 1;
+		break;
+	}
+
+	return regVal;
 }
 
 void GPIO_IntClear( uint32_t portNum, uint32_t bitPosi ) {
-  switch ( portNum )
-  {
-	case PORT0:
-	  LPC_GPIO0->IC |= (0x1<<bitPosi); 
-	break;
- 	case PORT1:
-	  LPC_GPIO1->IC |= (0x1<<bitPosi);	
-	break;
-	case PORT2:
-	  LPC_GPIO2->IC |= (0x1<<bitPosi);	    
-	break;
+	switch ( portNum ) {
+	 case PORT0:
+		LPC_GPIO0->IC |= (0x1<<bitPosi);
+		break;
+	 case PORT1:
+		LPC_GPIO1->IC |= (0x1<<bitPosi);
+		break;
+	 case PORT2:
+		LPC_GPIO2->IC |= (0x1<<bitPosi);
+		break;
 	case PORT3:
-	  LPC_GPIO3->IC |= (0x1<<bitPosi);	    
-	break;
-	default:
-	  break;
-  }
-  return;
+		LPC_GPIO3->IC |= (0x1<<bitPosi);
+		break;
+	}
 }
 
 void GPIO_SetValue( uint32_t portNum, uint32_t bitPosi, uint32_t bitVal ) {
@@ -505,7 +465,7 @@ void GPIO_SetValue( uint32_t portNum, uint32_t bitPosi, uint32_t bitVal ) {
 }
 
 uint32_t GPIO_GetValue( uint32_t portNum, uint32_t bitPosi) {
-	return LPC_GPIO[portNum]->MASKED_ACCESS[(1<<bitPosi)];
+	return LPC_GPIO[portNum]->MASKED_ACCESS[(1<<bitPosi)] >> bitPosi;
 }
 
 void GPIO_ToggleValue(uint32_t portNum, uint32_t bitPosi) {

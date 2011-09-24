@@ -728,7 +728,7 @@
 
 	/* Out Channels */
 	/* They're in milivolts / miliamps */
-	#define WS20_TRITIUM_HEARTBEAT				0 //motor controller base address, uint
+	#define WS20_WAVESCULPTOR_TYPE				0 //Wavesculptor type, either 20 or 22. Will be 20 here.
 	#define WS20_ACTIVE_MOTOR				1 //integer
 	#define WS20_ERRORS					2 //bit flags
 	#define WS20_LIMITS					3 //bit flags
@@ -762,7 +762,7 @@
 
 	/* Out Channels */
 	/* They're in milivolts / miliamps */
-	#define WS22_TRITIUM_HEARTBEAT				0 //motor controller base address, uint
+	#define WS22_WAVESCULPTOR_TYPE				0 //Wavesculptor type, either 20 or 22. Will be 22 here.
 	#define WS22_ACTIVE_MOTOR				1 //integer
 	#define WS22_ERRORS					2 //bit flags
 	#define WS22_LIMITS					3 //bit flags

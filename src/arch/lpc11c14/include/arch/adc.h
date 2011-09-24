@@ -57,11 +57,9 @@ extern volatile uint32_t ADCIntDone;
 
 extern volatile uint32_t ADCValue[ADC_NUM];
 
-extern void ADCInit( uint32_t ADC_Clk );
-extern uint32_t ADCRead( uint8_t channelNum );
-extern void ADCBurstRead( void );
+extern void ADC_Init( uint32_t ADC_Clk );
+extern uint32_t ADC_Read( uint8_t channelNum );
+void ADC_EnableChannel( uint32_t channelNum );
+extern void ADC_BurstRead( void );
 #endif
 #endif /* end __ADC_H */
-/*****************************************************************************
-**                            End Of File
-******************************************************************************/

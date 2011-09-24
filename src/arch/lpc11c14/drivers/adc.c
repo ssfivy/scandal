@@ -19,9 +19,9 @@
  * warranty that such application will be suitable for the specified
  * use without further testing or modification.
 ****************************************************************************/
-#include "project/driver_config.h"
-#if CONFIG_ENABLE_DRIVER_ADC==1
-#include "arch/adc.h"
+#include <project/driver_config.h>
+#include <arch/adc.h>
+#include <arch/gpio.h>
 
 volatile uint32_t ADCValue[ADC_NUM];
 
@@ -104,52 +104,66 @@ void ADC_IRQHandler (void)
 ** Returned value:		None
 ** 
 *****************************************************************************/
-void ADCInit( uint32_t ADC_Clk )
-{
-  uint32_t i;
+void ADC_Init( uint32_t ADC_Clk ) {
+	uint32_t i;
 
-  /* Disable Power down bit to the ADC block. */  
-  LPC_SYSCON->PDRUNCFG &= ~(0x1<<4);
+	/* Disable Power down bit to the ADC block. */  
+	LPC_SYSCON->PDRUNCFG &= ~(0x1<<4);
 
-  /* Enable AHB clock to the ADC. */
-  LPC_SYSCON->SYSAHBCLKCTRL |= (1<<13);
+	/* Enable AHB clock to the ADC. */
+	LPC_SYSCON->SYSAHBCLKCTRL |= (1<<13);
 
-  for ( i = 0; i < ADC_NUM; i++ )
-  {
-	ADCValue[i] = 0x0;
-  }
-  /* Unlike some other pins, for ADC test, all the pins need
-  to set to analog mode. Bit 7 needs to be cleared according 
-  to design team. */
-  LPC_IOCON->R_PIO0_11 &= ~0x8F; /*  ADC I/O config */
-  LPC_IOCON->R_PIO0_11 |= 0x02;  /* ADC IN0 */
-  LPC_IOCON->R_PIO1_0  &= ~0x8F;	
-  LPC_IOCON->R_PIO1_0  |= 0x02;  /* ADC IN1 */
-  LPC_IOCON->R_PIO1_1  &= ~0x8F;	
-  LPC_IOCON->R_PIO1_1  |= 0x02;  /* ADC IN2 */
-  LPC_IOCON->R_PIO1_2 &= ~0x8F;	
-  LPC_IOCON->R_PIO1_2 |= 0x02; /* ADC IN3 */
-#ifdef __SWD_DISABLED
-  LPC_IOCON->SWDIO_PIO1_3   &= ~0x8F;	
-  LPC_IOCON->SWDIO_PIO1_3   |= 0x02;  /* ADC IN4 */
-#endif
-  LPC_IOCON->R_PIO0_11   = 0x02;	// Select AD0 pin function
-  LPC_IOCON->R_PIO1_0    = 0x02;	// Select AD1 pin function
-  LPC_IOCON->R_PIO1_1    = 0x02;	// Select AD2 pin function
-  LPC_IOCON->R_PIO1_2    = 0x02;	// Select AD3 pin function
-//  LPC_IOCON->ARM_SWDIO_PIO1_3    = 0x02;	// Select AD4 pin function
-  LPC_IOCON->PIO1_4    = 0x01;	// Select AD5 pin function
-  LPC_IOCON->PIO1_10   = 0x01;	// Select AD6 pin function
-  LPC_IOCON->PIO1_11   = 0x01;	// Select AD7 pin function
+	for ( i = 0; i < ADC_NUM; i++ ) {
+		ADCValue[i] = 0x0;
+	}
 
-  LPC_ADC->CR = ((SystemCoreClock/LPC_SYSCON->SYSAHBCLKDIV)/ADC_Clk-1)<<8;
+	/* set the clock divider. this works with a 12M crystal */
+	LPC_ADC->CR = 2<<8;
 
-  /* If POLLING, no need to do the following */
-#if CONFIG_ADC_ENABLE_ADC_IRQHANDLER==1
-  NVIC_EnableIRQ(ADC_IRQn);
-  LPC_ADC->INTEN = 0x1FF;		/* Enable all interrupts */
-#endif
-  return;
+	/* enable the interrupt handler */
+	NVIC_EnableIRQ(ADC_IRQn);
+}
+
+/* Enable an individual ADC channel */
+void ADC_EnableChannel(uint32_t channel_num) {
+
+	switch (channel_num) {
+	 case 0:
+		GPIO_SetFunction(PORT0, 11, GPIO_FUNC1);
+		break;
+
+	 case 1:
+		GPIO_SetFunction(PORT1, 0, GPIO_FUNC1);
+		break;
+
+	 case 2:
+		GPIO_SetFunction(PORT1, 1, GPIO_FUNC1);
+		break;
+
+	 case 3:
+		GPIO_SetFunction(PORT1, 2, GPIO_FUNC1);
+		break;
+
+	 case 4:
+		/* this pin is TMS */
+		return;
+
+	 case 5:
+		GPIO_SetFunction(PORT1, 4, GPIO_FUNC1);
+		break;
+
+	 case 6:
+		GPIO_SetFunction(PORT1, 10, GPIO_FUNC1);
+		break;
+
+	 case 7:
+		GPIO_SetFunction(PORT1, 11, GPIO_FUNC1);
+		break;
+
+	}
+
+	LPC_ADC->CR |= 1 << channel_num;
+	LPC_ADC->INTEN |= 1 << channel_num;
 }
 
 /*****************************************************************************
@@ -161,7 +175,7 @@ void ADCInit( uint32_t ADC_Clk )
 ** Returned value:		Value read, if interrupt driven, return channel #
 ** 
 *****************************************************************************/
-uint32_t ADCRead( uint8_t channelNum )
+uint32_t ADC_Read( uint8_t channelNum )
 {
 #if CONFIG_ADC_ENABLE_ADC_IRQHANDLER!=1
   uint32_t regVal, ADC_Data;
@@ -209,7 +223,7 @@ uint32_t ADCRead( uint8_t channelNum )
 ** Returned value:		None
 ** 
 *****************************************************************************/
-void ADCBurstRead( void )
+void ADC_BurstRead( void )
 {
   if ( LPC_ADC->CR & (0x7<<24) )
   {
@@ -222,8 +236,3 @@ void ADCBurstRead( void )
   return;						/* the ADC reading is done inside the 
 								handler, return 0. */
 }
-#endif
-
-/*********************************************************************************
-**                            End Of File
-*********************************************************************************/

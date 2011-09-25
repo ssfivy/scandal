@@ -34,6 +34,13 @@ typedef enum gpio_function {
 	GPIO_FUNC2
 } gpio_function_t;
 
+typedef enum gpio_mode {
+	GPIO_MODE_NONE,
+	GPIO_MODE_PULLDOWN,
+	GPIO_MODE_PULLUP,
+	GPIO_MODE_REPEATER
+} gpio_mode_t;
+
 #define GPIO_INTERRUPT_SENSE_LEVEL    1
 #define GPIO_INTERRUPT_SENSE_EDGE     0
 #define GPIO_INTERRUPT_SINGLE_EDGE    0
@@ -66,6 +73,6 @@ void GPIO_SetValue( uint32_t portNum, uint32_t bitPosi, uint32_t bitVal );
 void GPIO_ToggleValue( uint32_t portNum, uint32_t bitPosi);
 uint32_t GPIO_GetValue( uint32_t portNum, uint32_t bitPosi);
 void GPIO_SetDir( uint32_t portNum, uint32_t bitPosi, uint32_t dir );
-void GPIO_SetFunction(uint32_t port, uint32_t bit, uint32_t func);
+void GPIO_SetFunction(uint32_t port, uint32_t bit, uint32_t func, uint32_t mode);
 
 #endif /* end __GPIO_H */

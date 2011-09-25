@@ -129,19 +129,19 @@ void ADC_EnableChannel(uint32_t channel_num) {
 
 	switch (channel_num) {
 	 case 0:
-		GPIO_SetFunction(PORT0, 11, GPIO_FUNC1);
+		GPIO_SetFunction(PORT0, 11, GPIO_FUNC1, GPIO_MODE_NONE);
 		break;
 
 	 case 1:
-		GPIO_SetFunction(PORT1, 0, GPIO_FUNC1);
+		GPIO_SetFunction(PORT1, 0, GPIO_FUNC1, GPIO_MODE_NONE);
 		break;
 
 	 case 2:
-		GPIO_SetFunction(PORT1, 1, GPIO_FUNC1);
+		GPIO_SetFunction(PORT1, 1, GPIO_FUNC1, GPIO_MODE_NONE);
 		break;
 
 	 case 3:
-		GPIO_SetFunction(PORT1, 2, GPIO_FUNC1);
+		GPIO_SetFunction(PORT1, 2, GPIO_FUNC1, GPIO_MODE_NONE);
 		break;
 
 	 case 4:
@@ -149,15 +149,15 @@ void ADC_EnableChannel(uint32_t channel_num) {
 		return;
 
 	 case 5:
-		GPIO_SetFunction(PORT1, 4, GPIO_FUNC1);
+		GPIO_SetFunction(PORT1, 4, GPIO_FUNC1, GPIO_MODE_NONE);
 		break;
 
 	 case 6:
-		GPIO_SetFunction(PORT1, 10, GPIO_FUNC1);
+		GPIO_SetFunction(PORT1, 10, GPIO_FUNC1, GPIO_MODE_NONE);
 		break;
 
 	 case 7:
-		GPIO_SetFunction(PORT1, 11, GPIO_FUNC1);
+		GPIO_SetFunction(PORT1, 11, GPIO_FUNC1, GPIO_MODE_NONE);
 		break;
 
 	}

@@ -81,7 +81,7 @@ void GPIO_RegisterInterruptHandler(uint32_t port, uint32_t bit, uint32_t sense,
 	}
 }
 
-void GPIO_SetFunction(uint32_t port, uint32_t bit, uint32_t func) {
+void GPIO_SetFunction(uint32_t port, uint32_t bit, uint32_t func, uint32_t mode) {
 
 	/* for the specified port and pin, first set the function bits to 0 and then
 	 * to the function we actually want */
@@ -95,40 +95,49 @@ void GPIO_SetFunction(uint32_t port, uint32_t bit, uint32_t func) {
 		 case 0:
 			/* this is the reset pin, we can't use it */
 			return;
-			LPC_IOCON->RESET_PIO0_0 &= ~0x07;
+			LPC_IOCON->RESET_PIO0_0 &= ~0x7F;
 			LPC_IOCON->RESET_PIO0_0 |= (func+1);
+			LPC_IOCON->RESET_PIO0_0 |= (mode << 3);
 			break;
 		 case 1:
-			LPC_IOCON->PIO0_1 &= ~0x07;
+			LPC_IOCON->PIO0_1 &= ~0x7F;
 			LPC_IOCON->PIO0_1 |= func;
+			LPC_IOCON->PIO0_1 |= (mode << 3);
 			break;
 		 case 2:
-			LPC_IOCON->PIO0_2 &= ~0x07;
+			LPC_IOCON->PIO0_2 &= ~0x7F;
 			LPC_IOCON->PIO0_2 |= func;
+			LPC_IOCON->PIO0_2 |= (mode << 3);
 			break;
 		 case 3:
-			LPC_IOCON->PIO0_3 &= ~0x07;
+			LPC_IOCON->PIO0_3 &= ~0x7F;
 			LPC_IOCON->PIO0_3 |= func;
+			LPC_IOCON->PIO0_3 |= (mode << 3);
 			break;
 		 case 4:
-			LPC_IOCON->PIO0_4 &= ~0x07;
+			LPC_IOCON->PIO0_4 &= ~0x7F;
 			LPC_IOCON->PIO0_4 |= func;
+			LPC_IOCON->PIO0_4 |= (mode << 3);
 			break;
 		 case 5:
-			LPC_IOCON->PIO0_5 &= ~0x07;
+			LPC_IOCON->PIO0_5 &= ~0x7F;
 			LPC_IOCON->PIO0_5 |= func;
+			LPC_IOCON->PIO0_5 |= (mode << 3);
 			break;
 		 case 6:
-			LPC_IOCON->PIO0_6 &= ~0x07;
+			LPC_IOCON->PIO0_6 &= ~0x7F;
 			LPC_IOCON->PIO0_6 |= func;
+			LPC_IOCON->PIO0_6 |= (mode << 3);
 			break;
 		 case 7:
-			LPC_IOCON->PIO0_7 &= ~0x07;
+			LPC_IOCON->PIO0_7 &= ~0x7F;
 			LPC_IOCON->PIO0_7 |= func;
+			LPC_IOCON->PIO0_7 |= (mode << 3);
 			break;
 		 case 8:
-			LPC_IOCON->PIO0_8 &= ~0x07;
+			LPC_IOCON->PIO0_8 &= ~0x7F;
 			LPC_IOCON->PIO0_8 |= func;
+			LPC_IOCON->PIO0_8 |= (mode << 3);
 			break;
 		 case 9:
 			/* this is TDO, it's used for programming */
@@ -137,8 +146,9 @@ void GPIO_SetFunction(uint32_t port, uint32_t bit, uint32_t func) {
 			/* this is TCLK, it's used for programming */
 			return;
 		 case 11:
-			LPC_IOCON->R_PIO0_11 &= ~0x07;
+			LPC_IOCON->R_PIO0_11 &= ~0x7F;
 			LPC_IOCON->R_PIO0_11 |= (func+1);
+			LPC_IOCON->R_PIO0_11 |= (mode << 3);
 			if (func == GPIO_FUNC1) /* ADC Mode, set to analog */
 				LPC_IOCON->R_PIO0_11 &= ~(0x80);
 			break;
@@ -148,20 +158,23 @@ void GPIO_SetFunction(uint32_t port, uint32_t bit, uint32_t func) {
 	 case 1:
 		switch (bit) {
 		 case 0:
-			LPC_IOCON->R_PIO1_0 &= ~0x07;
+			LPC_IOCON->R_PIO1_0 &= ~0x7F;
 			LPC_IOCON->R_PIO1_0 |= (func+1);
+			LPC_IOCON->R_PIO1_0 |= (mode << 3);
 			if (func == GPIO_FUNC1) /* ADC Mode, set to analog */
 				LPC_IOCON->R_PIO1_0 &= ~(0x80);
 			break;
 		 case 1:
-			LPC_IOCON->R_PIO1_1 &= ~0x07;
+			LPC_IOCON->R_PIO1_1 &= ~0x7F;
 			LPC_IOCON->R_PIO1_1 |= (func+1);
+			LPC_IOCON->R_PIO1_1 |= (mode << 3);
 			if (func == GPIO_FUNC1) /* ADC Mode, set to analog */
 				LPC_IOCON->R_PIO1_1 &= ~(0x80);
 			break;
 		 case 2:
-			LPC_IOCON->R_PIO1_2 &= ~0x07;
+			LPC_IOCON->R_PIO1_2 &= ~0x7F;
 			LPC_IOCON->R_PIO1_2 |= (func+1);
+			LPC_IOCON->R_PIO1_2 |= (mode << 3);
 			if (func == GPIO_FUNC1) /* ADC Mode, set to analog */
 				LPC_IOCON->R_PIO1_2 &= ~(0x80);
 			break;
@@ -169,40 +182,48 @@ void GPIO_SetFunction(uint32_t port, uint32_t bit, uint32_t func) {
 			/* this is TMS, it's used for programming */
 			return;
 		 case 4:
-			LPC_IOCON->PIO1_4 &= ~0x07;
+			LPC_IOCON->PIO1_4 &= ~0x7F;
 			LPC_IOCON->PIO1_4 |= func;
+			LPC_IOCON->PIO1_4 |= (mode << 3);
 			if (func == GPIO_FUNC1) /* ADC Mode, set to analog */
 				LPC_IOCON->PIO1_4 &= ~(0x80);
 			break;
 		 case 5:
-			LPC_IOCON->PIO1_5 &= ~0x07;
+			LPC_IOCON->PIO1_5 &= ~0x7F;
 			LPC_IOCON->PIO1_5 |= func;
+			LPC_IOCON->PIO1_5 |= (mode << 3);
 			break;
 		 case 6:
-			LPC_IOCON->PIO1_6 &= ~0x07;
+			LPC_IOCON->PIO1_6 &= ~0x7F;
 			LPC_IOCON->PIO1_6 |= func;
+			LPC_IOCON->PIO1_6 |= (mode << 3);
 			break;
 		 case 7:
-			LPC_IOCON->PIO1_7 &= ~0x07;
+			LPC_IOCON->PIO1_7 &= ~0x7F;
 			LPC_IOCON->PIO1_7 |= func;
+			LPC_IOCON->PIO1_7 |= (mode << 3);
 			break;
 		 case 8:
-			LPC_IOCON->PIO1_8 &= ~0x07;
+			LPC_IOCON->PIO1_8 &= ~0x7F;
 			LPC_IOCON->PIO1_8 |= func;
+			LPC_IOCON->PIO1_8 |= (mode << 3);
 			break;
 		 case 9:
-			LPC_IOCON->PIO1_9 &= ~0x07;
+			LPC_IOCON->PIO1_9 &= ~0x7F;
 			LPC_IOCON->PIO1_9 |= func;
+			LPC_IOCON->PIO1_9 |= (mode << 3);
 			break;
 		 case 10:
-			LPC_IOCON->PIO1_10 &= ~0x07;
+			LPC_IOCON->PIO1_10 &= ~0x7F;
 			LPC_IOCON->PIO1_10 |= func;
+			LPC_IOCON->PIO1_10 |= (mode << 3);
 			if (func == GPIO_FUNC1) /* ADC Mode, set to analog */
 				LPC_IOCON->PIO1_10 &= ~(0x80);
 			break;
 		 case 11:
-			LPC_IOCON->PIO1_11 &= ~0x07;
+			LPC_IOCON->PIO1_11 &= ~0x7F;
 			LPC_IOCON->PIO1_11 |= func;
+			LPC_IOCON->PIO1_11 |= (mode << 3);
 			if (func == GPIO_FUNC1) /* ADC Mode, set to analog */
 				LPC_IOCON->PIO1_11 &= ~(0x80);
 			break;
@@ -212,54 +233,64 @@ void GPIO_SetFunction(uint32_t port, uint32_t bit, uint32_t func) {
 	 case 2:
 		switch (bit) {
 		 case 0:
-			/* this is used for programming */
-			return;
-			LPC_IOCON->PIO2_0 &= ~0x07;
+			LPC_IOCON->PIO2_0 &= ~0x7F;
 			LPC_IOCON->PIO2_0 |= func;
+			LPC_IOCON->PIO2_0 |= (mode << 3);
 			break;
 		 case 1:
-			LPC_IOCON->PIO2_1 &= ~0x07;
+			LPC_IOCON->PIO2_1 &= ~0x7F;
 			LPC_IOCON->PIO2_1 |= func;
+			LPC_IOCON->PIO2_1 |= (mode << 3);
 			break;
 		 case 2:
-			LPC_IOCON->PIO2_2 &= ~0x07;
+			LPC_IOCON->PIO2_2 &= ~0x7F;
 			LPC_IOCON->PIO2_2 |= func;
+			LPC_IOCON->PIO2_2 |= (mode << 3);
 			break;
 		 case 3:
-			LPC_IOCON->PIO2_3 &= ~0x07;
+			LPC_IOCON->PIO2_3 &= ~0x7F;
 			LPC_IOCON->PIO2_3 |= func;
+			LPC_IOCON->PIO2_3 |= (mode << 3);
 			break;
 		 case 4:
-			LPC_IOCON->PIO2_4 &= ~0x07;
+			LPC_IOCON->PIO2_4 &= ~0x7F;
 			LPC_IOCON->PIO2_4 |= func;
+			LPC_IOCON->PIO2_4 |= (mode << 3);
 			break;
 		 case 5:
-			LPC_IOCON->PIO2_5 &= ~0x07;
+			LPC_IOCON->PIO2_5 &= ~0x7F;
 			LPC_IOCON->PIO2_5 |= func;
+			LPC_IOCON->PIO2_5 |= (mode << 3);
 			break;
 		 case 6:
-			LPC_IOCON->PIO2_6 &= ~0x07;
+			LPC_IOCON->PIO2_6 &= ~0x7F;
 			LPC_IOCON->PIO2_6 |= func;
+			LPC_IOCON->PIO2_6 |= (mode << 3);
 			break;
 		 case 7:
-			LPC_IOCON->PIO2_7 &= ~0x07;
+			LPC_IOCON->PIO2_7 &= ~0x7F;
 			LPC_IOCON->PIO2_7 |= func;
+			LPC_IOCON->PIO2_7 |= (mode << 3);
 			break;
 		 case 8:
-			LPC_IOCON->PIO2_8 &= ~0x07;
+			LPC_IOCON->PIO2_8 &= ~0x7F;
 			LPC_IOCON->PIO2_8 |= func;
+			LPC_IOCON->PIO2_8 |= (mode << 3);
 			break;
 		 case 9:
-			LPC_IOCON->PIO2_9 &= ~0x07;
+			LPC_IOCON->PIO2_9 &= ~0x7F;
 			LPC_IOCON->PIO2_9 |= func;
+			LPC_IOCON->PIO2_9 |= (mode << 3);
 			break;
 		 case 10:
-			LPC_IOCON->PIO2_10 &= ~0x07;
+			LPC_IOCON->PIO2_10 &= ~0x7F;
 			LPC_IOCON->PIO2_10 |= func;
+			LPC_IOCON->PIO2_10 |= (mode << 3);
 			break;
 		 case 11:
-			LPC_IOCON->PIO2_11 &= ~0x07;
+			LPC_IOCON->PIO2_11 &= ~0x7F;
 			LPC_IOCON->PIO2_11 |= func;
+			LPC_IOCON->PIO2_11 |= (mode << 3);
 			break;
 		}
 		break;
@@ -267,28 +298,34 @@ void GPIO_SetFunction(uint32_t port, uint32_t bit, uint32_t func) {
 	 case 3:
 		switch (bit) {
 		 case 0:
-			LPC_IOCON->PIO3_0 &= ~0x07;
+			LPC_IOCON->PIO3_0 &= ~0x7F;
 			LPC_IOCON->PIO3_0 |= func;
+			LPC_IOCON->PIO3_0 |= (mode << 3);
 			break;
 		 case 1:
-			LPC_IOCON->PIO3_1 &= ~0x07;
+			LPC_IOCON->PIO3_1 &= ~0x7F;
 			LPC_IOCON->PIO3_1 |= func;
+			LPC_IOCON->PIO3_1 |= (mode << 3);
 			break;
 		 case 2:
-			LPC_IOCON->PIO3_2 &= ~0x07;
+			LPC_IOCON->PIO3_2 &= ~0x7F;
 			LPC_IOCON->PIO3_2 |= func;
+			LPC_IOCON->PIO3_2 |= (mode << 3);
 			break;
 		 case 3:
-			LPC_IOCON->PIO3_3 &= ~0x07;
+			LPC_IOCON->PIO3_3 &= ~0x7F;
 			LPC_IOCON->PIO3_3 |= func;
+			LPC_IOCON->PIO3_3 |= (mode << 3);
 			break;
 		 case 4:
-			LPC_IOCON->PIO3_4 &= ~0x07;
+			LPC_IOCON->PIO3_4 &= ~0x7F;
 			LPC_IOCON->PIO3_4 |= func;
+			LPC_IOCON->PIO3_4 |= (mode << 3);
 			break;
 		 case 5:
-			LPC_IOCON->PIO3_5 &= ~0x07;
+			LPC_IOCON->PIO3_5 &= ~0x7F;
 			LPC_IOCON->PIO3_5 |= func;
+			LPC_IOCON->PIO3_5 |= (mode << 3);
 			break;
 		}
 		break;

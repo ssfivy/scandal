@@ -246,10 +246,10 @@ u08 scandal_send_ws_id(uint32_t identifier, const char *str, int len) {
 	// TODO
 	// len should always be 4. this is a hack, think about it some more.
 
-	msg.data[0] = str[len-1];
-	msg.data[1] = str[len-2];
-	msg.data[2] = str[len-3];
-	msg.data[3] = str[len-4];
+	msg.data[0] = str[len-4];
+	msg.data[1] = str[len-3];
+	msg.data[2] = str[len-2];
+	msg.data[3] = str[len-1];
 	msg.data[4] = 0;
 	msg.data[5] = 0;
 	msg.data[6] = 0;

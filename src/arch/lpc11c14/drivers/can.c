@@ -229,7 +229,6 @@ void CAN_IRQHandler(void) {
 				/* deal with RX only for now. */
 				msg_no = can_int & 0x7FFF;
 				if ( (msg_no >= 0x01) && (msg_no <= 0x20) ) {
-					toggle_yellow_led();
 					LPC_CAN->STAT &= ~STAT_RXOK;
 					CAN_MessageProcess( msg_no-1 ); //msg_no goes up from 1, msg_no ranges from 0
 					CANRxDone[msg_no-1] = TRUE;

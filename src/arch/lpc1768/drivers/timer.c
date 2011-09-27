@@ -60,6 +60,9 @@ static uint32_t getPClock (uint32_t timernum)
 	case 3:
 		clkdlycnt = CLKPWR_GetPCLK (CLKPWR_PCLKSEL_TIMER3);
 		break;
+
+	default: 
+		clkdlycnt = 1337; //ERROR
 	}
 	return clkdlycnt;
 }

@@ -231,6 +231,7 @@ void init_timer32(uint8_t timer_num, uint32_t TimerInterval)
     /* Some of the I/O pins need to be carefully planned if
     you use below module because JTAG and TIMER CAP/MAT pins are muxed. */
     LPC_SYSCON->SYSAHBCLKCTRL |= (1<<9);
+#if 0
     LPC_IOCON->PIO1_5 &= ~0x07;	/*  Timer0_32 I/O config */
     LPC_IOCON->PIO1_5 |= 0x02;	/* Timer0_32 CAP0 */
     LPC_IOCON->PIO1_6 &= ~0x07;
@@ -243,11 +244,14 @@ void init_timer32(uint8_t timer_num, uint32_t TimerInterval)
     LPC_IOCON->JTAG_TDI_PIO0_11 &= ~0x07;	
     LPC_IOCON->JTAG_TDI_PIO0_11 |= 0x03;	/* Timer0_32 MAT3 */
 #endif
+#endif
 #if CONFIG_TIMER32_DEFAULT_TIMER32_0_IRQHANDLER==1
     timer32_0_counter = 0;
     timer32_0_capture = 0;
 #endif //TIMER32_0_DEFAULT_HANDLER
     LPC_TMR32B0->MR0 = TimerInterval;
+
+#if 0
 #if TIMER_MATCH
 	LPC_TMR32B0->EMR &= ~(0xFF<<4);
 	LPC_TMR32B0->EMR |= ((0x3<<4)|(0x3<<6)|(0x3<<8)|(0x3<<10));	/* MR0/1/2/3 Toggle */
@@ -255,6 +259,8 @@ void init_timer32(uint8_t timer_num, uint32_t TimerInterval)
 	/* Capture 0 on rising edge, interrupt enable. */
 	LPC_TMR32B0->CCR = (0x1<<0)|(0x1<<2);
 #endif
+#endif
+
     LPC_TMR32B0->MCR = 3;			/* Interrupt and Reset on MR0 */
 
 #if CONFIG_TIMER32_DEFAULT_TIMER32_0_IRQHANDLER==1

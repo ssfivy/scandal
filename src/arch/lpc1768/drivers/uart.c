@@ -73,6 +73,8 @@ static Status uart_set_divisors(LPC_UART_TypeDef *UARTx, uint32_t baudrate)
 	{
 		uClk = CLKPWR_GetPCLK (CLKPWR_PCLKSEL_UART3);
 	}
+	else
+		return ERROR;
 
 
 	uClk = uClk >> 4; /* div by 16 */

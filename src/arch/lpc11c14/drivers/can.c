@@ -21,9 +21,8 @@
 ****************************************************************************/
 
 /* CAN_ functions are non scandal specific.
- * This still could do with a bit of tidy. */
 
-/* A note about transmission: Often what happens in a main loop is a test for a
+ * A note about transmission: Often what happens in a main loop is a test for a
  * 1 second timer, and then a burst of scandal_send_channels happens. If we try
  * to send more messages than we have transmit buffers, we could fail to send
  * some messages. To solve this problem, we have a transmit buffer. When we

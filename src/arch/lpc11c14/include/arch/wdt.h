@@ -19,7 +19,6 @@
 ****************************************************************************/
 #ifndef __WDT_H 
 #define __WDT_H
-#if CONFIG_ENABLE_DRIVER_WDT==1
 
 #define WDEN              (0x1<<0)
 #define WDRESET           (0x1<<1)
@@ -38,10 +37,7 @@
 #if CONFIG_WDT_DEFAULT_WDT_IRQHANDLER==1
 extern void WDT_IRQHandler(void);
 #endif
-extern void WDTInit( void );
-extern void WDTFeed( void );
 
-#endif
 #endif /* end __WDT_H */
 /*****************************************************************************
 **                            End Of File

@@ -19,10 +19,9 @@
  * warranty that such application will be suitable for the specified
  * use without further testing or modification.
 ****************************************************************************/
-#include "driver_config.h"			/* LPC11xx Peripheral Registers */
-#include "wdt.h"
-
-#if CONFIG_ENABLE_DRIVER_WDT==1
+#include <project/driver_config.h>
+#include <arch/wdt.h>
+#include <scandal/wdt.h>
 
 volatile uint32_t wdt_counter;
 
@@ -77,7 +76,7 @@ void WDT_IRQHandler(void)
 ** Returned value:		None
 ** 
 *****************************************************************************/
-void WDTInit( void )
+void WDT_Init( void )
 {
   uint32_t i;
 
@@ -163,14 +162,9 @@ void WDTInit( void )
 ** Returned value:		None
 ** 
 *****************************************************************************/
-void WDTFeed( void )
+void WDT_Feed( void )
 {
   LPC_WDT->FEED = 0xAA;		/* Feeding sequence */
   LPC_WDT->FEED = 0x55;
   return;
 }
-#endif
-
-/******************************************************************************
-**                            End Of File
-******************************************************************************/

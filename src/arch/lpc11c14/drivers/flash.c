@@ -75,11 +75,66 @@ void sc_write_conf(scandal_config*	conf) {
 }
 
 void sc_user_eeprom_read_block(u32 loc, u08* data, u08 length) {
+	IAP iap_entry;
+	iap_entry = (IAP)IAP_LOCATION;
 
+	if (length > 1024) {
+		return;
+	}
+
+	memcpy(data, (void *)(0x00006000 + loc), length);
 }
 
 void sc_user_eeprom_write_block(u32 loc, u08* data, u08 length) {
+	IAP iap_entry;
+	iap_entry = (IAP)IAP_LOCATION;
 
+	unsigned int iapCommand[5] = {0};
+	unsigned int iapResult[4] = {0};
+	/* 512 byte block min write size, first 256 is scandal config, 256 is user data */
+	uint32_t write_buffer[128] = {0};
+	//scandal_config *conf;
+
+	if (length > 1024) {
+		return;
+	}
+
+	//sc_read_conf(conf);
+
+	/* prepare for erase */
+	iapCommand[0] = 50;					// command to prepare
+	iapCommand[1] = 6;					// from sector 7
+	iapCommand[2] = 6;					// to sector 7
+	iap_entry (iapCommand, iapResult); 	// send the commands
+	scandal_delay(1);
+
+	/* do the erase */
+	iapCommand[0] = 52;					// command to erase
+	iapCommand[1] = 6;					// from sector 7
+	iapCommand[2] = 6;					// to sector 7
+	iapCommand[3] = 48000;				// clock rate in khz 
+	iap_entry (iapCommand, iapResult); 	// send the commands
+	scandal_delay(120);					// wait for it to be done
+
+	/* prepare for write */
+	iapCommand[0] = 50;					// command to prepare
+	iapCommand[1] = 6;					// from sector 7
+	iapCommand[2] = 6;					// to sector 7
+	iap_entry (iapCommand, iapResult); 	// send the commands
+	scandal_delay(1);
+
+	/* copy the config data into the write buffer */
+	//memcpy(write_buffer, conf, sizeof(scandal_config));
+	memcpy(write_buffer+loc, data, length);
+
+	/* actually do the write */
+	iapCommand[0] = 51;					// write to flash command
+	iapCommand[1] = 0x00006000;			// write starting from this flash address
+	iapCommand[2] = (uint32_t)(&write_buffer);		// read from this memory address
+	iapCommand[3] = 512;				// write 512 bytes
+	iapCommand[4] = 48000;				// clock speed in khz - 48000
+	iap_entry (iapCommand, iapResult);
+	scandal_delay(100);
 }
 
 /* *******************

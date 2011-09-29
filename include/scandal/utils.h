@@ -50,6 +50,7 @@ u08     scandal_div32(s32 *numerator, s32 *denominator);
 //u08 	scandal_bitdiv32(s32 *value, u08 bits);
 void	scandal_ms_delay(sc_time_t delay);
 void    scandal_delay(int num);
+void	scandal_naive_delay(int num);
 
 #ifdef AVAILABLE_64
 u08	scandal_integrate_trapz64(s64 *integral, s64 *timediff, s64 *old_val, s64 *pres_val, s64 *scaling);

@@ -16,6 +16,8 @@
 #include <scandal/error.h>
 #include <scandal/tritium.h>
 
+#include <string.h>
+
 #include <project/scandal_config.h>
 
 static inline u08 scandal_build_channel_msg(can_msg* msg, 
@@ -33,6 +35,8 @@ static inline u08 scandal_build_channel_msg(can_msg* msg,
 	msg->data[5] = (timestamp >> 16) & 0xFF;
 	msg->data[6] = (timestamp >> 8) & 0xFF;
 	msg->data[7] = (timestamp >> 0) & 0xFF;
+
+	msg->ext = CAN_EXT_MSG;
 
 	msg->length = 8;
 
@@ -72,6 +76,8 @@ u08 scandal_build_heartbeat_msg(can_msg* msg, u08 last_scandal_error,
 	msg->data[HEARTBEAT_SCVERSION_BYTE] = scandal_version;
 	msg->data[HEARTBEAT_NUMERRORS_BYTE] = num_errors;
 
+	msg->ext = CAN_EXT_MSG;
+
 	msg->length = 8;
 
 	return NO_ERR; 
@@ -110,6 +116,8 @@ u08 scandal_send_scandal_error(u08 err) {
 	msg.data[7] = (value >> 0) & 0xFF;
 	msg.length = 8;
 	
+	msg.ext = CAN_EXT_MSG;
+
 	if(can_send_msg(&msg, 1) != NO_ERR){
 		/*! \todo Do something intelligent when an error occurs */
 		// We need to do something here because something went wrong!!
@@ -132,6 +140,8 @@ u08 scandal_send_user_error(u08 err){
 	msg.data[7] = (value >> 0) & 0xFF;
 	msg.length = 8;
 
+	msg.ext = CAN_EXT_MSG;
+
 	if(can_send_msg(&msg, 1) != NO_ERR){
 		/*! \todo Do something intelligent when an error occurs */
 		// We need to do something here because something went wrong!!
@@ -144,6 +154,8 @@ u08 scandal_send_reset(u08 priority, u08 node) {
   
 	msg.id = scandal_mk_reset_id(priority, node);
 	msg.length = 8;
+
+	msg.ext = CAN_EXT_MSG;
 
 	if(can_send_msg(&msg, 1) != NO_ERR){
 		/*! \todo Do something intelligent when an error occurs */
@@ -172,6 +184,8 @@ u08 scandal_send_user_config(u08 priority, u08 node, u08 param,
 	msg.data[7] = (value2 >> 0) & 0xFF;
 	msg.length = 8;
 
+	msg.ext = CAN_EXT_MSG;
+
 	if(can_send_msg(&msg, 1) != NO_ERR){
 		/*! \todo Do something intelligent when an error occurs */
 		// We need to do something here because something went wrong!!
@@ -199,6 +213,8 @@ u08 scandal_send_timesync(u08 priority, u08 node, uint64_t newtime) {
     msg.data[7] = (newtime >> 0) & 0x00000000000000FF;;
     msg.length = 8; 
 
+	msg.ext = CAN_EXT_MSG;
+
 	if(can_send_msg(&msg, 0) != NO_ERR){
 		/*! \todo Do something intelligent when an error occurs */
 		// We need to do something here because something went wrong!!
@@ -208,24 +224,15 @@ u08 scandal_send_timesync(u08 priority, u08 node, uint64_t newtime) {
 }
 
 u08 scandal_send_ws_drive_command(uint32_t identifier, float first, float second) {
-	group_64 ws_packet;
     can_msg msg;
 
-	ws_packet.data_fp[0] = first;
-	ws_packet.data_fp[1] = second;
-
 	msg.id = identifier;
+	msg.ext = CAN_STD_MSG;
 
-	msg.data[0] = ws_packet.data_u8[0];
-	msg.data[1] = ws_packet.data_u8[1];
-	msg.data[2] = ws_packet.data_u8[2];
-	msg.data[3] = ws_packet.data_u8[3];
-	msg.data[4] = ws_packet.data_u8[4];
-	msg.data[5] = ws_packet.data_u8[5];
-	msg.data[6] = ws_packet.data_u8[6];
-	msg.data[7] = ws_packet.data_u8[7];
+	memcpy(msg.data, &first, 4);
+	memcpy(msg.data+4, &second, 4);
 
-	can_send_std_msg(&msg, 0);
+	can_send_msg(&msg, 3);
 
 	return NO_ERR;
 
@@ -239,16 +246,18 @@ u08 scandal_send_ws_id(uint32_t identifier, const char *str, int len) {
 	// TODO
 	// len should always be 4. this is a hack, think about it some more.
 
-	msg.data[0] = str[len-1];
-	msg.data[1] = str[len-2];
-	msg.data[2] = str[len-3];
-	msg.data[3] = str[len-4];
+	msg.data[0] = str[len-4];
+	msg.data[1] = str[len-3];
+	msg.data[2] = str[len-2];
+	msg.data[3] = str[len-1];
 	msg.data[4] = 0;
 	msg.data[5] = 0;
 	msg.data[6] = 0;
 	msg.data[7] = 0;
 
-	can_send_std_msg(&msg, 0);
+	msg.ext = CAN_STD_MSG;
+
+	can_send_msg(&msg, 3);
 
 	return NO_ERR;
 

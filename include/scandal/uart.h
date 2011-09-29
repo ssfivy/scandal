@@ -44,11 +44,7 @@ extern void UART_PrintfProgStr  (u08* pBuf);
 extern void UART_PrintfEndOfLine(void); 
 extern void UART_Printfu08      (u08 Data); 
 extern void UART_Printfu16      (u16 Data); 
-//<<<<<<< scandal_uart.h
-extern void UART_Init           (void); 
-//=======
-//extern int UART_Init           (void); 
-//>>>>>>> 1.15
+extern void UART_Init           (uint32_t baudrate); 
 extern u08  UART_CheckReceived	(void);
 extern u08  UART_is_received	(void);
 extern void UART_Flush          (void);
@@ -65,6 +61,22 @@ extern void UART_ClearReceive   (void);
 /* Macros */ 
 #define EOL           UART_PrintfEndOfLine 
 
+
+/* New buffer managed UART stuff */
+
+#define UART_BUFFER_OVERFLOW -1
+#define UART_NO_LINE -2
+
+struct UART_buffer_descriptor {
+	char *buf;
+	uint32_t size;
+	uint32_t write_pos;
+	uint8_t overflow;
+};
+
+char *UART_readline_double_buffer(struct UART_buffer_descriptor *desc_1, struct UART_buffer_descriptor *desc_2);
+void UART_init_double_buffer(struct UART_buffer_descriptor *desc_1, char *buf_1, uint32_t size_1,
+	struct UART_buffer_descriptor *desc_2, char *buf_2, uint32_t size_2);
 
 /* Utilities */
 void print_hex(u08 byte);

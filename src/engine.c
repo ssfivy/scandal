@@ -28,12 +28,14 @@
 #include <scandal/engine.h>
 #include <scandal/types.h>
 #include <scandal/timer.h>
-#include <scandal/led.h>
 #include <scandal/error.h>
 #include <scandal/eeprom.h>
 #include <scandal/devices.h>
 #include <scandal/message.h>
 #include <scandal/uart.h>
+#include <scandal/utils.h>
+#include <scandal/wavesculptor.h>
+#include <scandal/system.h>
 
 #include <project/scandal_config.h>
 
@@ -55,7 +57,6 @@ inline u08      scandal_handle_reset(can_msg* msg);
 inline u08      scandal_handle_user_config(can_msg* msg);
 inline u08      scandal_handle_command(can_msg* msg);
 inline u08      scandal_handle_timesync(can_msg* msg);
-inline u08      scandal_handle_ws_message(can_msg* msg);
 
 void            set_channel_mb(u16 chan_num, s32 m, s32 b);
 void            retrieve_channel_mb(u16 chan_num);
@@ -79,6 +80,7 @@ u08 scandal_init(void){
 		determine if this is first run or not */
 
 	sc_read_conf(&my_config);
+
 	if(my_config.version != SCANDAL_VERSION)
 		do_first_run();
 
@@ -94,28 +96,29 @@ u08 scandal_init(void){
 								my_config.ins[i].source_num);
 		can_register_id(0x03FFFFFF,
 				id,
-				0);
+				0,
+				CAN_EXT_MSG);
 	}
 
 	/* Register for my config messages */
 	can_register_id(0x03FFFF00,
 			scandal_mk_config_id( 0, scandal_get_addr(), 0),
-			0);  
+			0, CAN_EXT_MSG);
 			
 	/* Register for user config messages */
 	can_register_id(0x03FFFF00,
 			scandal_mk_user_config_id( 0, scandal_get_addr(), 0),
-			0);
+			0, CAN_EXT_MSG);
 
 	/* Register for timesync messages */ 
 	can_register_id(0x03FFFF00, 
 			scandal_mk_timesync_id(CRITICAL_PRIORITY), 
-			0); 
+			0, CAN_EXT_MSG); 
 
 	/* Register for command messages */ 
 	can_register_id(0x03FFFF00, 
 			scandal_mk_command_id(CRITICAL_PRIORITY, scandal_get_addr(), 0), 
-			0); 
+			0, CAN_EXT_MSG); 
 
 	heartbeat_timer = 0;
 
@@ -397,7 +400,7 @@ u08	scandal_handle_config(can_msg* msg){
 		break;
 	}
 
-	scandal_reset_node();
+	system_reset();
 	return NO_ERR;
 }
 
@@ -411,7 +414,7 @@ u08 scandal_handle_reset(can_msg* msg){
 	dest_node = (u08)((msg->id >> RESET_NODE_ADDR_OFFSET) & 0xFF);
 
 	if(dest_node == scandal_get_addr())
-		scandal_reset_node();				/* Should not return from this */
+		system_reset();				/* Should not return from this */
 
 	return NO_ERR;
 }
@@ -451,9 +454,4 @@ u08	scandal_handle_command(can_msg* msg){
 	}
 
 	return NO_ERR;
-}  
-
-u08	scandal_handle_ws_message(can_msg* msg){
-//	UART_PrintfProgStr("WS Message!\n\r");
-	return;
 }

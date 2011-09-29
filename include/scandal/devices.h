@@ -28,7 +28,9 @@
  */
 
 /* -----------------------------------------------
-	Devices
+   Devices Identifier Number
+   Used to identify the type of node sending the CAN packets
+   This is NOT the device address, they are not hardcoded.
    -----------------------------------------------*/
 #define CURRENTSENSOR						1
 #define DCDC								2
@@ -64,6 +66,9 @@
 #define STEERINGWHEEL						32
 #define GPSBAROMETER                        33
 #define TEMPLATE							34
+#define SION								35
+#define WS20								36
+#define WS22								37
 
 /* -----------------------------------------------
 	Channel Numbering Constants
@@ -557,7 +562,8 @@
 #define CURRENTINT_NUM_OUT_CHANNELS                                     6
 
 /* In Channels */ 
-#define CURRENTINT_NUM_IN_CHANNELS                                      0
+#define CURRENTINT_RESET_INTEGRATION				1
+#define CURRENTINT_NUM_IN_CHANNELS                                      1
 
 /* MSPOnewire */ 
 /* Out Channels */ 
@@ -571,33 +577,36 @@
 
 
 /* Smart DC-DC */
-
+/* Revised channel listing */
 	/* Out channels */
+		/* Voltages */
 		#define SMARTDCDC_BATT_VOLTAGE				0
-		#define SMARTDCDC_DCDC_IN_CURRENT			1
-		#define SMARTDCDC_DCDC_OUT_CURRENT			2
-		#define SMARTDCDC_5V_VOLTAGE				3
-		#define SMARTDCDC_12V_VOLTAGE				4
-		#define SMARTDCDC_CAN_5V_VOLTAGE			5
-		#define SMARTDCDC_CAN_12V_VOLTAGE			6
-		#define SMARTDCDC_HEATSINK_TEMP				7
+		#define SMARTDCDC_WAVESCULPTOR_VOLTAGE			1
+		#define SMARTDCDC_5V_VOLTAGE				2
+		#define SMARTDCDC_12V_VOLTAGE				3
+		#define SMARTDCDC_CAN_5V_VOLTAGE			4
+		#define SMARTDCDC_CAN_12V_VOLTAGE			5
+		/* Currents */
+		#define SMARTDCDC_DCDC_IN_CURRENT			6
+		#define SMARTDCDC_DCDC_OUT_CURRENT			7
+		/* Temperatures */
 		#define SMARTDCDC_MSP_TEMP				8
-		#define SMARTDCDC_WAVESCULPTOR_VOLTAGE			9
-		#define SMARTDCDC_VICOR_STATUS				10
-		#define SMARTDCDC_NUM_OUT_CHANNELS			11
+		#define SMARTDCDC_HEATSINK_TEMP				9
+		#define SMARTDCDC_NUM_OUT_CHANNELS			10
  
 	/* Unscaled channels don't need to be explicitly declared */
-		#define SMARTDCDC_RELAY_STATUS				11
-		#define SMARTDCDC_CONTACTOR_STATUS			12
-		#define SMARTDCDC_PRECHARGE_STATUS			13
-		#define SMARTDCDC_CAN_STATUS 				14
-		#define SMARTDCDC_AUX1_STATUS				15
-		#define SMARTDCDC_AUX2_STATUS				16
-		
+		#define SMARTDCDC_PRECHARGE_STATUS			10
+		#define SMARTDCDC_AUX1_STATUS				11
+		#define SMARTDCDC_AUX2_STATUS				12
+		#define SMARTDCDC_CAN_STATUS 				13
+		#define SMARTDCDC_VICOR_STATUS				14
+		#define SMARTDCDC_RELAY_STATUS				15
+		#define SMARTDCDC_CONTACTOR_STATUS			16
+
 	/* In channels */
-		#define SMARTDCDC_AUX1_SW				0
-		#define SMARTDCDC_AUX2_SW				1
-		#define SMARTDCDC_IGNITION				2
+		#define SMARTDCDC_IGNITION				0
+		#define SMARTDCDC_AUX1_SW				1
+		#define SMARTDCDC_AUX2_SW				2
 		#define SMARTDCDC_CAN_POWER				3
 		#define SMARTDCDC_VI_J00				4
 
@@ -614,70 +623,67 @@
  
 	/* Errors */
 		#define SMARTDCDC_ERROR_NONE				0
-		#define SMARTDCDC_ERROR_EEPROM				1
-		#define SMARTDCDC_ERROR_CIRCUIT_OVERHEAT		2
-		#define SMARTDCDC_ERROR_HEATSINK_OVERHEAT		3
-		#define SMARTDCDC_ERROR_INPUT_UNDER_VOLTAGE		4
-		#define SMARTDCDC_ERROR_WAVESCULPTOR_OVER_VOLTAGE	5
-		#define SMARTDCDC_ERROR_ADC_SIGNAL_LOST_OH_SHIT		6
-		#define SMARTDCDC_ERROR_PRECHARGE_OVERTIME		7
-		#define SMARTDCDC_ERROR_RELAY				8
-		#define SMARTDCDC_ERROR_CONTACTOR_FUSE_BLOWS_OH_FUCK 	9
-		#define SMARTDCDC_ERROR_AUX1_FUSE_BLOWS			10
-		#define SMARTDCDC_ERROR_AUX2_FUSE_BLOWS			11
-
+		#define SMARTDCDC_ERROR_AUX1_FUSE_BLOWS			1
+		#define SMARTDCDC_ERROR_AUX2_FUSE_BLOWS			2
+		#define SMARTDCDC_ERROR_PRECHARGE_OVERTIME		3
+		#define SMARTDCDC_ERROR_PRECHARGE_UNDERTIME		4
+		#define SMARTDCDC_ERROR_CIRCUIT_OVERHEAT		5
+		#define SMARTDCDC_ERROR_HEATSINK_OVERHEAT		6
+		/* Showstopper errors need to be giver higher attention to. */
+		#define SMARTDCDC_ERROR_EEPROM				7
+		#define SMARTDCDC_ERROR_INPUT_UNDER_VOLTAGE		8
+		#define SMARTDCDC_ERROR_WAVESCULPTOR_OVER_VOLTAGE	9
+		#define SMARTDCDC_ERROR_CONTACTOR_FUSE_BLOWS 		10
+		#define SMARTDCDC_ERROR_RELAY_POSITION_WEIRD 		11
+		#define SMARTDCDC_ERROR_BUS_VOLTAGE_MISSING		12
 /* SteeringWheel Interface */
 	/* Out Channels */
-		#define STEERINGWHEEL_VIN				0
-		#define STEERINGWHEEL_THROTTLE				1
-		#define STEERINGWHEEL_REGEN				2
-		#define STEERINGWHEEL_AMBIENT_TEMP			3
-		#define STEERINGWHEEL_NUM_OUT_CHANNELS			4
-		
-	/* Unofficial out channels -- no scaling */		
-	
-                #define STEERINGWHEEL_BUSCURRENT                       (STEERINGWHEEL_NUM_OUT_CHANNELS + 0)
-                #define STEERINGWHEEL_BUSVOLTS                         (STEERINGWHEEL_NUM_OUT_CHANNELS + 1)
-                #define STEERINGWHEEL_VELOCITY                         (STEERINGWHEEL_NUM_OUT_CHANNELS + 2)
-                #define STEERINGWHEEL_CURRENTA                         (STEERINGWHEEL_NUM_OUT_CHANNELS + 3)
-                #define STEERINGWHEEL_CURRENTB                         (STEERINGWHEEL_NUM_OUT_CHANNELS + 4)
-                #define STEERINGWHEEL_15V                              (STEERINGWHEEL_NUM_OUT_CHANNELS + 5)
-                #define STEERINGWHEEL_FAN_SPEED                        (STEERINGWHEEL_NUM_OUT_CHANNELS + 6)
-                #define STEERINGWHEEL_BRAKE                            (STEERINGWHEEL_NUM_OUT_CHANNELS + 7)
-                #define STEERINGWHEEL_TEMP_HS                          (STEERINGWHEEL_NUM_OUT_CHANNELS + 8)
-                #define STEERINGWHEEL_TEMP_MOTOR                       (STEERINGWHEEL_NUM_OUT_CHANNELS + 9)
-                #define STEERINGWHEEL_SET_VELOCITY                     (STEERINGWHEEL_NUM_OUT_CHANNELS + 10)
-                #define STEERINGWHEEL_SET_CURRENT                      (STEERINGWHEEL_NUM_OUT_CHANNELS + 11)
-                #define STEERINGWHEEL_SET_BUSCURRENT                   (STEERINGWHEEL_NUM_OUT_CHANNELS + 12)
-                #define STEERINGWHEEL_LIMITS                           (STEERINGWHEEL_NUM_OUT_CHANNELS + 13)
-                #define STEERINGWHEEL_ERRORS				(STEERINGWHEEL_NUM_OUT_CHANNELS + 14)
-                #define STEERINGWHEEL_AMP_HOURS				(STEERINGWHEEL_NUM_OUT_CHANNELS + 15)
-                #define STEERINGWHEEL_ODO				(STEERINGWHEEL_NUM_OUT_CHANNELS + 16)
-                #define STEERINGWHEEL_LH_IND				(STEERINGWHEEL_NUM_OUT_CHANNELS + 19)
-                #define STEERINGWHEEL_RH_IND				(STEERINGWHEEL_NUM_OUT_CHANNELS + 20)
-                #define STEERINGWHEEL_HORN				(STEERINGWHEEL_NUM_OUT_CHANNELS + 21)
-                #define STEERINGWHEEL_RADIO				(STEERINGWHEEL_NUM_OUT_CHANNELS + 22)
-                #define STEERINGWHEEL_REAR_VISION			(STEERINGWHEEL_NUM_OUT_CHANNELS + 23)
-                #define STEERINGWHEEL_START				(STEERINGWHEEL_NUM_OUT_CHANNELS + 24)
+	#define STEERINGWHEEL_VIN              0
+	#define STEERINGWHEEL_THROTTLE         1
+	#define STEERINGWHEEL_REGEN            2
+	#define STEERINGWHEEL_AMBIENT_TEMP     3
+	#define STEERINGWHEEL_NUM_OUT_CHANNELS 4
 
-		
-	
+	/* these are unofficial, i.e. no scaling */
+	#define STEERINGWHEEL_BUSCURRENT     (STEERINGWHEEL_NUM_OUT_CHANNELS + 0)
+	#define STEERINGWHEEL_BUSVOLTS       (STEERINGWHEEL_NUM_OUT_CHANNELS + 1)
+	#define STEERINGWHEEL_VELOCITY       (STEERINGWHEEL_NUM_OUT_CHANNELS + 2)
+	#define STEERINGWHEEL_CURRENTA       (STEERINGWHEEL_NUM_OUT_CHANNELS + 3)
+	#define STEERINGWHEEL_CURRENTB       (STEERINGWHEEL_NUM_OUT_CHANNELS + 4)
+	#define STEERINGWHEEL_15V            (STEERINGWHEEL_NUM_OUT_CHANNELS + 5)
+	#define STEERINGWHEEL_FAN_SPEED      (STEERINGWHEEL_NUM_OUT_CHANNELS + 6)
+	#define STEERINGWHEEL_BRAKE          (STEERINGWHEEL_NUM_OUT_CHANNELS + 7)
+	#define STEERINGWHEEL_TEMP_HS        (STEERINGWHEEL_NUM_OUT_CHANNELS + 8)
+	#define STEERINGWHEEL_TEMP_MOTOR     (STEERINGWHEEL_NUM_OUT_CHANNELS + 9)
+	#define STEERINGWHEEL_SET_VELOCITY   (STEERINGWHEEL_NUM_OUT_CHANNELS + 10)
+	#define STEERINGWHEEL_SET_CURRENT    (STEERINGWHEEL_NUM_OUT_CHANNELS + 11)
+	#define STEERINGWHEEL_SET_BUSCURRENT (STEERINGWHEEL_NUM_OUT_CHANNELS + 12)
+	#define STEERINGWHEEL_LIMITS         (STEERINGWHEEL_NUM_OUT_CHANNELS + 13)
+	#define STEERINGWHEEL_ERRORS         (STEERINGWHEEL_NUM_OUT_CHANNELS + 14)
+	#define STEERINGWHEEL_AMP_HOURS      (STEERINGWHEEL_NUM_OUT_CHANNELS + 15)
+	#define STEERINGWHEEL_ODO            (STEERINGWHEEL_NUM_OUT_CHANNELS + 16)
+	#define STEERINGWHEEL_LH_IND         (STEERINGWHEEL_NUM_OUT_CHANNELS + 19)
+	#define STEERINGWHEEL_RH_IND         (STEERINGWHEEL_NUM_OUT_CHANNELS + 20)
+	#define STEERINGWHEEL_HORN           (STEERINGWHEEL_NUM_OUT_CHANNELS + 21)
+	#define STEERINGWHEEL_RADIO          (STEERINGWHEEL_NUM_OUT_CHANNELS + 22)
+	#define STEERINGWHEEL_REAR_VISION    (STEERINGWHEEL_NUM_OUT_CHANNELS + 23)
+	#define STEERINGWHEEL_START          (STEERINGWHEEL_NUM_OUT_CHANNELS + 24)
+	#define STEERINGWHEEL_CRUISE         (STEERINGWHEEL_NUM_OUT_CHANNELS + 25)
+	#define STEERINGWHEEL_PRCH_TIMEOUT   (STEERINGWHEEL_NUM_OUT_CHANNELS + 26)
+	#define STEERINGWHEEL_REVERSE        (STEERINGWHEEL_NUM_OUT_CHANNELS + 27)
+
 	/* In Channels */
-		#define STEERINGWHEEL_LCD_1				0
-		#define STEERINGWHEEL_LCD_2				1
-		#define STEERINGWHEEL_LCD_3				2
-		#define STEERINGWHEEL_LCD_4				3
-		#define STEERINGWHEEL_LCD_5				4
-		#define STEERINGWHEEL_LCD_6				5
-		#define STEERINGWHEEL_LCD_7				6
-		#define STEERINGWHEEL_LCD_8				7
-		#define STEERINGWHEEL_LCD_MSG				8
-		#define STEERINGWHEEL_PRECHARGE_STAT			9
-		#define STEERINGWHEEL_NUM_IN_CHANNELS			10
-	
-		
-
-
+	#define STEERINGWHEEL_LCD_1                0
+	#define STEERINGWHEEL_LCD_2                1
+	#define STEERINGWHEEL_LCD_3                2
+	#define STEERINGWHEEL_LCD_4                3
+	#define STEERINGWHEEL_LCD_5                4
+	#define STEERINGWHEEL_LCD_6                5
+	#define STEERINGWHEEL_LCD_7                6
+	#define STEERINGWHEEL_LCD_8                7
+	#define STEERINGWHEEL_LCD_MSG              8
+	#define STEERINGWHEEL_PRECHARGE_STAT       9
+	#define STEERINGWHEEL_NUM_IN_CHANNELS      10
 
 /* GPS Barometer interface */
 	/* Out Channels */
@@ -694,7 +700,9 @@
                 #define GPSBAROMETER_PRESSURE_16                            10
                 #define GPSBAROMETER_B_OPERATION_STATUS                     11 
                 #define GPSBAROMETER_B_STATUS                               12
-                #define GPSBAROMETER_NUM_OUT_CHANNELS                       13
+                #define GPSBAROMETER_GGA_PARSE_ERROR_COUNT                  13
+                #define GPSBAROMETER_FIX                                    14
+                #define GPSBAROMETER_NUM_OUT_CHANNELS                       15
 
 	/* In Channels */
                 #define GPSBAROMETER_NUM_IN_CHANNELS                        0
@@ -708,5 +716,89 @@
 	/* In Channels */
                 #define TEMPLATE_TEST_IN                                    0
                 #define TEMPLATE_NUM_IN_CHANNELS                            1
+
+/* SION interface */
+	/* These are hardcoded and are listed here only to prevent other 
+	nodes from using the same ID / channels. */
+		#define SION_DROPPED_PACKET_COUNT		0
+		#define SION_NUM_OUT_CHANNELS			1
+
+		#define SION_NUM_IN_CHANNELS			0
+
+/* WaveSculptor 20 Translated Packets */
+	/* These are hardcoded separately and listed here to prevent other
+	nodes from using the same ID / channels */
+	//see tritium-can.h in SION
+
+	/* Out Channels */
+	/* They're in milivolts / miliamps */
+	#define WS20_WAVESCULPTOR_TYPE				0 //Wavesculptor type, either 20 or 22. Will be 20 here.
+	#define WS20_ACTIVE_MOTOR				1 //integer
+	#define WS20_ERRORS					2 //bit flags
+	#define WS20_LIMITS					3 //bit flags
+	#define WS20_BUSCURRENT					4 //mV
+	#define WS20_BUSVOLT					5 //mA
+	#define WS20_VEHICLE_VELOCITY				6 //km/h
+	#define WS20_PHASE_A					7 //mA
+	#define WS20_PHASE_B					8 //mA
+	//motor vector and random voltage isnt useful to us
+	#define WS20_FAN_SPEED_RPM				9  //rpm
+	#define WS20_HEATSINK_TEMP				10 //milidegree celsius
+	#define WS20_MOTOR_TEMP					11 //milidegree celsius
+	#define WS20_AMBIENT_AIR_IN_TEMP			12 //milidegree celsius
+	#define WS20_AMP_HOURS					13 //miliamp hours
+	#define WS20_ODOMETER					14 //metres
+	#define WS20_NUM_OUT_CHANNELS				15
+
+	/* In channels */
+	//There's no code to handle these. They are placeholder only.
+	#define WS20_MOTOR_DRIVE_COMMAND		0
+	#define WS20_MOTOR_POWER_COMMAND		1
+	#define WS20_RESET_COMMAND			2
+	// Configuration commands
+	#define WS20_CHANGE_ACTIVE_MOTOR		3
+	#define WS20_NUM_IN_CHANNELS			4
+
+/* WaveSculptor 22 Translated Packets */
+	/* These are hardcoded separately and listed here to prevent other
+	nodes from using the same ID / channels */
+	//see tritium-can.h in SION
+
+	/* Out Channels */
+	/* They're in milivolts / miliamps */
+	#define WS22_WAVESCULPTOR_TYPE				0 //Wavesculptor type, either 20 or 22. Will be 22 here.
+	#define WS22_ACTIVE_MOTOR				1 //integer
+	#define WS22_ERRORS					2 //bit flags
+	#define WS22_LIMITS					3 //bit flags
+	#define WS22_BUSCURRENT					4 //mV
+	#define WS22_BUSVOLT					5 //mA
+	#define WS22_VEHICLE_VELOCITY				6 //km/h
+	#define WS22_PHASE_A					7 //mA
+	#define WS22_PHASE_B					8 //mA
+	//motor vector and random voltage isnt useful to us
+	//#define WS22_FAN_SPEED_RPM				9  //not present in WS22
+	//#define WS22_HEATSINK_TEMP				10 //not present in WS22
+	#define WS22_MOTOR_TEMP					11 //milidegree celsius
+	//#define WS22_AMBIENT_AIR_IN_TEMP			12 //not present in WS22
+	#define WS22_AMP_HOURS					13 //miliamp hours
+	#define WS22_ODOMETER					14 //metres
+	#define WS22_IPM_PHASEA_TEMP					15 //milidegree celsius
+	#define WS22_IPM_PHASEB_TEMP					16 //milidegree celsius
+	#define WS22_IPM_PHASEC_TEMP					17 //milidegree celsius
+	#define WS22_DSP_BOARD_TEMP					18 //milidegree celsius
+	#define WS22_CAN_RX_ERROR_COUNT				19 //uint
+	#define WS22_CAN_TX_ERROR_COUNT				20 //uint
+	#define WS22_NUM_OUT_CHANNELS				18 //18 since we add 6 channels and remove 3
+
+	/* In channels */
+	//There's no code to handle these, they are placeholder only.
+	#define WS20_MOTOR_DRIVE_COMMAND		0
+	#define WS20_MOTOR_POWER_COMMAND		1
+	#define WS22_RESET_COMMAND			2
+	// Configuration commands
+	#define WS22_CHANGE_ACTIVE_MOTOR		3 
+	#define WS22_NUM_IN_CHANNELS			4
+
+
 
 

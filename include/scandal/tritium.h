@@ -47,11 +47,27 @@ typedef union _group_16 {
 } group_16;
 
 // Driver controls CAN base address and packet offsets
-#define DC_CAN_BASE		0x0500
-#define DC_DRIVE		0x01
-#define DC_POWER		0x02
-#define DC_RESET		0x03
-#define DC_SWITCH		0x04
+#define DC_BASE					0x0500
+#define DC_DRIVE				DC_BASE+1
+#define DC_POWER				DC_BASE+2
+#define DC_RESET				DC_BASE+3
+#define DC_SWITCH				DC_BASE+4
+
+#define MC_BASE					0x400
+#define MC_STATUS				MC_BASE+1
+#define MC_BUS					MC_BASE+2
+#define MC_VELOCITY				MC_BASE+3
+#define MC_PHASE				MC_BASE+4
+#define MC_MOTOR_VOLTAGE_VECTOR	MC_BASE+5
+#define MC_MOTOR_CURRENT_VECTOR	MC_BASE+6
+#define MC_MOTOR_BACKEMF_VECTOR	MC_BASE+7
+#define MC_MOTOR_15V_1V65		MC_BASE+8
+#define MC_MOTOR_2V5_1V2		MC_BASE+9
+#define MC_FAN_SPEED			MC_BASE+10
+#define MC_HEATSINK_MOTOR_TEMP	MC_BASE+11
+#define MC_AIR_IN_CPU_TEMP		MC_BASE+12
+#define MC_AIR_OUT_CAP_TEMP		MC_BASE+13
+#define MC_ODOMETER_BUSAMPHOURS	MC_BASE+14
 
 // Status values (for message reception)
 #define CAN_ERROR		0xFFFF

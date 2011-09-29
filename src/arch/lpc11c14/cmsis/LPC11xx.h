@@ -106,7 +106,7 @@ typedef enum IRQn
 /*@}*/ /* end of group LPC11xx_CMSIS */
 
 
-#include "core_cm0.h"                       /* Cortex-M0 processor and core peripherals           */
+#include <cmsis/core_cm0.h>                       /* Cortex-M0 processor and core peripherals           */
 #include <project/system_LPC11xx.h>                 /* System Header                                      */
 
 

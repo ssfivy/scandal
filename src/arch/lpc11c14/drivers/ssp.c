@@ -162,8 +162,8 @@ void SSP_IOConfig( uint8_t portNum )
 
   LPC_IOCON->PIO0_2 &= ~0x07;		/* SSP SSEL is a GPIO pin */
   /* port0, bit 2 is set to GPIO output and high */
-  GPIOSetDir( PORT0, 2, 1 );
-  GPIOSetValue( PORT0, 2, 1 );
+  GPIO_SetDir( PORT0, 2, 1 );
+  GPIO_SetValue( PORT0, 2, 1 );
 #endif
   }
   else		/* port number 1 */

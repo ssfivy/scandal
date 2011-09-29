@@ -51,6 +51,11 @@
 
 /* CAN Properties */
 #define CAN_MSG_MAXSIZE  8
+#define CAN_EXT_MSG 1
+#define CAN_STD_MSG 0
+
+#define CAN_ID_STD_MASK 0x07FF
+#define CAN_ID_EXT_MASK 0x1FFFFFFF
 
 /* Types */
 typedef struct can_mg {
@@ -61,29 +66,26 @@ typedef struct can_mg {
 } can_msg;
 
 /* Standard CAN Layer Prototypes */
-/*! Initialise the controller such that it is scandal compliant,
+/* Initialise the controller such that it is scandal compliant,
     using the correct baud rate (DEFAULT_BAUD) */
 void init_can(void);
 
-/*! Get a message from the CAN controller. */
+/* Get a message from the CAN controller. */
 u08  can_get_msg(can_msg* msg);
 
-/*! Send a EXTID message using the CAN controller */
+/* Send a message using the CAN controller */
 u08  can_send_msg(can_msg* msg, u08 priority);
 
-/*! Send a STDID message using the CAN controller */
-u08  can_send_std_msg(can_msg* msg, u08 priority);
-
-/*! Register a message ID/mask. This guarantees that these messages will
+/* Register a message ID/mask. This guarantees that these messages will
   not be filtered out by hardware filters. Other messages are not
   guaranteed */
-u08  can_register_id(u32 mask, u32 data, u08 priority);
+u08  can_register_id(u32 mask, u32 data, u08 priority, u08 ext);
 
-/*! Should be called when the CAN controller has an interrupt */
-/*! \todo This is probably not the right location for this */
+/* Should be called when the CAN controller has an interrupt */
+/* \todo This is probably not the right location for this */
 void can_interrupt(void);
 
-/*! Should be called when there is idle time available and the CAN
+/* Should be called when there is idle time available and the CAN
 	controller is able to do some housekeeping */
 void can_poll(void);
 

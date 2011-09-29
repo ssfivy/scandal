@@ -23,7 +23,19 @@
 /* CAN_ functions are non scandal specific.
  * This still could do with a bit of tidy. */
 
+/* A note about transmission: Often what happens in a main loop is a test for a
+ * 1 second timer, and then a burst of scandal_send_channels happens. If we try
+ * to send more messages than we have transmit buffers, we could fail to send
+ * some messages. To solve this problem, we have a transmit buffer. When we
+ * call scandal_send_channel, can_send_msg gets called, and eventually CAN_Send
+ * gets called. If CAN_Send fails (i.e. there was no free message object), then
+ * we store the message temporarily in a CAN_txbuf location. In the main while
+ * loop, every iteration calls handle_scandal, which calls can_poll. can_poll
+ * will call send_enqueued messages which sends out any enqueued messages.
+ */
+
 #include <project/driver_config.h>
+#include <project/scandal_config.h>
 
 #include <string.h> /* for memcpy */
 
@@ -42,6 +54,10 @@
 
 uint8_t recv_buf_used[MSG_OBJ_MAX]; /* this will be used to determine if a recv buffer is available */
 
+can_msg CAN_txbuf[CAN_TX_BUFFER_SIZE];
+uint8_t tx_buf_start;
+uint8_t tx_num_msgs;
+
 /* statistics of all the interrupts */
 volatile uint32_t BOffCnt = 0;
 volatile uint32_t EWarnCnt = 0;
@@ -49,7 +65,7 @@ volatile uint32_t EPassCnt = 0;
 
 uint32_t CANRxDone[MSG_OBJ_MAX];
 
-message_object can_buff[MSG_OBJ_MAX];
+message_object CAN_rxbuf[MSG_OBJ_MAX];
 
 #undef CAN_UART_DEBUG
 
@@ -58,26 +74,68 @@ uint32_t CANStatusLog[100];
 uint32_t CANStatusLogCount = 0;
 #endif
 
+/* enqueue a message into the transmit buffer */
+uint8_t enqueue_message(can_msg* msg){
+	u08 pos;
+	u08 i;
+	
+	if(tx_num_msgs >= CAN_TX_BUFFER_SIZE)
+		return BUF_FULL_ERR;
+
+	pos = (tx_buf_start + tx_num_msgs) & CAN_TX_BUFFER_MASK;
+
+	CAN_txbuf[pos].id = msg->id;
+
+	for (i = 0; i < 8; i++)
+		CAN_txbuf[pos].data[i] = msg->data[i];
+
+	CAN_txbuf[pos].length = msg->length;
+
+	tx_num_msgs++;
+
+	return NO_ERR;
+}
+
+/* send out any enqueued messages */
+uint8_t send_queued_messages(void){
+	can_msg* msg;
+	u08 err = NO_ERR;
+
+	if(tx_num_msgs <= 0)
+		return (NO_MSG_ERR);
+
+	msg = &(CAN_txbuf[tx_buf_start]);
+
+	err = CAN_Send(0, msg);
+
+	if(err == NO_ERR){
+		tx_buf_start = (tx_buf_start + 1) & CAN_TX_BUFFER_MASK;
+		tx_num_msgs--;
+	}
+
+	return err;
+}
+
 /* Get a message out of the buffer and break it into bits */
 void CAN_decode_packet(uint8_t msg_num, can_msg *msg) {
 	/* copy the data */
-	msg->data[0] = (can_buff[msg_num].data[0] & 0x000000FF);
-	msg->data[1] = (can_buff[msg_num].data[0] >> 8) & 0x000000FF;
-	msg->data[2] = (can_buff[msg_num].data[1] & 0x000000FF);
-	msg->data[3] = (can_buff[msg_num].data[1] >> 8) & 0x000000FF;
-	msg->data[4] = (can_buff[msg_num].data[2] & 0x000000FF);
-	msg->data[5] = (can_buff[msg_num].data[2] >> 8) & 0x000000FF;
-	msg->data[6] = (can_buff[msg_num].data[3] & 0x000000FF);
-	msg->data[7] = (can_buff[msg_num].data[3] >>8)  & 0x000000FF;
+	msg->data[0] = (CAN_rxbuf[msg_num].data[0] & 0x000000FF);
+	msg->data[1] = (CAN_rxbuf[msg_num].data[0] >> 8) & 0x000000FF;
+	msg->data[2] = (CAN_rxbuf[msg_num].data[1] & 0x000000FF);
+	msg->data[3] = (CAN_rxbuf[msg_num].data[1] >> 8) & 0x000000FF;
+	msg->data[4] = (CAN_rxbuf[msg_num].data[2] & 0x000000FF);
+	msg->data[5] = (CAN_rxbuf[msg_num].data[2] >> 8) & 0x000000FF;
+	msg->data[6] = (CAN_rxbuf[msg_num].data[3] & 0x000000FF);
+	msg->data[7] = (CAN_rxbuf[msg_num].data[3] >>8)  & 0x000000FF;
 
 	/* copy the id */
-	msg->id = can_buff[msg_num].id;
+	msg->id = CAN_rxbuf[msg_num].id;
 
 	/* copy the length */
 	msg->length= CAN_MSG_MAXSIZE;
 
 	/* set the type */
-	msg->ext = can_buff[msg_num].ext;
+	msg->ext = CAN_rxbuf[msg_num].ext;
 
 #ifdef CAN_UART_DEBUG
 	{
@@ -89,10 +147,10 @@ void CAN_decode_packet(uint8_t msg_num, can_msg *msg) {
 			uint16_t node_address;
 			uint16_t channel_num;
 
-			channel_num  = ((can_buff[msg_num].id >> 0)  & 0x03FF);
-			node_address = ((can_buff[msg_num].id >> 10) & 0x00FF);
-			type         = ((can_buff[msg_num].id >> 18) & 0x00FF);
-			priority     = ((can_buff[msg_num].id >> 26) & 0x0007);
+			channel_num  = ((CAN_rxbuf[msg_num].id >> 0)  & 0x03FF);
+			node_address = ((CAN_rxbuf[msg_num].id >> 10) & 0x00FF);
+			type         = ((CAN_rxbuf[msg_num].id >> 18) & 0x00FF);
+			priority     = ((CAN_rxbuf[msg_num].id >> 26) & 0x0007);
 
 			UART_printf("got an ext can message...\n\r");
 			UART_printf(" id is               (0x%x)\n\r",msg->id);
@@ -180,7 +238,7 @@ void CAN_MessageProcess( uint8_t MsgNo ) {
 		;
 
 	/* where are we storing the message? */
-	p_add = (uint32_t *)&can_buff[MsgNo];
+	p_add = (uint32_t *)&CAN_rxbuf[MsgNo];
 
 	if( LPC_CAN->IF2_ARB2 & ID_MTD ) { /* bit 28-0 is 29 bit extended frame */
 		*p_add++ = CAN_EXT_MSG;
@@ -392,7 +450,14 @@ u08 can_get_msg(can_msg *msg) {
 
 /* Send a message using the CAN controller */
 u08 can_send_msg(can_msg *msg, u08 priority) {
-	return CAN_Send((uint16_t)priority, msg);
+
+	/* If we can't send a message right now, enqueue it for later.
+	 * handle_scandal will call can_poll every main loop iteration to send any enqueued messages */
+	if (CAN_Send((uint16_t)priority, msg) == NO_MSG_ERR)
+		return enqueue_message(msg);
+
+	return NO_ERR;
+
 }
 
 /* Register for a message type. Currently, each message that we want to
@@ -424,6 +489,7 @@ u08 can_register_id(u32 mask, u32 data, u08 priority, u08 ext) {
 			return NO_ERR;
 		}
 	}
+
 	return NO_MSG_ERR;
 }
 
@@ -432,8 +498,9 @@ u08  can_baud_rate(u08 mode) {
 	return 0;
 }
 
-/* this is not used on LPC11C14 */
-void can_poll(void) {}
+void can_poll(void) {
+	send_queued_messages();
+}
 
 /* *******************
  * End Scandal wrappers

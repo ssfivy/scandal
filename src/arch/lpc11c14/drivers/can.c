@@ -31,6 +31,17 @@
  * we store the message temporarily in a CAN_txbuf location. In the main while
  * loop, every iteration calls handle_scandal, which calls can_poll. can_poll
  * will call send_enqueued messages which sends out any enqueued messages.
+
+ * For example: In the steering wheel, we send out wavesculptor commands every
+ * 100ms. We also send out about 15 scandal channels every 1s. This means that
+ * when we go to send out those 17 messages on the bounary of 1s, our transmit
+ * codepath has to be able to handle 17 messages in *very* quick succession.
+ * Currently on the LPC11C14, we have 32 message objects, 20 of which are used
+ * for message reception. That only leaves 12 for message transmission. We need
+ * to handle the case where we send out more than 12 messages in quick
+ * succession, and the transmit buffer helps us with this by spreading out the
+ * message transmission over multiple main loop iterations using handle_scandal
+ * and can_poll.
  */
 
 #include <project/driver_config.h>

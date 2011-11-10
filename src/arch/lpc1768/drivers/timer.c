@@ -26,7 +26,7 @@
 
 
 #include <scandal/timer.h>
-//#include <scandal/leds.h>
+#include <scandal/leds.h>
 
 /* Private Functions ---------------------------------------------------------- */
 

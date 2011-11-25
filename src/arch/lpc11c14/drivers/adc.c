@@ -117,9 +117,9 @@ void ADC_Init( uint32_t ADC_Clk ) {
 		ADCValue[i] = 0x0;
 	}
 
-	/* set the clock divider. this works with a 12M crystal */
-	LPC_ADC->CR = 2<<8;
-
+	/* set the clock divider to just under 4.5MHz */
+	LPC_ADC->CR = LPC_ADC->CR = (SystemCoreClock/((LPC_SYSCON->SYSAHBCLKDIV)*ADC_MAXCLK))<<8;
+    
 	/* enable the interrupt handler */
 	NVIC_EnableIRQ(ADC_IRQn);
 }

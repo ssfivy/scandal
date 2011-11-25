@@ -45,6 +45,7 @@
 
 #define ADC_NUM			8			/* for LPC11xx */
 #define ADC_CLK			2400000		/* set to 2.4Mhz */
+#define ADC_MAXCLK      4500000     /* maximum ADC speed for the lpc11c14 */
 
 #ifndef CONFIG_ADC_DEFAULT_ADC_IRQHANDLER
 #define CONFIG_ADC_DEFAULT_ADC_IRQHANDLER 1

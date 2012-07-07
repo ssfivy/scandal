@@ -6,7 +6,7 @@
 */
 
 INCLUDE "../linker/lpc1114_lib_flash_crp.ld"
-INCLUDE "../linker/lpc1114_mem_flash_can_crp.ld"
+INCLUDE "../linker/lpc1114_mem_flash_can_crp_28K.ld"
 
 ENTRY(ResetISR)
 

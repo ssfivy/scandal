@@ -207,10 +207,10 @@ u08 scandal_send_timesync(u08 priority, u08 node, uint64_t newtime) {
     msg.data[2] = (val >> 8) & 0xFF; 
     msg.data[3] = (val >> 0) & 0xFF;
 
-    msg.data[4] = (newtime >> 24) & 0x00000000000000FF;;
-    msg.data[5] = (newtime >> 16) & 0x00000000000000FF;;
-    msg.data[6] = (newtime >> 8) & 0x00000000000000FF;;
-    msg.data[7] = (newtime >> 0) & 0x00000000000000FF;;
+    msg.data[4] = (newtime >> 24) & 0x00000000000000FF;
+    msg.data[5] = (newtime >> 16) & 0x00000000000000FF;
+    msg.data[6] = (newtime >> 8) & 0x00000000000000FF;
+    msg.data[7] = (newtime >> 0) & 0x00000000000000FF;
     msg.length = 8; 
 
 	msg.ext = CAN_EXT_MSG;

@@ -26,8 +26,7 @@
 
 
 #include <scandal/timer.h>
-//#include <scandal/leds.h>
-#include <project/led.h>
+#include <scandal/leds.h>
 
 /* Private Functions ---------------------------------------------------------- */
 
@@ -317,7 +316,6 @@ void TIM_Init(LPC_TIM_TypeDef *TIMx, TIM_MODE_OPT TimerCounterMode, void *TIM_Co
 	TIMx->PR =0;
 	TIMx->TCR |= (1<<1); //Reset Counter
 	TIMx->TCR &= ~(1<<1); //release reset
-red_led(1);
 	if (TimerCounterMode == TIM_TIMER_MODE )
 	{
 		pTimeCfg = (TIM_TIMERCFG_Type *)TIM_ConfigStruct;
@@ -577,7 +575,6 @@ uint32_t TIM_GetCaptureValue(LPC_TIM_TypeDef *TIMx, TIM_COUNTER_INPUT_OPT Captur
 
 void sc_init_timer(void) {
 TIM_TIMERCFG_Type TIMConfigStruct;
-red_led(1);
 TIM_ConfigStructInit(TIM_TIMER_MODE, &TIMConfigStruct);
 TIM_Init(LPC_TIM0, TIM_TIMER_MODE, &TIMConfigStruct);
 TIM_Cmd(LPC_TIM0, ENABLE);

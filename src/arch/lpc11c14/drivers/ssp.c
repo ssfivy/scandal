@@ -24,8 +24,6 @@
 #include <arch/gpio.h>
 #include <arch/ssp.h>
 
-#define TIMEOUT	25000
-
 /* statistics of all the interrupts */
 volatile uint32_t interruptRxStat0 = 0;
 volatile uint32_t interruptOverRunStat0 = 0;
@@ -356,7 +354,6 @@ void SSP_Send( uint8_t portNum, uint8_t *buf, uint32_t Length )
 void SSP_Receive( uint8_t portNum, uint8_t *buf, uint32_t Length )
 {
   uint32_t i;
-  uint32_t j;
  
   for ( i = 0; i < Length; i++ )
   {
@@ -372,14 +369,8 @@ void SSP_Receive( uint8_t portNum, uint8_t *buf, uint32_t Length )
 	  while ( !(LPC_SSP0->SR & SSPSR_RNE) );
 #else
 	  LPC_SSP0->DR = 0xFF;
-
 	/* Wait until the Busy bit is cleared */
-	  j = 0;
-	  while ( ((LPC_SSP0->SR & (SSPSR_BSY|SSPSR_RNE)) != SSPSR_RNE) && j<TIMEOUT) {
-           j++;
-      }
-      if (j>=TIMEOUT) return;
-
+	  while ( (LPC_SSP0->SR & (SSPSR_BSY|SSPSR_RNE)) != SSPSR_RNE );
 #endif
 #else
 	  while ( !(LPC_SSP0->SR & SSPSR_RNE) );
@@ -395,13 +386,7 @@ void SSP_Receive( uint8_t portNum, uint8_t *buf, uint32_t Length )
 #else
 	  LPC_SSP1->DR = 0x00;
 	  /* Wait until the Busy bit is cleared */
-      j = 0;
-	  while ( ((LPC_SSP1->SR & (SSPSR_BSY|SSPSR_RNE)) != SSPSR_RNE) && j<TIMEOUT ){
-          j++;
-      }
-
-      if (j>=TIMEOUT) return;
-
+	  while ( (LPC_SSP1->SR & (SSPSR_BSY|SSPSR_RNE)) != SSPSR_RNE );
 #endif
 #else
 	  while ( !(LPC_SSP1->SR & SSPSR_RNE) );

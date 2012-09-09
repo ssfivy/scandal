@@ -100,27 +100,36 @@ static int UART_printi(char **out, int i, int b, int sg, int width, int pad, int
  * as an int. Subtracts decimal part, and multiplies by 10^digits_past_point
  * and prints that as the fraction part.
  * Warning: There is probably going to be rounding error in here.
+ * NOTE: This function should only be used for debugging as it's VERY slow in use
+ * it performs many double floating point ops per character printed.
  */
 static unsigned UART_printfloat(char **out, double dbl, unsigned frac_len) {
 	int len = 0;
 	int frac = 0;
 	int dec = (int)dbl;
 	int i;
-	int multiplier;
+	int sign;
+	int multiplier=1;
 
 	if (dbl < 0.0)
-		multiplier = -1;
+		sign = -1;
 	else
-		multiplier = 1;
+		sign = 1;
 
 	len += UART_printf("%d", dec);
 
-	for (i = 0; i < frac_len; i++)
-		multiplier *= 10;
-
-	frac = (int)((dbl - (double)dec) * multiplier);
-
-	len += UART_printf(".%d", frac);
+	for (i = 0; i < frac_len; i++){
+		if(i==0){
+			UART_printf(".");
+		}
+ 
+		frac=((int) (dbl*multiplier*sign))*10; //Stuff already printed to the left mi
+		multiplier*=10;
+		dec=((int) (dbl * multiplier*sign))-frac;
+		
+		UART_printf("%d", dec);
+		
+	}
 
 	return len;
 }

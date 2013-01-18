@@ -129,8 +129,8 @@ void SSP_IOConfig( uint8_t portNum )
   if ( portNum == 0 )
 {
   LPC_SYSCON->PRESETCTRL |= (0x1<<0);
-	LPC_SYSCON->SYSAHBCLKCTRL |= (0x1<<11);
-	LPC_SYSCON->SSP0CLKDIV = 0x02;			/* Divided by 2 */
+  LPC_SYSCON->SYSAHBCLKCTRL |= (0x1<<11);
+  LPC_SYSCON->SSP0CLKDIV = 0x02;			/* Divided by 2 */
   LPC_IOCON->PIO0_8           &= ~0x07;	/*  SSP I/O config */
   LPC_IOCON->PIO0_8           |= 0x01;		/* SSP MISO */
   LPC_IOCON->PIO0_9           &= ~0x07;	
@@ -284,6 +284,62 @@ void SSP_Init( uint8_t portNum )
 	LPC_SSP1->IMSC = SSPIMSC_RORIM | SSPIMSC_RTIM;
   }
   return;
+}
+
+
+void SSP0_Init(SSP_init_struct *initVars){
+  
+  //((initVars->DataSize & 0xF))
+  
+  //Set SSP Control Register 0: SCR(15:8), CPHA(7), CPOL(6), FRF(5:4), DSS(3:0)
+  LPC_SSP0->CR0 = ((initVars->ClockRate & 0xFF) << 8) | ((initVars->ClockPhase & 0x1) << 7) | ((initVars->ClockPolarity & 0x1) << 6) | ((initVars->FrameFormat & 0x3) << 4) | ((initVars->DataSize & 0xF) << 0);
+
+  /* SSPCPSR clock prescale register, master mode, minimum divisor is 0x02 */
+  LPC_SSP0->CPSR = initVars->ClockPrescale;
+
+  uint8_t i;
+  uint32_t Dummy;
+  /* clear the RxFIFO */
+  for ( i = 0; i < FIFOSIZE; i++ )
+  {
+    Dummy = LPC_SSP0->DR;		
+  }
+
+  /* Enable the SSP Interrupt */
+  NVIC_EnableIRQ(SSP0_IRQn);
+	
+  /* Device select as master, SSP Enabled */
+  
+  /*
+    Previous initialisation for Loopback mode:
+    LPC_SSP0->CR1 = SSPCR1_LBM | SSPCR1_SSE;
+
+    Previous initialisation for Slave mode (Currently not implemented!)
+   */
+  
+  if(initVars->Slave){
+    /* Initialise in slave mode */
+    
+    if ( LPC_SSP0->CR1 & SSPCR1_SSE ){
+	/* The slave bit can't be set until SSE bit is zero. */
+      LPC_SSP0->CR1 &= ~SSPCR1_SSE;
+    }
+    
+      LPC_SSP0->CR1 = SSPCR1_MS;	/* Enable slave bit first */
+      LPC_SSP0->CR1 |= SSPCR1_SSE;	/* Enable SSP */
+      
+  }else{
+    /* Initialise in master mode */
+    LPC_SSP0->CR1 = SSPCR1_SSE;
+  }
+
+  /* Set SSPINMS registers to enable interrupts */
+  /* enable all error related interrupts */
+  LPC_SSP0->IMSC = SSPIMSC_RORIM | SSPIMSC_RTIM;    
+
+    
+    return;
+
 }
 
 /*****************************************************************************

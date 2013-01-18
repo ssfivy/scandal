@@ -38,6 +38,19 @@
 /* When test serial SEEPROM(LOOPBACK_MODE=0, TX_RX_ONLY=0), set USE_CS to 0. */
 /* When LOOPBACK_MODE=1 or TX_RX_ONLY=1, set USE_CS to 1. */
 
+
+typedef struct _SSP_init_struct{
+    uint8_t DataSize;
+    uint8_t FrameFormat;
+    uint8_t ClockPolarity;
+    uint8_t ClockPhase;
+    uint8_t ClockRate;
+    uint8_t Slave;
+    uint8_t ClockPrescale;
+} SSP_init_struct;
+    
+    
+#define __JTAG_DISABLED 1
 #define USE_CS			0
 #define SSP_DEBUG		0
 
@@ -46,7 +59,7 @@
 #define FIFOSIZE		8
 
 #define DELAY_COUNT		10
-#define MAX_TIMEOUT		0xFF
+#define SSP_MAX_TIMEOUT		0xFF //Was previously called MAX_TIMEOUT...
 
 /* Port0.2 is the SSP select pin */
 #define SSP0_SEL        (0x1<<2)
@@ -59,9 +72,31 @@
 #define SSPSR_BSY       (0x1<<4)
 
 /* SSP CR0 register */
-#define SSPCR0_DSS      (0x1<<0)
-#define SSPCR0_FRF      (0x1<<4)
+#define SSPCR0_DSS      (0x1<<0) //Useless....
+#define SSPCR0_DSS_3BIT (0x2)
+#define SSPCR0_DSS_4BIT (0x3)
+#define SSPCR0_DSS_5BIT (0x4)
+#define SSPCR0_DSS_6BIT (0x5)
+#define SSPCR0_DSS_7BIT (0x6)
+#define SSPCR0_DSS_8BIT (0x7)
+#define SSPCR0_DSS_9BIT (0x8)
+#define SSPCR0_DSS_10BIT (0x9)
+#define SSPCR0_DSS_11BIT (0xA)
+#define SSPCR0_DSS_12BIT (0xB)
+#define SSPCR0_DSS_13BIT (0xC)
+#define SSPCR0_DSS_14BIT (0xD)
+#define SSPCR0_DSS_15BIT (0xE)
+#define SSPCR0_DSS_16BIT (0xF)
+
+#define SSPCR0_FRF      (0x1<<4) //Useless...
+#define SSPCR0_FRF_SPI (0x0<<4)
+#define SSPCR0_FRF_TI (0x1<<4)
+#define SSPCR0_FRF_MICROWIRE (0x2<<4)
+
 #define SSPCR0_SPO      (0x1<<6)
+#define SSPCR0_CPOL_LOW      (0x0<<6)
+#define SSPCR0_CPOL_HIGH      (0x1<<6)
+
 #define SSPCR0_SPH      (0x1<<7)
 #define SSPCR0_SCR      (0x1<<8)
 
@@ -111,6 +146,7 @@ extern void SSP0_IRQHandler (void);
 extern void SSP1_IRQHandler (void);
 extern void SSP_IOConfig( uint8_t portNum );
 extern void SSP_Init( uint8_t portNum );
+void SSP0_Init(SSP_init_struct *initVars);
 extern void SSP_Send( uint8_t portNum, uint8_t *Buf, uint32_t Length );
 extern void SSP_Receive( uint8_t portNum, uint8_t *buf, uint32_t Length );
 

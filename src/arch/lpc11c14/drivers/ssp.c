@@ -289,7 +289,14 @@ void SSP_Init( uint8_t portNum )
 
 void SSP0_Init(SSP_init_struct *initVars){
   
-  //((initVars->DataSize & 0xF))
+  uint8_t i;
+  uint32_t temp; //scratch register
+  
+  temp = (initVars->DataSize & 0xF) << 0;
+  temp |= ((initVars->FrameFormat & 0x3) << 4);
+  temp |= ((initVars->ClockPolarity & 0x1) << 6);
+  temp |= ((initVars->ClockPhase & 0x1) << 7);
+  temp |= ((initVars->ClockRate & 0xFF) << 8);
   
   //Set SSP Control Register 0: SCR(15:8), CPHA(7), CPOL(6), FRF(5:4), DSS(3:0)
   LPC_SSP0->CR0 = ((initVars->ClockRate & 0xFF) << 8) | ((initVars->ClockPhase & 0x1) << 7) | ((initVars->ClockPolarity & 0x1) << 6) | ((initVars->FrameFormat & 0x3) << 4) | ((initVars->DataSize & 0xF) << 0);
@@ -297,12 +304,10 @@ void SSP0_Init(SSP_init_struct *initVars){
   /* SSPCPSR clock prescale register, master mode, minimum divisor is 0x02 */
   LPC_SSP0->CPSR = initVars->ClockPrescale;
 
-  uint8_t i;
-  uint32_t Dummy;
   /* clear the RxFIFO */
   for ( i = 0; i < FIFOSIZE; i++ )
   {
-    Dummy = LPC_SSP0->DR;		
+    temp = LPC_SSP0->DR;		
   }
 
   /* Enable the SSP Interrupt */
@@ -337,9 +342,7 @@ void SSP0_Init(SSP_init_struct *initVars){
   /* enable all error related interrupts */
   LPC_SSP0->IMSC = SSPIMSC_RORIM | SSPIMSC_RTIM;    
 
-    
     return;
-
 }
 
 /*****************************************************************************

@@ -296,7 +296,7 @@ void SSP0_Init(SSP_init_struct *initVars){
   temp |= ((initVars->FrameFormat & 0x3) << 4);
   temp |= ((initVars->ClockPolarity & 0x1) << 6);
   temp |= ((initVars->ClockPhase & 0x1) << 7);
-  temp |= ((initVars->ClockRate & 0xFF) << 8);
+  temp |= ((initVars->ClockRate & 0xFF) << 8); //SCR
   
   //Set SSP Control Register 0: SCR(15:8), CPHA(7), CPOL(6), FRF(5:4), DSS(3:0)
   LPC_SSP0->CR0 = ((initVars->ClockRate & 0xFF) << 8) | ((initVars->ClockPhase & 0x1) << 7) | ((initVars->ClockPolarity & 0x1) << 6) | ((initVars->FrameFormat & 0x3) << 4) | ((initVars->DataSize & 0xF) << 0);
@@ -344,6 +344,137 @@ void SSP0_Init(SSP_init_struct *initVars){
 
     return;
 }
+
+
+////////
+////////
+////
+///////////////////////
+void SSP1_Init(SSP_init_struct *initVars){
+  
+  uint8_t i;
+  uint32_t temp; //scratch register
+  
+  temp = (initVars->DataSize & 0xF) << 0;
+  temp |= ((initVars->FrameFormat & 0x3) << 4);
+  temp |= ((initVars->ClockPolarity & 0x1) << 6);
+  temp |= ((initVars->ClockPhase & 0x1) << 7);
+  temp |= ((initVars->ClockRate & 0xFF) << 8); //SCR
+  
+  //Set SSP Control Register 0: SCR(15:8), CPHA(7), CPOL(6), FRF(5:4), DSS(3:0)
+  LPC_SSP1->CR0 = ((initVars->ClockRate & 0xFF) << 8) | ((initVars->ClockPhase & 0x1) << 7) | ((initVars->ClockPolarity & 0x1) << 6) | ((initVars->FrameFormat & 0x3) << 4) | ((initVars->DataSize & 0xF) << 0);
+
+  /* SSPCPSR clock prescale register, master mode, minimum divisor is 0x02 */
+  LPC_SSP1->CPSR = initVars->ClockPrescale;
+
+  /* clear the RxFIFO */
+  for ( i = 0; i < FIFOSIZE; i++ )
+  {
+    temp = LPC_SSP1->DR;        
+  }
+
+  /* Enable the SSP Interrupt */
+  NVIC_EnableIRQ(SSP1_IRQn);
+    
+  /* Device select as master, SSP Enabled */
+  
+  /*
+    Previous initialisation for Loopback mode:
+    LPC_SSP1->CR1 = SSPCR1_LBM | SSPCR1_SSE;
+
+    Previous initialisation for Slave mode (Currently not implemented!)
+   */
+  
+  if(initVars->Slave){
+    /* Initialise in slave mode */
+    
+    if ( LPC_SSP1->CR1 & SSPCR1_SSE ){
+    /* The slave bit can't be set until SSE bit is zero. */
+      LPC_SSP1->CR1 &= ~SSPCR1_SSE;
+    }
+    
+      LPC_SSP1->CR1 = SSPCR1_MS;    /* Enable slave bit first */
+      LPC_SSP1->CR1 |= SSPCR1_SSE;  /* Enable SSP */
+      
+  }else{
+    /* Initialise in master mode */
+    LPC_SSP1->CR1 = SSPCR1_SSE;
+  }
+
+  /* Set SSPINMS registers to enable interrupts */
+  /* enable all error related interrupts */
+  LPC_SSP1->IMSC = SSPIMSC_RORIM | SSPIMSC_RTIM;    
+
+    return;
+}
+
+////////
+////////
+////
+
+/////
+
+void SSP_new_Init(SSP_init_struct *initVars, LPC_SSP_TypeDef *port){
+  
+  uint8_t i;
+  uint32_t temp; //scratch register
+  
+  temp = (initVars->DataSize & 0xF) << 0;
+  temp |= ((initVars->FrameFormat & 0x3) << 4);
+  temp |= ((initVars->ClockPolarity & 0x1) << 6);
+  temp |= ((initVars->ClockPhase & 0x1) << 7);
+  temp |= ((initVars->ClockRate & 0xFF) << 8); //SCR
+  
+  //Set SSP Control Register 0: SCR(15:8), CPHA(7), CPOL(6), FRF(5:4), DSS(3:0)
+  port->CR0 = temp;
+  
+  /* SSPCPSR clock prescale register, master mode, minimum divisor is 0x02 */
+  port->CPSR = initVars->ClockPrescale;
+
+  /* clear the RxFIFO */
+  
+  for ( i = 0; i < FIFOSIZE; i++ )
+  {
+    temp = port->DR;        
+  }
+  
+  /* Enable the SSP Interrupt */
+  NVIC_EnableIRQ(SSP1_IRQn);
+    
+  /* Device select as master, SSP Enabled */
+  
+  /*
+    Previous initialisation for Loopback mode:
+    port->CR1 = SSPCR1_LBM | SSPCR1_SSE;
+
+    Previous initialisation for Slave mode (Currently not implemented!)
+   */
+  
+  if(initVars->Slave){
+    /* Initialise in slave mode */
+    
+    if ( port->CR1 & SSPCR1_SSE ){
+    /* The slave bit can't be set until SSE bit is zero. */
+      port->CR1 &= ~SSPCR1_SSE;
+    }
+    
+      port->CR1 = SSPCR1_MS;    /* Enable slave bit first */
+      port->CR1 |= SSPCR1_SSE;  /* Enable SSP */
+      
+  }else{
+    /* Initialise in master mode */
+    port->CR1 = SSPCR1_SSE;
+  }
+
+  /* Set SSPINMS registers to enable interrupts */
+  /* enable all error related interrupts */
+  port->IMSC = SSPIMSC_RORIM | SSPIMSC_RTIM;    
+
+    return;
+}
+
+
+///////////////////////
 
 /*****************************************************************************
 ** Function name:		SSP_Send

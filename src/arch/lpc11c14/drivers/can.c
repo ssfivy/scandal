@@ -84,7 +84,16 @@ uint32_t CANStatusLog[100];
 uint32_t CANStatusLogCount = 0;
 #endif
 
-/* enqueue a message into the transmit buffer */
+/******************************************************************************
+** Function name:		enqueue_message
+**
+** Descriptions:		
+**
+** parameters:			Message
+** Returned value:		****
+**
+**
+******************************************************************************/
 uint8_t enqueue_message(can_msg* msg){
 	u08 pos;
 	u08 i;
@@ -106,7 +115,17 @@ uint8_t enqueue_message(can_msg* msg){
 	return NO_ERR;
 }
 
-/* send out any enqueued messages */
+/******************************************************************************
+** Function name:		send_queued_messages
+**
+** Descriptions:		Send out any enqueued messages
+**
+** parameters:			None
+** Returned value:		*****
+**
+**
+******************************************************************************/
+
 uint8_t send_queued_messages(void){
 	can_msg* msg;
 	u08 err = NO_ERR;
@@ -126,7 +145,16 @@ uint8_t send_queued_messages(void){
 	return err;
 }
 
-/* Get a message out of the buffer and break it into bits */
+/******************************************************************************
+** Function name:		CAN_decode_packet
+**
+** Descriptions:		Get a message out of the buffer and break it into bits
+**
+** parameters:			Message Number, Message
+** Returned value:		None
+**
+**
+******************************************************************************/
 void CAN_decode_packet(uint8_t msg_num, can_msg *msg) {
 	/* copy the data */
 	msg->data[0] = (CAN_rxbuf[msg_num].data[0] & 0x000000FF);
@@ -271,7 +299,20 @@ void CAN_MessageProcess( uint8_t MsgNo ) {
 	return;
 }
 
-/* Something happened, see what it was and deal with it */
+
+
+
+/******************************************************************************
+** Function name:		CAN_IRQHandler
+**
+** Descriptions:		CAN interrupt handler
+**
+** parameters:			None
+** Returned value:		None
+**
+**
+******************************************************************************/
+
 void CAN_IRQHandler(void) {
 	uint32_t canstat = canstat;
 	uint32_t can_int, msg_no;
@@ -307,7 +348,18 @@ void CAN_IRQHandler(void) {
 	return;
 }
 
-/* Initialise the CAN controller at a certain baud rate */
+
+/******************************************************************************
+** Function name:		CAN_Init
+**
+** Descriptions:		initialize CAN controller
+**
+** parameters:			Baud rate
+** Returned value:		None
+**
+**
+******************************************************************************/
+
 void CAN_Init( uint32_t baud ) {
 	LPC_SYSCON->PRESETCTRL |= (0x1<<3);
 	LPC_SYSCON->SYSAHBCLKCTRL |= (1<<17);
@@ -353,7 +405,17 @@ void CAN_Init( uint32_t baud ) {
 	return;
 }
 
-/* Returns true of the buffer is BUSY so move on to the next buffer */
+/******************************************************************************
+** Function name:		buffer_free
+**
+** Descriptions:		Returns true of the buffer is BUSY so move on to the next buffer
+**
+** parameters:			Message Number
+** Returned value:		*****
+**
+**
+******************************************************************************/
+
 uint8_t buffer_free(uint8_t msg_num) {
 	uint32_t BufferStatus = (((LPC_CAN->TXREQ2) & (0x0000FFFF)) << 16) | ((LPC_CAN->TXREQ1) & (0x0000FFFF));
 
@@ -361,7 +423,17 @@ uint8_t buffer_free(uint8_t msg_num) {
 	return ((((uint8_t) (BufferStatus >> (msg_num-1))) & 0x01) == 0);
 }
 
-/* Send a message */
+
+/******************************************************************************
+** Function name:		CAN_Send
+**
+** Descriptions:		Send a message
+**
+** parameters:			*****, Message
+** Returned value:		*****
+**
+**
+******************************************************************************/
 int CAN_Send(uint16_t Pri, can_msg *msg) {
 	uint32_t tx_addr;
 	uint8_t  length = 8;
@@ -430,22 +502,53 @@ int CAN_Send(uint16_t Pri, can_msg *msg) {
 	return NO_MSG_ERR;
 }
 
-/* Scandal wrappers
- * *****************
+/* 
  * for reference:
- * typedef struct can_mg {
+ * typedef struct can_msg {
  *   u32 id;
  *   u08 data[CAN_MSG_MAXSIZE];
  *   u08 length;
  * } can_msg;
  */
 
-/* Scandal wrapper for init */
+/******************************************************************************
+** 
+**  Scandal wrappers
+*******************
+** * for reference:
+** typedef struct can_msg {
+**   u32 id;
+**   u08 data[CAN_MSG_MAXSIZE];
+**   u08 length;
+** } can_msg;
+** 
+******************************************************************************/
+
+/******************************************************************************
+** Function name:		init_can
+**
+** Descriptions:		Initialise - Scandal wrapper
+**
+** parameters:			None
+** Returned value:		None
+**
+**
+******************************************************************************/
 void init_can(void) {
 	CAN_Init(BITRATE50K16MHZ);
 }
 
-/* Get a message from the CAN controller. */
+/******************************************************************************
+** Function name:		can_get_msg
+**
+** Descriptions:		Get a message from the CAN controller
+**
+** parameters:			Message
+** Returned value:		****
+**
+**
+******************************************************************************/
+
 u08 can_get_msg(can_msg *msg) {
 	int i;
 
@@ -458,7 +561,16 @@ u08 can_get_msg(can_msg *msg) {
 	return NO_MSG_ERR;
 }
 
-/* Send a message using the CAN controller */
+/******************************************************************************
+** Function name:		can_send_msg
+**
+** Descriptions:		Send a message using the CAN controller
+**
+** parameters:			Message, Priority
+** Returned value:		****
+**
+**
+******************************************************************************/
 u08 can_send_msg(can_msg *msg, u08 priority) {
 
 	/* If we can't send a message right now, enqueue it for later.
@@ -470,13 +582,25 @@ u08 can_send_msg(can_msg *msg, u08 priority) {
 
 }
 
-/* Register for a message type. Currently, each message that we want to
+/******************************************************************************
+** Function name:		can_register_id
+**
+** Descriptions:	
+ *	
+ * Register for a message type. Currently, each message that we want to
  * register for is given a specific message buffer. This limits the maximum
  * number of in channels to be 21 - 4 = 17. (the 4 comes from the 4 types of
  * messages that scandal registers for by default). Look in scandal/engine.c
  * for where this function is called to see why. At the moment, I don't think
  * there are any nodes with large numbers of in channels. If we need to deal
- * with this, it can be done in the future */
+ * with this, it can be done in the future.
+**
+** parameters:			**Mask,  Data, Priority, Ex**
+** Returned value:		****
+**
+**
+******************************************************************************/
+
 u08 can_register_id(u32 mask, u32 data, u08 priority, u08 ext) {
 	int i;
 
@@ -503,10 +627,31 @@ u08 can_register_id(u32 mask, u32 data, u08 priority, u08 ext) {
 	return NO_MSG_ERR;
 }
 
-/* does nothing yet */
+/******************************************************************************
+** Function name:		can_baud_rate
+**
+** Descriptions:		NONE
+**
+** parameters:			Mode
+** Returned value:		****
+**
+**
+******************************************************************************/
 u08  can_baud_rate(u08 mode) {
 	return 0;
 }
+
+
+/******************************************************************************
+** Function name:		can_poll
+**
+** Descriptions:		send messages
+**
+** parameters:			None
+** Returned value:		None
+**
+**
+******************************************************************************/
 
 void can_poll(void) {
 	send_queued_messages();

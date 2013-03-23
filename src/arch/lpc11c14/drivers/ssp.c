@@ -3,7 +3,7 @@
  *   Project: NXP LPC11xx SSP example
  *
  *   Description:
- *     This file contains SSP code example which include SSP 
+ *     This file contains SSP code which include SSP 
  *     initialization, SSP interrupt handler, and APIs for SSP
  *     reading.
  *
@@ -120,7 +120,7 @@ void SSP1_IRQHandler(void)
 **
 ** Descriptions:		SSP port initialization routine
 **				
-** parameters:			None
+** parameters:			port #
 ** Returned value:		None
 ** 
 *****************************************************************************/
@@ -199,9 +199,10 @@ void SSP_IOConfig( uint8_t portNum )
 **
 ** Descriptions:		SSP port initialization routine
 **				
-** parameters:			None
+** parameters:			port #
 ** Returned value:		None
 ** 
+** ORIGINAL CODE EXAMPLE
 *****************************************************************************/
 void SSP_Init( uint8_t portNum )
 {
@@ -286,6 +287,17 @@ void SSP_Init( uint8_t portNum )
   return;
 }
 
+/*****************************************************************************
+
+** Function name:		SSP0_Init
+**
+** Descriptions:		SSP0 port initialization routine
+**				
+
+** parameters:			initialisation variables 
+** Returned value:		None
+** 
+*****************************************************************************/
 
 void SSP0_Init(SSP_init_struct *initVars){
   
@@ -346,10 +358,16 @@ void SSP0_Init(SSP_init_struct *initVars){
 }
 
 
-////////
-////////
-////
-///////////////////////
+/*****************************************************************************
+** Function name:		SSP1_Init
+**
+** Descriptions:		SSP1 port initialization routine
+**				
+** parameters:			initialisation variables 
+** Returned value:		None
+** 
+*****************************************************************************/
+
 void SSP1_Init(SSP_init_struct *initVars){
   
   uint8_t i;
@@ -408,11 +426,16 @@ void SSP1_Init(SSP_init_struct *initVars){
     return;
 }
 
-////////
-////////
-////
-
-/////
+/*****************************************************************************
+** Function name:		SSP_new_Init
+**
+** Descriptions:		SSP port initialization routine
+**				
+** parameters:			initialisation variables, 
+**                      port (LPC_SSP0 / LPC_SSP1)
+** Returned value:		None
+** 
+*****************************************************************************/
 
 void SSP_new_Init(SSP_init_struct *initVars, LPC_SSP_TypeDef *port){
   
@@ -472,9 +495,6 @@ void SSP_new_Init(SSP_init_struct *initVars, LPC_SSP_TypeDef *port){
 
     return;
 }
-
-
-///////////////////////
 
 /*****************************************************************************
 ** Function name:		SSP_Send

@@ -30,65 +30,9 @@
  * which is really application project specific.
  * Set TIMER32_GENERIC_INTS to 1 to reenable original code.
  * =================== */
-volatile uint32_t timer32_0_period = 0;
-
-#ifdef CONFIG_TIMER32_DEFAULT_TIMER32_0_IRQHANDLER
-volatile uint32_t timer32_0_counter = 0;
-volatile uint32_t timer32_0_capture = 0;
-#endif //CONFIG_TIMER32_DEFAULT_TIMER32_0_IRQHANDLER
-
-volatile uint32_t timer32_1_period = 0;
-
-#ifdef CONFIG_TIMER32_DEFAULT_TIMER32_1_IRQHANDLER
-volatile uint32_t timer32_1_counter = 0;
-volatile uint32_t timer32_1_capture = 0;
-#endif //CONFIG_TIMER32_DEFAULT_TIMER32_1_IRQHANDLER
 
 
-/*****************************************************************************
-** Function name:		delay32Ms
-**
-** Descriptions:		Start the timer delay in milo seconds
-**						until elapsed
-**
-** parameters:			timer number, Delay value in milo second			 
-** 						
-** Returned value:		None
-** 
-*****************************************************************************/
-void delay32Ms(uint8_t timer_num, uint32_t delayInMs)
-{
-  if (timer_num == 0)
-  {
-    /* setup timer #0 for delay */
-    LPC_TMR32B0->TCR = 0x02;		/* reset timer */
-    LPC_TMR32B0->PR  = 0x00;		/* set prescaler to zero */
-    LPC_TMR32B0->MR0 = delayInMs * ((SystemCoreClock/(LPC_TMR32B0->PR+1)) / 1000);
-    LPC_TMR32B0->IR  = 0xff;		/* reset all interrrupts */
-    LPC_TMR32B0->MCR = 0x04;		/* stop timer on match */
-    LPC_TMR32B0->TCR = 0x01;		/* start timer */
-  
-    /* wait until delay time has elapsed */
-    while (LPC_TMR32B0->TCR & 0x01);
-  }
-  else if (timer_num == 1)
-  {
-    /* setup timer #1 for delay */
-    LPC_TMR32B1->TCR = 0x02;		/* reset timer */
-    LPC_TMR32B1->PR  = 0x00;		/* set prescaler to zero */
-    LPC_TMR32B1->MR0 = delayInMs * ((SystemCoreClock/(LPC_TMR32B0->PR+1)) / 1000);
-    LPC_TMR32B1->IR  = 0xff;		/* reset all interrrupts */
-    LPC_TMR32B1->MCR = 0x04;		/* stop timer on match */
-    LPC_TMR32B1->TCR = 0x01;		/* start timer */
-  
-    /* wait until delay time has elapsed */
-    while (LPC_TMR32B1->TCR & 0x01);
-  }
-  return;
-}
 
-
-#if CONFIG_TIMER32_DEFAULT_TIMER32_0_IRQHANDLER==1
 /******************************************************************************
 ** Function name:		TIMER32_0_IRQHandler
 **
@@ -101,21 +45,10 @@ void delay32Ms(uint8_t timer_num, uint32_t delayInMs)
 ******************************************************************************/
 void TIMER32_0_IRQHandler(void)
 {  
-  if ( LPC_TMR32B0->IR & 0x01 )
-  {  
-	LPC_TMR32B0->IR = 1;				/* clear interrupt flag */
-	timer32_0_counter++;
-  }
-  if ( LPC_TMR32B0->IR & (0x1<<4) )
-  {  
-	LPC_TMR32B0->IR = 0x1<<4;			/* clear interrupt flag */
-	timer32_0_capture++;
-  }
+  LPC_TMR32B0->IR=0x1F; //Clear all timer 0 interrupts
   return;
 }
-#endif //CONFIG_TIMER32_DEFAULT_TIMER32_0_IRQHANDLER
 
-#if CONFIG_TIMER32_DEFAULT_TIMER32_1_IRQHANDLER==1
 /******************************************************************************
 ** Function name:		TIMER32_1_IRQHandler
 **
@@ -128,19 +61,9 @@ void TIMER32_0_IRQHandler(void)
 ******************************************************************************/
 void TIMER32_1_IRQHandler(void)
 {  
-  if ( LPC_TMR32B1->IR & 0x01 )
-  {    
-	LPC_TMR32B1->IR = 1;			/* clear interrupt flag */
-	timer32_1_counter++;
-  }
-  if ( LPC_TMR32B1->IR & (0x1<<4) )
-  {  
-	LPC_TMR32B1->IR = 0x1<<4;			/* clear interrupt flag */
-	timer32_1_capture++;
-  }
+  LPC_TMR32B0->IR=0x1F; //Clear all timer 1 interrupts
   return;
 }
-#endif //CONFIG_TIMER32_DEFAULT_TIMER32_1_IRQHANDLER
 
 /******************************************************************************
 ** Function name:		enable_timer
@@ -214,6 +137,93 @@ void reset_timer32(uint8_t timer_num)
   return;
 }
 
+
+/* TODO:Define function to retrieve TC for either timer 0 or 1 */
+
+
+/* TODO:Define function to retrieve Capture Register 0 for either timer 0 or 1 */
+
+
+
+
+/*
+Name: timer32_ioconfig
+
+Description: Sets the desired pins to the timer related functions
+
+Parameters: 
+  - time number (either 1 or 2 to specify which timer block is being used)
+  - t32_ioconfig struct which specifies which pins are to be set with a nonzero value
+  
+  typedef struct _T32_IOCONFIG{
+    uint8_t 	T32_CAP0; //
+    uint8_t 	T32_MAT0; //
+    uint8_t 	T32_MAT1; //
+    uint8_t 	T32_MAT2; //
+    uint8_t 	T32_MAT3; //
+} T32_IOCONFIG;
+
+Return: No return
+
+*/
+
+void timer32_ioconfig(uint8_t timer_number, T32_IOCONFIG ioconfig_struct)
+{
+  if(timer_number==0){/*  Timer0_32 I/O config */
+    if(ioconfig_struct.T32_CAP0){
+      LPC_IOCON->PIO1_5 &= ~0x07;	
+      LPC_IOCON->PIO1_5 |= 0x02;	/* Timer0_32 CAP0 */
+    }
+    if(ioconfig_struct.T32_MAT0){
+      LPC_IOCON->PIO1_6 &= ~0x07;
+      LPC_IOCON->PIO1_6 |= 0x02;	/* Timer0_32 MAT0 */
+    }
+    
+    if(ioconfig_struct.T32_MAT1){
+      LPC_IOCON->PIO1_7 &= ~0x07;
+      LPC_IOCON->PIO1_7 |= 0x02;	/* Timer0_32 MAT1 */
+    }
+    
+    if(ioconfig_struct.T32_MAT2){
+      LPC_IOCON->PIO0_1 &= ~0x07;	
+      LPC_IOCON->PIO0_1 |= 0x02;	/* Timer0_32 MAT2 */
+    }
+    
+    if(ioconfig_struct.T32_MAT3){
+      LPC_IOCON->R_PIO0_11 &= ~0x07;	
+      LPC_IOCON->R_PIO0_11 |= 0x03;	/* Timer0_32 MAT3 */
+    }
+  
+    
+  }else if(timer_number==1){/*  Timer1_32 I/O config */
+    if(ioconfig_struct.T32_CAP0){
+      LPC_IOCON->R_PIO1_0  &= ~0x07;	
+      LPC_IOCON->R_PIO1_0  |= 0x03;	/* Timer1_32 CAP0 */
+    }
+    
+    if(ioconfig_struct.T32_MAT0){
+      LPC_IOCON->R_PIO1_1  &= ~0x07;	
+      LPC_IOCON->R_PIO1_1  |= 0x03;	/* Timer1_32 MAT0 */
+    }
+    
+    if(ioconfig_struct.T32_MAT1){
+      LPC_IOCON->R_PIO1_2 &= ~0x07;
+      LPC_IOCON->R_PIO1_2 |= 0x03;	/* Timer1_32 MAT1 */
+    }
+    
+    if(ioconfig_struct.T32_MAT2){
+      LPC_IOCON->SWDIO_PIO1_3  &= ~0x07;
+      LPC_IOCON->SWDIO_PIO1_3  |= 0x03;	/* Timer1_32 MAT2 */
+    }
+    
+    if(ioconfig_struct.T32_MAT3){
+      LPC_IOCON->PIO1_4 &= ~0x07;
+      LPC_IOCON->PIO1_4 |= 0x02;		/* Timer0_32 MAT3 */
+    }
+  }
+  
+}
+
 /******************************************************************************
 ** Function name:		init_timer
 **
@@ -221,52 +231,82 @@ void reset_timer32(uint8_t timer_num)
 **						install timer interrupt handler
 **
 ** parameters:			timer number and timer interval
+
+  __IO uint32_t IR;                     /*!< Offset: 0x000 Interrupt Register (R/W) 
+  __IO uint32_t TCR;                    /*!< Offset: 0x004 Timer Control Register (R/W) 
+  __IO uint32_t TC;                     /*!< Offset: 0x008 Timer Counter Register (R/W) *
+  __IO uint32_t PR;                     /*!< Offset: 0x00C Prescale Register (R/W) *
+  __IO uint32_t PC;                     /*!< Offset: 0x010 Prescale Counter Register (R/W) *
+  __IO uint32_t MCR;                    /*!< Offset: 0x014 Match Control Register (R/W) *
+  __IO uint32_t MR0;                    /*!< Offset: 0x018 Match Register 0 (R/W) *
+  __IO uint32_t MR1;                    /*!< Offset: 0x01C Match Register 1 (R/W) *
+  __IO uint32_t MR2;                    /*!< Offset: 0x020 Match Register 2 (R/W) *
+  __IO uint32_t MR3;                    /*!< Offset: 0x024 Match Register 3 (R/W) *
+  __IO uint32_t CCR;                    /*!< Offset: 0x028 Capture Control Register (R/W) *
+  __I  uint32_t CR0;                    /*!< Offset: 0x02C Capture Register 0 (R/ ) *
+       uint32_t RESERVED1[3];
+  __IO uint32_t EMR;                    /*!< Offset: 0x03C External Match Register (R/W) *
+       uint32_t RESERVED2[12];
+  __IO uint32_t CTCR;                   /*!< Offset: 0x070 Count Control Register (R/W) *
+  __IO uint32_t PWMC;                   /*!< Offset: 0x074 PWM Control Register (R/W) *
+
+
+  typedef struct _T32_CONFIG{
+    uint8_t 	T32_INTERRUPT; _IR // CR0_INT | MR3_INT | MR2_INT | MR1_INT | MR0_INT (Set and 0x1F)
+    uint8_t 	T32_ENABLE; _TCR // Starts the timer
+    uint8_t 	T32_RESET; _TCR // Restarts timer to zero (Assert and de-assert)
+    uint32_t 	T32_PRESCALER; // Prescaler to divide the main clock value by + 1
+    uint16_t 	T32_MATCH_CONTROL; // Match control register to decide what match registers are enabled and what their function is
+    uint32_t 	T32_MATCH0; // Match register number 0, you can make something happen when the timer reaches this value using the Match Control Register
+    uint32_t 	T32_MATCH1; // Match register number 1, you can make something happen when the timer reaches this value using the Match Control Register
+    uint32_t 	T32_MATCH2; // Match register number 2, you can make something happen when the timer reaches this value using the Match Control Register
+    uint32_t 	T32_MATCH3; // Match register number 3, you can make something happen when the timer reaches this value using the Match Control Register
+    uint32_t 	T32_CAPTURE_CONTROL; // Can be used to configure capturing timer value to CR0 on an external event
+    uint8_t 	T32_EXTERNAL_MATCH_CONTROL; // Used to enable output of square waves
+    uint32_t 	T32_EXTERNAL_MATCH_0; // Function of external match on pin CT32n_MAT0 if enabled. 0:Do nothing, 1:Low on match, 2:High on match, 3:Toggle on match
+    uint32_t 	T32_EXTERNAL_MATCH_1; // Function of external match on pin CT32n_MAT1 if enabled. 0:Do nothing, 1:Low on match, 2:High on match, 3:Toggle on match
+    uint32_t 	T32_EXTERNAL_MATCH_2; // Function of external match on pin CT32n_MAT2 if enabled. 0:Do nothing, 1:Low on match, 2:High on match, 3:Toggle on match
+    uint32_t 	T32_EXTERNAL_MATCH_3; // Function of external match on pin CT32n_MAT3 if enabled. 0:Do nothing, 1:Low on match, 2:High on match, 3:Toggle on match
+    uint8_t 	T32_COUNTER_CONTROL; // Set to zero unless you want to use this to count an external signal
+    uint8_t 	T32_PWM_CONTROL; // Set the appropriate bit high to enable PWM on the corresponding external match pin
+    
+} T32_CONFIG;
+/*
+
 ** Returned value:		None
 ** 
 ******************************************************************************/
-void init_timer32(uint8_t timer_num, uint32_t TimerInterval) 
+void init_timer32(uint8_t timer_num, T32_CONFIG conf_struct) 
 {
   if ( timer_num == 0 )
   {
     /* Some of the I/O pins need to be carefully planned if
     you use below module because JTAG and TIMER CAP/MAT pins are muxed. */
     LPC_SYSCON->SYSAHBCLKCTRL |= (1<<9);
-#if 0
-    LPC_IOCON->PIO1_5 &= ~0x07;	/*  Timer0_32 I/O config */
-    LPC_IOCON->PIO1_5 |= 0x02;	/* Timer0_32 CAP0 */
-    LPC_IOCON->PIO1_6 &= ~0x07;
-    LPC_IOCON->PIO1_6 |= 0x02;	/* Timer0_32 MAT0 */
-    LPC_IOCON->PIO1_7 &= ~0x07;
-    LPC_IOCON->PIO1_7 |= 0x02;	/* Timer0_32 MAT1 */
-    LPC_IOCON->PIO0_1 &= ~0x07;	
-    LPC_IOCON->PIO0_1 |= 0x02;	/* Timer0_32 MAT2 */
-#ifdef __JTAG_DISABLED
-    LPC_IOCON->JTAG_TDI_PIO0_11 &= ~0x07;	
-    LPC_IOCON->JTAG_TDI_PIO0_11 |= 0x03;	/* Timer0_32 MAT3 */
-#endif
-#endif
-#if CONFIG_TIMER32_DEFAULT_TIMER32_0_IRQHANDLER==1
-    timer32_0_counter = 0;
-    timer32_0_capture = 0;
-#endif //TIMER32_0_DEFAULT_HANDLER
-    LPC_TMR32B0->MR0 = TimerInterval;
+    
+    LPC_TMR32B0->IR = conf_struct.T32_INTERRUPT & 0x1F;
+    //LPC_TMR32B0->TCR = c//Do not edit yet, we do this at the end when we want to start the timer
+    //LPC_TMR32B0->TC //This is a read only and stores the timer counter, we don't want to write to this
+    LPC_TMR32B0->PR = conf_struct.T32_PRESCALER;
+    //LPC_TMR32B0->PC = //Do not edit - Read only and it's not initialisation related
+    LPC_TMR32B0->MCR = conf_struct.T32_MATCH_CONTROL & 0xFFF;
+    LPC_TMR32B0->MR0 = conf_struct.T32_MATCH0;
+    LPC_TMR32B0->MR1 = conf_struct.T32_MATCH1;
+    LPC_TMR32B0->MR2 = conf_struct.T32_MATCH2;
+    LPC_TMR32B0->MR3 = conf_struct.T32_MATCH3;
+    LPC_TMR32B0->CCR = conf_struct.T32_CAPTURE_CONTROL & 0x1; //Note, interrupts cannot be set, change this mask to allow interrupts on capture
+    //LPC_TMR32B0->CR0 = //Do not edit - Read only and it's not initialisation related
+    LPC_TMR32B0->EMR = ((conf_struct.T32_EXTERNAL_MATCH_3 & 0x3) << 10 ) | ((conf_struct.T32_EXTERNAL_MATCH_2 & 0x3) << 8 ) | ((conf_struct.T32_EXTERNAL_MATCH_1 & 0x3) << 6 ) | ((conf_struct.T32_EXTERNAL_MATCH_0 & 0x3) << 4 ) | (conf_struct.T32_EXTERNAL_MATCH_CONTROL & 0xF) ;
+    LPC_TMR32B0->CTCR = conf_struct.T32_COUNTER_CONTROL & 0x3;
+    LPC_TMR32B0->PWMC = conf_struct.T32_PWM_CONTROL & 0xF;
+    
+    
+    LPC_TMR32B0->TCR = ((conf_struct.T32_RESET & 0x1) << 1) | (conf_struct.T32_ENABLE & 0x1);
+    LPC_TMR32B0->TCR = (conf_struct.T32_ENABLE & 0x1);
 
-#if 0
-#if TIMER_MATCH
-	LPC_TMR32B0->EMR &= ~(0xFF<<4);
-	LPC_TMR32B0->EMR |= ((0x3<<4)|(0x3<<6)|(0x3<<8)|(0x3<<10));	/* MR0/1/2/3 Toggle */
-#else
-	/* Capture 0 on rising edge, interrupt enable. */
-	LPC_TMR32B0->CCR = (0x1<<0)|(0x1<<2);
-#endif
-#endif
+    /* Enable the TIMER0 Interrupt - enable this once a handler has been written! */
+    //NVIC_EnableIRQ(TIMER_32_0_IRQn);
 
-    LPC_TMR32B0->MCR = 3;			/* Interrupt and Reset on MR0 */
-
-#if CONFIG_TIMER32_DEFAULT_TIMER32_0_IRQHANDLER==1
-    /* Enable the TIMER0 Interrupt */
-    NVIC_EnableIRQ(TIMER_32_0_IRQn);
-#endif
   }
   else if ( timer_num == 1 )
   {
@@ -291,7 +331,7 @@ void init_timer32(uint8_t timer_num, uint32_t TimerInterval)
     timer32_1_capture = 0;
 #endif //TIMER32_1_DEFAULT_HANDLER
 
-    LPC_TMR32B1->MR0 = TimerInterval;
+    LPC_TMR32B1->MR0 = 0;
 #if TIMER_MATCH
 	LPC_TMR32B1->EMR &= ~(0xFF<<4);
 	LPC_TMR32B1->EMR |= ((0x3<<4)|(0x3<<6)|(0x3<<8)|(0x3<<10));	/* MR0/1/2 Toggle */
@@ -308,128 +348,10 @@ void init_timer32(uint8_t timer_num, uint32_t TimerInterval)
   }
   return;
 }
-/******************************************************************************
-** Function name:		init_timer32PWM
-**
-** Descriptions:		Initialize timer as PWM
-**
-** parameters:			timer number, period and match enable:
-**										match_enable[0] = PWM for MAT0 
-**										match_enable[1] = PWM for MAT1
-**										match_enable[2] = PWM for MAT2
-**			
-** Returned value:		None
-** 
-******************************************************************************/
-void init_timer32PWM(uint8_t timer_num, uint32_t period, uint8_t match_enable)
-{
-	
-	disable_timer32(timer_num);
-	if (timer_num == 1)
-	{
-	    /* Some of the I/O pins need to be clearfully planned if
-	    you use below module because JTAG and TIMER CAP/MAT pins are muxed. */
-	    LPC_SYSCON->SYSAHBCLKCTRL |= (1<<10);
-
-		/* Setup the external match register */
-		LPC_TMR32B1->EMR = (1<<EMC3)|(1<<EMC2)|(2<<EMC1)|(1<<EMC0)|(1<<3)|(match_enable);
-
-		/* Setup the outputs */
-		/* If match0 is enabled, set the output */
-		if (match_enable & 0x01)
-		{
-		  	LPC_IOCON->R_PIO1_1  &= ~0x07;
-  			LPC_IOCON->R_PIO1_1  |= 0x03;		/* Timer1_32 MAT0 */
-		}
-		/* If match1 is enabled, set the output */
-		if (match_enable & 0x02)
-		{
-		  LPC_IOCON->R_PIO1_2 &= ~0x07;
-		  LPC_IOCON->R_PIO1_2 |= 0x03;		/* Timer1_32 MAT1 */
-		}
-		/* If match2 is enabled, set the output */
-		if (match_enable & 0x04)
-		{
-		  LPC_IOCON->SWDIO_PIO1_3   &= ~0x07;
-		  LPC_IOCON->SWDIO_PIO1_3   |= 0x03;		/* Timer1_32 MAT2 */
-		}
-		/* If match3 is enabled, set the output */
-		if (match_enable & 0x08)
-		{
-		  LPC_IOCON->PIO1_4           &= ~0x07;
-		  LPC_IOCON->PIO1_4           |= 0x02;		/* Timer1_32 MAT3 */
-		}
-
-//#ifdef __JTAG_DISABLED
-//	  PIO1_0_JTAG_TMS  &= ~0x07;	/*  Timer1_32 I/O config */
-//	  PIO1_0_JTAG_TMS  |= 0x03;		/* Timer1_32 CAP0 */
-//#endif
-
-		/* Enable the selected PWMs and enable Match3 */
-		LPC_TMR32B1->PWMC = (1<<3)|(match_enable);
- 
-		/* Setup the match registers */
-		/* set the period value to a global variable */
-		timer32_1_period = period;
-		LPC_TMR32B1->MR3 = timer32_1_period;
-		LPC_TMR32B1->MR0	= timer32_1_period/2;
-		LPC_TMR32B1->MR1	= timer32_1_period/2;
-		LPC_TMR32B1->MR2	= timer32_1_period/2;
-		
-		/* */
-    	LPC_TMR32B1->MCR = 1<<10;				/* Reset on MR3 */
-	}
-	else
-	{
-	    /* Some of the I/O pins need to be clearfully planned if
-	    you use below module because JTAG and TIMER CAP/MAT pins are muxed. */
-	    LPC_SYSCON->SYSAHBCLKCTRL |= (1<<9);
-
-		/* Setup the external match register */
-		LPC_TMR32B0->EMR = (1<<EMC3)|(2<<EMC2)|(1<<EMC1)|(1<<EMC0)|(1<<3)|(match_enable);
- 
-		/* Setup the outputs */
-		/* If match0 is enabled, set the output */
-		if (match_enable & 0x01)
-		{
-//	 		LPC_IOCON->PIO1_6           &= ~0x07;
-//		  	LPC_IOCON->PIO1_6           |= 0x02;		/* Timer0_32 MAT0 */
-		}
-		/* If match1 is enabled, set the output */
-		if (match_enable & 0x02)
-		{
-			LPC_IOCON-> PIO1_7           &= ~0x07;
-		  	LPC_IOCON->PIO1_7           |= 0x02;		/* Timer0_32 MAT1 */
-		}
-		/* If match2 is enabled, set the output */
-		if (match_enable & 0x04)
-		{
-		  LPC_IOCON->PIO0_1           &= ~0x07;	
-		  LPC_IOCON->PIO0_1           |= 0x02;		/* Timer0_32 MAT2 */
-		}
-		/* If match3 is enabled, set the output */
-		if (match_enable & 0x08)
-		{
-		  LPC_IOCON->R_PIO0_11 &= ~0x07;
-		  LPC_IOCON->R_PIO0_11 |= 0x03;		/* Timer0_32 MAT3 */
-		}
-
-		/* Enable the selected PWMs and enable Match3 */
-		LPC_TMR32B0->PWMC = (1<<3)|(match_enable);
-
-		/* Setup the match registers */
-		/* set the period value to a global variable */
-		timer32_0_period = period;
-		LPC_TMR32B0->MR3 = timer32_0_period;
-		LPC_TMR32B0->MR0	= timer32_0_period;	///2;
-		LPC_TMR32B0->MR1	= timer32_0_period/2;
-		LPC_TMR32B0->MR2	= timer32_0_period/2;
-
-    	LPC_TMR32B0->MCR = 1<<10;				/* Reset on MR3 */
-	}
 
 
-}
+
+
 /******************************************************************************
 ** Function name:		pwm32_setMatch
 **
@@ -489,17 +411,40 @@ void setMatch_timer32PWM (uint8_t timer_num, uint8_t match_nr, uint32_t value)
 /* Scandal wrappers
  * *****************/
 
+ //Scandal makes use of timer 0 of the LPC11C14 for timekeeping purposes
+ 
 void sc_init_timer(void) {
-	init_timer32(0,  (SystemCoreClock/1000-1));
-	enable_timer32(0); // Enabling the timer
+  T32_CONFIG config_struct;
+   
+  config_struct.T32_INTERRUPT               = 0; // CR0_INT | MR3_INT | MR2_INT | MR1_INT | MR0_INT (Set and 0x1F)
+  config_struct.T32_ENABLE                  = 1; // Starts the timer if set
+  config_struct.T32_RESET                   = 1; // Restarts timer to zero if set
+  config_struct.T32_PRESCALER               = (SystemCoreClock/1000-1); // Prescaler to divide the main clock value by + 1
+  config_struct.T32_MATCH_CONTROL           = 0; // Match control register to decide what match registers are enabled and what their function is
+  config_struct.T32_MATCH0                  = 0; // Match register number 0, you can make something happen when the timer reaches this value using the Match Control Register
+  config_struct.T32_MATCH1                  = 0; // Match register number 1, you can make something happen when the timer reaches this value using the Match Control Register
+  config_struct.T32_MATCH2                  = 0; // Match register number 2, you can make something happen when the timer reaches this value using the Match Control Register
+  config_struct.T32_MATCH3                  = 0; // Match register number 3, you can make something happen when the timer reaches this value using the Match Control Register
+  config_struct.T32_CAPTURE_CONTROL         = 0; // Can be used to configure capturing timer value to CR0 on an external event
+  config_struct.T32_EXTERNAL_MATCH_CONTROL  = 0; // Used to enable output of square waves
+  config_struct.T32_EXTERNAL_MATCH_0        = 0; // Function of external match on pin CT32n_MAT0 if enabled. 0:Do nothing, 1:Low on match, 2:High on match, 3:Toggle on match
+  config_struct.T32_EXTERNAL_MATCH_1        = 0; // Function of external match on pin CT32n_MAT1 if enabled. 0:Do nothing, 1:Low on match, 2:High on match, 3:Toggle on match
+  config_struct.T32_EXTERNAL_MATCH_2        = 0; // Function of external match on pin CT32n_MAT2 if enabled. 0:Do nothing, 1:Low on match, 2:High on match, 3:Toggle on match
+  config_struct.T32_EXTERNAL_MATCH_3        = 0; // Function of external match on pin CT32n_MAT3 if enabled. 0:Do nothing, 1:Low on match, 2:High on match, 3:Toggle on match
+  config_struct.T32_COUNTER_CONTROL         = 0; // Set to zero unless you want to use this to count an external signal
+  config_struct.T32_PWM_CONTROL             = 0; // Set the appropriate bit high to enable PWM on the corresponding external match pin
+  
+	init_timer32(0,  config_struct);
+	//enable_timer32(0); // Enabling the timer
 }
 
 void sc_set_timer(sc_time_t time) {
-	timer32_0_counter = (uint32_t)time;
+	//timer32_0_counter = (uint32_t)time;
+  LPC_TMR32B0->TC = (uint32_t)time;
 }
 
 sc_time_t sc_get_timer(void) {
-	return (sc_time_t)timer32_0_counter;
+	return (sc_time_t)LPC_TMR32B0->TC; //TODO:Change this to use a proper interface function and not just access the memory directly
 }
 
 /* *******************

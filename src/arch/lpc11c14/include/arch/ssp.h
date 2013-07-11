@@ -147,6 +147,7 @@ extern void SSP1_IRQHandler (void);
 extern void SSP_IOConfig( uint8_t portNum );
 void SSP_new_Init(SSP_init_struct *initVars, LPC_SSP_TypeDef *port);
 extern void SSP_Init( uint8_t portNum );
+void SSP_new_Init(SSP_init_struct *initVars, LPC_SSP_TypeDef *port);
 void SSP0_Init(SSP_init_struct *initVars);
 extern void SSP_Send( uint8_t portNum, uint8_t *Buf, uint32_t Length );
 extern void SSP_Receive( uint8_t portNum, uint8_t *buf, uint32_t Length );

@@ -572,7 +572,15 @@ u08 can_get_msg(can_msg *msg) {
 **
 ******************************************************************************/
 u08 can_send_msg(can_msg *msg, u08 priority) {
-
+    /* FIX BY GEOFFREY, NOT NXP CODE
+     * Check if the CAN is in a busoff state which can occur in a specific
+     * scenario (can pin connected connected and disconnected in rapid succession
+     */
+    if((LPC_CAN->STAT & 0x80) != 0) {
+        LPC_CAN->CNTL = LPC_CAN->CNTL & (~0x1);
+    }
+    
+    
 	/* If we can't send a message right now, enqueue it for later.
 	 * handle_scandal will call can_poll every main loop iteration to send any enqueued messages */
 	if (CAN_Send((uint16_t)priority, msg) == NO_MSG_ERR)

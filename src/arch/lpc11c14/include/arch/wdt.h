@@ -26,17 +26,12 @@
 #define WDINT             (0x1<<3)
 #define WDPROTECT         (0x1<<4)
 
-#ifndef WDT_FEED_VALUE
-#define WDT_FEED_VALUE		0x003FFFFF
-#endif
-
-#define WINDOW_MODE       0
-#define PROTECT_MODE      1
-#define WATCHDOG_RESET    0
-
 #if CONFIG_WDT_DEFAULT_WDT_IRQHANDLER==1
 extern void WDT_IRQHandler(void);
 #endif
+
+void WDT_Init(uint32_t wdt_timer_value);
+void WDT_Feed(void);
 
 #endif /* end __WDT_H */
 /*****************************************************************************

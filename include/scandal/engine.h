@@ -34,6 +34,10 @@
 #include <scandal/timer.h>
 #include <scandal/obligations.h>
 
+#ifndef WATCHDOG_TIMER_PERIOD
+#define WATCHDOG_TIMER_PERIOD 5000
+#endif
+
 /* Types */
 /* Channel representative structure */
 typedef struct in_chan{

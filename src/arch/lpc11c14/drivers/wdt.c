@@ -72,11 +72,11 @@ void WDT_IRQHandler(void)
 ** Descriptions:		Initialize watchdog timer, install the
 **						watchdog timer interrupt handler
 **
-** parameters:			None
+** parameters:			wdt_timer_value: WDT reset period in milliseconds (rounded to 4ms in implementation)
 ** Returned value:		None
 ** 
 *****************************************************************************/
-void WDT_Init( void )
+void WDT_Init(uint32_t wdt_timer_value)
 {
   uint32_t i;
 
@@ -84,72 +84,39 @@ void WDT_Init( void )
   /* Enable clock to WDT */
   LPC_SYSCON->SYSAHBCLKCTRL |= (1<<15);
 
-  LPC_SYSCON->WDTOSCCTRL = 0x03F; /* ~8kHz */
+  LPC_SYSCON->WDTOSCCTRL = (0x1 << 5) | 24; /* 10kHz WDT Osc */
   LPC_SYSCON->PDRUNCFG &= ~(0x1<<6);
 
+  
+  /* Connecting the WDT Oscillator to the WDT peripheral without any division in the way */
   LPC_SYSCON->WDTCLKSEL = 0x02;		/* Select watchdog osc */
-  LPC_SYSCON->WDTCLKUEN = 0x01;		/* Update clock */
+  
+  /* Update clock source: Write zero and then a one to update */
+  //LPC_SYSCON->WDTCLKUEN = 0x01;		
   LPC_SYSCON->WDTCLKUEN = 0x00;		/* Toggle update register once */
   LPC_SYSCON->WDTCLKUEN = 0x01;
   while ( !(LPC_SYSCON->WDTCLKUEN & 0x01) );		/* Wait until updated */
-  LPC_SYSCON->WDTCLKDIV = 1;		/* Divided by 1 */
-  wdt_counter = 0;
+  
+  /* 0 for Disabled clock, 1 to 255 for division ratio - Note this is again divided by 4 afterwards in the peripheral */
+  LPC_SYSCON->WDTCLKDIV = 10; //Divide clock by 10 for 1kHz at WDT
+  
 
-#if CONFIG_WDT_ENABLE_IRQ==1
-  NVIC_EnableIRQ(WDT_IRQn);
-#endif
+  //NVIC_EnableIRQ(WDT_IRQn);
 
-  LPC_WDT->TC = WDT_FEED_VALUE;	/* once WDEN is set, the WDT will start after feeding */
-#if CONFIG_WDT_PROTECT_MODE==1
-  LPC_WDT->TC = 0x3FF;
-#endif
-#if CONFIG_WDT_WINDOW_MODE==1
-  LPC_WDT->TC = 0x3FF;
-#endif
+  //We divide wdt_timer_value by 4 to offset for the division by 4 of the main input clock
+  LPC_WDT->TC = wdt_timer_value >> 2;	/* once WDEN is set, the WDT will start after feeding */
 
-#if CONFIG_WDT_WATCHDOG_RESET==1
-  LPC_WDT->MOD = WDEN | WDRESET;
-#else
-  LPC_WDT->MOD = WDEN;
-#endif
+
+  LPC_WDT->MOD = WDEN | WDRESET; //Enable the WDT counter and also the ability for it to reset the MCU
+
 
   LPC_WDT->FEED = 0xAA;		/* Feeding sequence */
   LPC_WDT->FEED = 0x55;    
   /* Make sure feed sequence executed properly */
-  for (i = 0; i < 0x80000; i++);
+for (i = 0; i < 0x80000; i++);
 
-  /* For WDWARNINT test */
-  LPC_WDT->WARNINT = 0x1FF;
-
-#if CONFIG_WDT_PROTECT_MODE==1
-  /* For WDPROTECT test */
-  LPC_WDT->MOD = WDEN | WDPROTECT;
-
-  LPC_WDT->WINDOW = 0x2FF;
-#endif
-
-#if CONFIG_WDT_WINDOW_MODE==1
-  /* For WDWINDOW test */
-  LPC_WDT->WINDOW = 0x2FF;
-#endif
-
-#if CONFIG_WDT_WINDOW_MODE==1
-  /* For WDWINDOW test */
-  while (1)
-  {
-    wdt_counter = LPC_WDT->TV;
-    while (wdt_counter >= 0x0000027F)
-    {
-      wdt_counter = LPC_WDT->TV;
-    }
-
-    LPC_WDT->FEED = 0xAA;		/* Feeding sequence */
-    LPC_WDT->FEED = 0x55;    
-    /* Make sure feed sequence executed properly */
-    for (i = 0; i < 0x80000; i++);
-  }
-#endif
-
+    /* Enabling Brown out detect and reset */
+    LPC_SYSCON->BODCTRL = 0x13; //Setting BOD Level (BODRSTLEV) to 3: Reset at 2.63, deassert at 2.71V and enabling the BOD circuitry
   return;
 }
 

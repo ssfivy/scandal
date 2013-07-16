@@ -523,9 +523,14 @@ void GPIO_ToggleValue(uint32_t portNum, uint32_t bitPosi) {
 	LPC_GPIO[portNum]->MASKED_ACCESS[(1<<bitPosi)] ^= (1<<bitPosi);
 }
 
+/* portNum = Port number of the pin you want
+   bitPosi = Bit number of the pin you want
+   Dir = Input (0 or INPUT), Output (1 or OUTPUT)*/
 void GPIO_SetDir( uint32_t portNum, uint32_t bitPosi, uint32_t dir ) {
-	if(dir)
+	GPIO_SetFunction(portNum, bitPosi, 0, 0x4);
+	if(dir == OUTPUT){
 		LPC_GPIO[portNum]->DIR |= 1<<bitPosi;
-	else
+	}else if(dir == INPUT){
 		LPC_GPIO[portNum]->DIR &= ~(1<<bitPosi);
+	}
 }

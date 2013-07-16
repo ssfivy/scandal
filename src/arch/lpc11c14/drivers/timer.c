@@ -232,23 +232,23 @@ void timer32_ioconfig(uint8_t timer_number, T32_IOCONFIG ioconfig_struct)
 **
 ** parameters:			timer number and timer interval
 
-  __IO uint32_t IR;                     /*!< Offset: 0x000 Interrupt Register (R/W) 
-  __IO uint32_t TCR;                    /*!< Offset: 0x004 Timer Control Register (R/W) 
-  __IO uint32_t TC;                     /*!< Offset: 0x008 Timer Counter Register (R/W) *
-  __IO uint32_t PR;                     /*!< Offset: 0x00C Prescale Register (R/W) *
-  __IO uint32_t PC;                     /*!< Offset: 0x010 Prescale Counter Register (R/W) *
-  __IO uint32_t MCR;                    /*!< Offset: 0x014 Match Control Register (R/W) *
-  __IO uint32_t MR0;                    /*!< Offset: 0x018 Match Register 0 (R/W) *
-  __IO uint32_t MR1;                    /*!< Offset: 0x01C Match Register 1 (R/W) *
-  __IO uint32_t MR2;                    /*!< Offset: 0x020 Match Register 2 (R/W) *
-  __IO uint32_t MR3;                    /*!< Offset: 0x024 Match Register 3 (R/W) *
-  __IO uint32_t CCR;                    /*!< Offset: 0x028 Capture Control Register (R/W) *
-  __I  uint32_t CR0;                    /*!< Offset: 0x02C Capture Register 0 (R/ ) *
+  __IO uint32_t IR;                     !< Offset: 0x000 Interrupt Register (R/W) 
+  __IO uint32_t TCR;                    !< Offset: 0x004 Timer Control Register (R/W) 
+  __IO uint32_t TC;                     !< Offset: 0x008 Timer Counter Register (R/W) *
+  __IO uint32_t PR;                     !< Offset: 0x00C Prescale Register (R/W) *
+  __IO uint32_t PC;                     !< Offset: 0x010 Prescale Counter Register (R/W) *
+  __IO uint32_t MCR;                    !< Offset: 0x014 Match Control Register (R/W) *
+  __IO uint32_t MR0;                    !< Offset: 0x018 Match Register 0 (R/W) *
+  __IO uint32_t MR1;                    !< Offset: 0x01C Match Register 1 (R/W) *
+  __IO uint32_t MR2;                    !< Offset: 0x020 Match Register 2 (R/W) *
+  __IO uint32_t MR3;                    !< Offset: 0x024 Match Register 3 (R/W) *
+  __IO uint32_t CCR;                    !< Offset: 0x028 Capture Control Register (R/W) *
+  __I  uint32_t CR0;                    !< Offset: 0x02C Capture Register 0 (R/ ) *
        uint32_t RESERVED1[3];
-  __IO uint32_t EMR;                    /*!< Offset: 0x03C External Match Register (R/W) *
+  __IO uint32_t EMR;                    !< Offset: 0x03C External Match Register (R/W) *
        uint32_t RESERVED2[12];
-  __IO uint32_t CTCR;                   /*!< Offset: 0x070 Count Control Register (R/W) *
-  __IO uint32_t PWMC;                   /*!< Offset: 0x074 PWM Control Register (R/W) *
+  __IO uint32_t CTCR;                   !< Offset: 0x070 Count Control Register (R/W) *
+  __IO uint32_t PWMC;                   !< Offset: 0x074 PWM Control Register (R/W) *
 
 
   typedef struct _T32_CONFIG{
@@ -271,7 +271,7 @@ void timer32_ioconfig(uint8_t timer_number, T32_IOCONFIG ioconfig_struct)
     uint8_t 	T32_PWM_CONTROL; // Set the appropriate bit high to enable PWM on the corresponding external match pin
     
 } T32_CONFIG;
-/*
+
 
 ** Returned value:		None
 ** 

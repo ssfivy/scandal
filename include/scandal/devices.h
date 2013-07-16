@@ -59,8 +59,8 @@
 #define MSPSWITCH							25
 #define LHSCONTROLS							26
 #define TYREMASTER							27
-#define SCULPTORBRIDGE                                                  28
-#define CURRENTINT                                                      29
+#define SCULPTORBRIDGE						28
+#define CURRENTINT							29
 #define MSPONEWIRE							30
 #define SMARTDCDC							31
 #define STEERINGWHEEL						32

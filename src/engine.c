@@ -25,6 +25,12 @@
  * along with Scandal.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <project/scandal_config.h>
+#include <project/driver_config.h>
+
+#include <arch/uart.h>
+#include <arch/wdt.h> 
+ 
 #include <scandal/engine.h>
 #include <scandal/types.h>
 #include <scandal/timer.h>
@@ -36,8 +42,9 @@
 #include <scandal/utils.h>
 #include <scandal/wavesculptor.h>
 #include <scandal/system.h>
+#include <scandal/stdio.h>
 
-#include <project/scandal_config.h>
+
 
 in_channel           in_channels[NUM_IN_CHANNELS];
 in_channel_handler   in_channel_handlers[NUM_IN_CHANNELS];
@@ -48,6 +55,7 @@ uint64_t        timesync_offset;
 
 /* Local Prototypes */
 void            do_first_run(void);
+static void 	scandal_handle_channel_overrides();
 
 u08             handle_ext_message(can_msg*	msg);
 u08             handle_std_message(can_msg*	msg);
@@ -64,11 +72,19 @@ void            retrieve_channel_mb(u16 chan_num);
 u08             scandal_get_msg_type(can_msg *msg);
 u08             scandal_get_msg_priority(can_msg *msg);
 
+
 /* Functions */
 u08 scandal_init(void){
 	u16 i;
 
 	timesync_offset = 0; 
+    
+#if !DISABLE_WATCHDOG_TIMER
+    /* Initialising the WDT with either user defined period or the default of 5000ms
+       Default is defined in engine.h
+    */
+    WDT_Init(WATCHDOG_TIMER_PERIOD);
+#endif
 
 	init_can();
 	sc_init_timer();
@@ -83,10 +99,14 @@ u08 scandal_init(void){
 
 	if(my_config.version != SCANDAL_VERSION)
 		do_first_run();
+	
+    /* Handle channel overrides from scandal configuration */
+	scandal_handle_channel_overrides();
 
 	/* Set up infrastructure for the in-channels */
 	for(i=0; i<NUM_IN_CHANNELS; i++){
 		/* Zero out the in_channel's value and time */
+		UART_printf("setting up in channel %d, to addr:%d, ch#:%d\r\n", i, my_config.ins[i].source_node, my_config.ins[i].source_num);
 		in_channels[i].value = 0;
 		in_channels[i].rcvd_time = 0;
 		in_channels[i].time = 0;
@@ -100,25 +120,33 @@ u08 scandal_init(void){
 				CAN_EXT_MSG);
 	}
 
+#if !DISABLE_CONFIG_MESSAGES
 	/* Register for my config messages */
 	can_register_id(0x03FFFF00,
 			scandal_mk_config_id( 0, scandal_get_addr(), 0),
 			0, CAN_EXT_MSG);
-			
+#endif
+
+#if !DISABLE_USER_CONFIG_MESSAGES	
 	/* Register for user config messages */
 	can_register_id(0x03FFFF00,
 			scandal_mk_user_config_id( 0, scandal_get_addr(), 0),
 			0, CAN_EXT_MSG);
+#endif
 
+#if !DISABLE_TIMESYNC_MESSAGES
 	/* Register for timesync messages */ 
 	can_register_id(0x03FFFF00, 
 			scandal_mk_timesync_id(CRITICAL_PRIORITY), 
 			0, CAN_EXT_MSG); 
+#endif
 
+#if !DISABLE_COMMAND_MESSAGES
 	/* Register for command messages */ 
 	can_register_id(0x03FFFF00, 
 			scandal_mk_command_id(CRITICAL_PRIORITY, scandal_get_addr(), 0), 
 			0, CAN_EXT_MSG); 
+#endif
 
 	heartbeat_timer = 0;
 
@@ -217,6 +245,8 @@ void handle_scandal(void){
 	default:
 		scandal_do_scandal_err(err);
 	}
+    
+    WDT_Feed();
 }
 
 /* this is most likely to be a wave sculptor message */
@@ -283,6 +313,145 @@ void	do_first_run(void){
 	scandal_user_do_first_run();
 }
 
+static void scandal_handle_channel_overrides(void){
+
+#if SCANDAL_ADDRESS_OVERRIDE_ENABLE
+	my_config.addr = SCANDAL_ADDRESS_OVERRIDE;
+#endif
+
+#if (NUM_IN_CHANNELS > 0)
+#if SCANDAL_IN_CHANNEL_0_OVERRIDE_ENABLE
+	UART_printf("Applying Override 0\r\n");
+	my_config.ins[0].source_node = SCANDAL_IN_CHANNEL_0_OVERRIDE_ADDRESS;
+	my_config.ins[0].source_num = SCANDAL_IN_CHANNEL_0_OVERRIDE_CHANNEL;
+#endif
+#endif
+
+#if (NUM_IN_CHANNELS > 1)
+#if SCANDAL_IN_CHANNEL_1_OVERRIDE_ENABLE
+	UART_printf("Applying Override 1\r\n");
+	my_config.ins[1].source_node = SCANDAL_IN_CHANNEL_1_OVERRIDE_ADDRESS;
+	my_config.ins[1].source_num = SCANDAL_IN_CHANNEL_1_OVERRIDE_CHANNEL;
+#endif
+#endif
+
+#if (NUM_IN_CHANNELS > 2)
+#if SCANDAL_IN_CHANNEL_2_OVERRIDE_ENABLE
+	UART_printf("Applying Override 2\r\n");
+	my_config.ins[2].source_node = SCANDAL_IN_CHANNEL_2_OVERRIDE_ADDRESS;
+	my_config.ins[2].source_num = SCANDAL_IN_CHANNEL_2_OVERRIDE_CHANNEL;
+#endif
+#endif
+
+#if (NUM_IN_CHANNELS > 2)
+#if SCANDAL_IN_CHANNEL_3_OVERRIDE_ENABLE
+	UART_printf("Applying Override 3\r\n");
+	my_config.ins[3].source_node = SCANDAL_IN_CHANNEL_3_OVERRIDE_ADDRESS;
+	my_config.ins[3].source_num = SCANDAL_IN_CHANNEL_3_OVERRIDE_CHANNEL;
+#endif
+#endif
+
+#if (NUM_IN_CHANNELS > 4)
+#if SCANDAL_IN_CHANNEL_4_OVERRIDE_ENABLE
+	UART_printf("Applying Override 4\r\n");
+	my_config.ins[4].source_node = SCANDAL_IN_CHANNEL_4_OVERRIDE_ADDRESS;
+	my_config.ins[4].source_num = SCANDAL_IN_CHANNEL_4_OVERRIDE_CHANNEL;
+#endif
+#endif
+
+#if (NUM_IN_CHANNELS > 5)
+#if SCANDAL_IN_CHANNEL_5_OVERRIDE_ENABLE
+	UART_printf("Applying Override 5\r\n");
+	my_config.ins[5].source_node = SCANDAL_IN_CHANNEL_5_OVERRIDE_ADDRESS;
+	my_config.ins[5].source_num = SCANDAL_IN_CHANNEL_5_OVERRIDE_CHANNEL;
+#endif
+#endif
+
+#if (NUM_IN_CHANNELS > 6)
+#if SCANDAL_IN_CHANNEL_6_OVERRIDE_ENABLE
+	my_config.ins[6].source_node = SCANDAL_IN_CHANNEL_6_OVERRIDE_ADDRESS;
+	my_config.ins[6].source_num = SCANDAL_IN_CHANNEL_6_OVERRIDE_CHANNEL;
+#endif
+#endif
+
+#if (NUM_IN_CHANNELS > 7)
+#if SCANDAL_IN_CHANNEL_7_OVERRIDE_ENABLE
+	my_config.ins[7].source_node = SCANDAL_IN_CHANNEL_7_OVERRIDE_ADDRESS;
+	my_config.ins[7].source_num = SCANDAL_IN_CHANNEL_7_OVERRIDE_CHANNEL;
+#endif
+#endif
+
+#if (NUM_IN_CHANNELS > 8)
+#if SCANDAL_IN_CHANNEL_8_OVERRIDE_ENABLE
+	my_config.ins[8].source_node = SCANDAL_IN_CHANNEL_8_OVERRIDE_ADDRESS;
+	my_config.ins[8].source_num = SCANDAL_IN_CHANNEL_8_OVERRIDE_CHANNEL;
+#endif
+#endif
+
+#if (NUM_IN_CHANNELS > 9)
+#if SCANDAL_IN_CHANNEL_9_OVERRIDE_ENABLE
+	my_config.ins[9].source_node = SCANDAL_IN_CHANNEL_9_OVERRIDE_ADDRESS;
+	my_config.ins[9].source_num = SCANDAL_IN_CHANNEL_9_OVERRIDE_CHANNEL;
+#endif
+#endif
+
+#if (NUM_IN_CHANNELS > 10)
+#if SCANDAL_IN_CHANNEL_10_OVERRIDE_ENABLE
+	my_config.ins[10].source_node = SCANDAL_IN_CHANNEL_10_OVERRIDE_ADDRESS;
+	my_config.ins[10].source_num = SCANDAL_IN_CHANNEL_10_OVERRIDE_CHANNEL;
+#endif
+#endif
+
+#if (NUM_IN_CHANNELS > 11)
+#if SCANDAL_IN_CHANNEL_11_OVERRIDE_ENABLE
+	my_config.ins[11].source_node = SCANDAL_IN_CHANNEL_11_OVERRIDE_ADDRESS;
+	my_config.ins[11].source_num = SCANDAL_IN_CHANNEL_11_OVERRIDE_CHANNEL;
+#endif
+#endif
+
+#if (NUM_IN_CHANNELS > 12)
+#if SCANDAL_IN_CHANNEL_12_OVERRIDE_ENABLE
+	my_config.ins[12].source_node = SCANDAL_IN_CHANNEL_12_OVERRIDE_ADDRESS;
+	my_config.ins[12].source_num = SCANDAL_IN_CHANNEL_12_OVERRIDE_CHANNEL;
+#endif
+#endif
+
+#if (NUM_IN_CHANNELS > 13)
+#if SCANDAL_IN_CHANNEL_13_OVERRIDE_ENABLE
+	my_config.ins[13].source_node = SCANDAL_IN_CHANNEL_13_OVERRIDE_ADDRESS;
+	my_config.ins[13].source_num = SCANDAL_IN_CHANNEL_13_OVERRIDE_CHANNEL;
+#endif
+#endif
+
+#if (NUM_IN_CHANNELS > 14)
+#if SCANDAL_IN_CHANNEL_14_OVERRIDE_ENABLE
+	my_config.ins[14].source_node = SCANDAL_IN_CHANNEL_14_OVERRIDE_ADDRESS;
+	my_config.ins[14].source_num = SCANDAL_IN_CHANNEL_14_OVERRIDE_CHANNEL;
+#endif
+#endif
+
+#if (NUM_IN_CHANNELS > 15)
+#if SCANDAL_IN_CHANNEL_15_OVERRIDE_ENABLE
+	my_config.ins[15].source_node = SCANDAL_IN_CHANNEL_15_OVERRIDE_ADDRESS;
+	my_config.ins[15].source_num = SCANDAL_IN_CHANNEL_15_OVERRIDE_CHANNEL;
+#endif
+#endif
+
+#if (NUM_IN_CHANNELS > 16)
+#if SCANDAL_IN_CHANNEL_16_OVERRIDE_ENABLE
+	my_config.ins[16].source_node = SCANDAL_IN_CHANNEL_16_OVERRIDE_ADDRESS;
+	my_config.ins[16].source_num = SCANDAL_IN_CHANNEL_16_OVERRIDE_CHANNEL;
+#endif
+#endif
+
+#if (NUM_OUT_CHANNELS > 17)
+#if SCANDAL_IN_CHANNEL_16_OVERRIDE_ENABLE
+	my_config.ins[17].source_node = SCANDAL_IN_CHANNEL_17_OVERRIDE_ADDRESS;
+	my_config.ins[17].source_num = SCANDAL_IN_CHANNEL_17_OVERRIDE_CHANNEL;
+#endif
+#endif
+}
+
 /* Functions for accessing features of messages */
 u08		scandal_get_msg_type(can_msg*	msg){
 	return (u08)((msg->id >> TYPE_OFFSET) & 0xFF);
@@ -329,7 +498,7 @@ u08	scandal_handle_channel(can_msg* msg){
 			in_channels[i].value = value;
 			in_channels[i].time = time;
 			in_channels[i].rcvd_time = sc_get_timer();
-
+			
 			if (in_channel_handlers[i] != 0) {
 				in_channel_handler handler = in_channel_handlers[i];
 				handler(value, time);

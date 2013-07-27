@@ -106,7 +106,6 @@ u08 scandal_init(void){
 	/* Set up infrastructure for the in-channels */
 	for(i=0; i<NUM_IN_CHANNELS; i++){
 		/* Zero out the in_channel's value and time */
-		UART_printf("setting up in channel %d, to addr:%d, ch#:%d\r\n", i, my_config.ins[i].source_node, my_config.ins[i].source_num);
 		in_channels[i].value = 0;
 		in_channels[i].rcvd_time = 0;
 		in_channels[i].time = 0;
@@ -321,7 +320,6 @@ static void scandal_handle_channel_overrides(void){
 
 #if (NUM_IN_CHANNELS > 0)
 #if SCANDAL_IN_CHANNEL_0_OVERRIDE_ENABLE
-	UART_printf("Applying Override 0\r\n");
 	my_config.ins[0].source_node = SCANDAL_IN_CHANNEL_0_OVERRIDE_ADDRESS;
 	my_config.ins[0].source_num = SCANDAL_IN_CHANNEL_0_OVERRIDE_CHANNEL;
 #endif
@@ -329,7 +327,6 @@ static void scandal_handle_channel_overrides(void){
 
 #if (NUM_IN_CHANNELS > 1)
 #if SCANDAL_IN_CHANNEL_1_OVERRIDE_ENABLE
-	UART_printf("Applying Override 1\r\n");
 	my_config.ins[1].source_node = SCANDAL_IN_CHANNEL_1_OVERRIDE_ADDRESS;
 	my_config.ins[1].source_num = SCANDAL_IN_CHANNEL_1_OVERRIDE_CHANNEL;
 #endif
@@ -337,7 +334,6 @@ static void scandal_handle_channel_overrides(void){
 
 #if (NUM_IN_CHANNELS > 2)
 #if SCANDAL_IN_CHANNEL_2_OVERRIDE_ENABLE
-	UART_printf("Applying Override 2\r\n");
 	my_config.ins[2].source_node = SCANDAL_IN_CHANNEL_2_OVERRIDE_ADDRESS;
 	my_config.ins[2].source_num = SCANDAL_IN_CHANNEL_2_OVERRIDE_CHANNEL;
 #endif
@@ -345,7 +341,6 @@ static void scandal_handle_channel_overrides(void){
 
 #if (NUM_IN_CHANNELS > 2)
 #if SCANDAL_IN_CHANNEL_3_OVERRIDE_ENABLE
-	UART_printf("Applying Override 3\r\n");
 	my_config.ins[3].source_node = SCANDAL_IN_CHANNEL_3_OVERRIDE_ADDRESS;
 	my_config.ins[3].source_num = SCANDAL_IN_CHANNEL_3_OVERRIDE_CHANNEL;
 #endif
@@ -353,7 +348,6 @@ static void scandal_handle_channel_overrides(void){
 
 #if (NUM_IN_CHANNELS > 4)
 #if SCANDAL_IN_CHANNEL_4_OVERRIDE_ENABLE
-	UART_printf("Applying Override 4\r\n");
 	my_config.ins[4].source_node = SCANDAL_IN_CHANNEL_4_OVERRIDE_ADDRESS;
 	my_config.ins[4].source_num = SCANDAL_IN_CHANNEL_4_OVERRIDE_CHANNEL;
 #endif
@@ -361,7 +355,6 @@ static void scandal_handle_channel_overrides(void){
 
 #if (NUM_IN_CHANNELS > 5)
 #if SCANDAL_IN_CHANNEL_5_OVERRIDE_ENABLE
-	UART_printf("Applying Override 5\r\n");
 	my_config.ins[5].source_node = SCANDAL_IN_CHANNEL_5_OVERRIDE_ADDRESS;
 	my_config.ins[5].source_num = SCANDAL_IN_CHANNEL_5_OVERRIDE_CHANNEL;
 #endif

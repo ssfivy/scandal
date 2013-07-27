@@ -621,14 +621,7 @@ u08 can_register_id(u32 mask, u32 data, u08 priority, u08 ext) {
 	LPC_CAN->CNTL &= ~(CTRL_IE|CTRL_SIE|CTRL_EIE);
 
 	for(i = 0; i <= RECV_BUFF_DIVIDE; i++) {
-		/* if we have run out of recv buffers, error out */
-		if (i == RECV_BUFF_DIVIDE-1) {
-			NVIC_EnableIRQ(CAN_IRQn);
-			LPC_CAN->CNTL |= (CTRL_IE|CTRL_SIE|CTRL_EIE);
-			return NO_MSG_ERR;
-
-		/* find a free buffer and set up a filter */
-		} else if (!recv_buf_used[i]) {
+		if (!recv_buf_used[i]) {
 			CAN_set_up_filter(i, mask, data, ext);
 			recv_buf_used[i] = 1;
 			NVIC_EnableIRQ(CAN_IRQn);
@@ -637,6 +630,9 @@ u08 can_register_id(u32 mask, u32 data, u08 priority, u08 ext) {
 		}
 	}
 
+	NVIC_EnableIRQ(CAN_IRQn);
+	LPC_CAN->CNTL |= (CTRL_IE|CTRL_SIE|CTRL_EIE);
+			
 	return NO_MSG_ERR;
 }
 

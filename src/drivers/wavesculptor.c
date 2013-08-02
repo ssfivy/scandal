@@ -169,7 +169,7 @@ uint8_t scandal_store_ws_message(can_msg *msg, Wavesculptor_Output_Struct *dataS
         */
         
         group_64 *data = (group_64 *)msg->data;
-        dataStruct->lastUpdateTime = sc_get_timer();
+        //dataStruct->lastUpdateTime = sc_get_timer();
         
         switch(baseOffset){
         
@@ -199,6 +199,7 @@ uint8_t scandal_store_ws_message(can_msg *msg, Wavesculptor_Output_Struct *dataS
         case MC_VELOCITY:
             dataStruct->VehicleVelocity = data->data_fp[1];
             dataStruct->MotorVelocity = data->data_fp[0];
+            dataStruct->lastUpdateTime = sc_get_timer();
             break;
             
         case MC_PHASE:
@@ -263,13 +264,19 @@ uint8_t scandal_store_ws_message(can_msg *msg, Wavesculptor_Output_Struct *dataS
     
     }
     
-    
+  return checks;
 }
 
 int32_t check_device_type(Wavesculptor_Output_Struct *dataStruct){
     
     int32_t device_Type=0;
     //UART_printf("In the function_2 %c", *dataStruct->TritiumID[0]);
+    
+    /* If we have not received a message in the last 5 seconds, don't return a valid type of WS */
+    if((dataStruct->lastUpdateTime + 5000) < sc_get_timer()){
+      return device_Type;
+    }
+    
     /* Check for WS22 case as that should be more likely */
     if((dataStruct->TritiumID[0]=='T') && (dataStruct->TritiumID[1]=='0') && (dataStruct->TritiumID[2]=='8') && (dataStruct->TritiumID[3]=='8')){
         device_Type = WS_22;
@@ -288,10 +295,10 @@ void send_ws_drive_commands(float rpm, float phase_current, float bus_current, W
     
     deviceType = check_device_type(dataStruct);
     
-    UART_printf("Type = %d \r\n", deviceType);
+    //UART_printf("Type = %d \r\n", (int) deviceType);
 /* Depending on the device type, send the appropriate drive commands to the two wavesculptors */
     if(deviceType == WS_22){
-        //(dataStruct->ControlAddress + DC_DRIVE_OFFSET) //((dataStruct->ControlAddress) + DC_DRIVE_OFFSET), DC_POWER_OFFSET
+        //(dataStruc  t->ControlAddress + DC_DRIVE_OFFSET) //((dataStruct->ControlAddress) + DC_DRIVE_OFFSET), DC_POWER_OFFSET
         scandal_send_ws_drive_command(((dataStruct->ControlAddress) + DC_DRIVE_OFFSET), rpm, phase_current);
         scandal_send_ws_drive_command(((dataStruct->ControlAddress) + DC_POWER_OFFSET), 0, bus_current);
         UART_printf("TX 22\t %x\t vel:%1.3f\t iph:%1.3f\t ibus:%1.3f\r\n", dataStruct->ControlAddress, rpm, phase_current, bus_current);

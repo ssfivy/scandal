@@ -98,5 +98,6 @@ void			scandal_register_ws_temp_callback(ws_temp_callback cb);
 
 void scandal_handle_ws_message(can_msg *msg);
 uint8_t scandal_store_ws_message(can_msg *msg, Wavesculptor_Output_Struct *dataStruct);
+uint8_t check_device_valid(Wavesculptor_Output_Struct *dataStruct);
 int32_t check_device_type(Wavesculptor_Output_Struct *dataStruct);
 void send_ws_drive_commands(float rpm, float phase_current, float bus_current, Wavesculptor_Output_Struct *dataStruct);

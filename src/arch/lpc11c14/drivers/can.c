@@ -73,11 +73,16 @@ volatile uint32_t BOffCnt = 0;
 volatile uint32_t EWarnCnt = 0;
 volatile uint32_t EPassCnt = 0;
 
-uint32_t CANRxDone[MSG_OBJ_MAX];
+uint8_t CANRxDone[MSG_OBJ_MAX]; //Maybe convert to a single uint32 and use bitwise operations?
 
-message_object CAN_rxbuf[MSG_OBJ_MAX];
+#if ENABLE_RX_QUEUE
+/* Position in RX Buffer queue if queing is enabled (0-31), allows discarding
+   of old data if buffer is full. 
+*/
+int8_t RXQueuePosition; 
+#endif
 
-#undef CAN_UART_DEBUG
+message_object CAN_rxbuf[MSG_OBJ_MAX]; //Input RX buffer
 
 #if CAN_DEBUG
 uint32_t CANStatusLog[100];
@@ -175,7 +180,7 @@ void CAN_decode_packet(uint8_t msg_num, can_msg *msg) {
 	/* set the type */
 	msg->ext = CAN_rxbuf[msg_num].ext;
 
-#ifdef CAN_UART_DEBUG
+#if CAN_UART_DEBUG
 	{
 		int i = 0;
 
@@ -191,8 +196,8 @@ void CAN_decode_packet(uint8_t msg_num, can_msg *msg) {
 			priority     = ((CAN_rxbuf[msg_num].id >> 26) & 0x0007);
 
 			UART_printf("got an ext can message...\n\r");
-			UART_printf(" id is               (0x%x)\n\r",msg->id);
 
+			UART_printf(" id is               (0x%x)\n\r",(unsigned int) msg->id);
 			UART_printf(" priority is         %u\n\r", priority);
 			UART_printf(" node_address is     %u\n\r", node_address);
 			UART_printf(" message type is     %u\n\r", type);
@@ -203,10 +208,10 @@ void CAN_decode_packet(uint8_t msg_num, can_msg *msg) {
 
 		} else {
 			UART_printf("got a std can message...\n\r");
-			UART_printf(" id is               (0x%x)\n\r", msg->id);
+			UART_printf(" id is               (0x%x)\n\r", (unsigned int) msg->id);
 
-			for(i = 0; i < 8; i++)
-				UART_printf("can_data[%d] = 0x%x\r\n", i, msg->data[i]);
+			for(i = 0; i < 0; i++)
+				UART_printf("can_data[%d] = 0x%x\r\n", i, (unsigned int) msg->data[i]);
 		}
 	}
 #endif
@@ -217,7 +222,7 @@ void CAN_decode_packet(uint8_t msg_num, can_msg *msg) {
 
 /* Set up a message buffer to receive a particular type of message specified in filter and mask */
 void CAN_set_up_filter(uint8_t msg_id, uint32_t filter_mask, uint32_t filter_addr, uint8_t ext) {
-
+  UART_printf("Filter Setup: id:%u msk:%u flt:%u ext:%u\n", msg_id, filter_mask, filter_addr, ext);
 	/* This is what we're changing in the message buffer object */
 	LPC_CAN->IF1_CMDMSK = WR | MASK | ARB | CTRL | DATAA | DATAB;
 
@@ -344,8 +349,10 @@ void CAN_IRQHandler(void) {
 					LPC_CAN->STAT &= ~STAT_RXOK;
 					CAN_MessageProcess( msg_no-1 ); //msg_no goes up from 1, msg_no ranges from 0
 					CANRxDone[msg_no-1] = TRUE;
+          //UART_printf("# = %d ", (msg_no - 1));
 				}
 			} else {
+      /* Should I be here? :o */
                 LPC_CAN->STAT = 0; //Clear the status register so we can carry on.
             }
 		}
@@ -620,9 +627,9 @@ u08 can_register_id(u32 mask, u32 data, u08 priority, u08 ext) {
 	NVIC_DisableIRQ(CAN_IRQn);
 	LPC_CAN->CNTL &= ~(CTRL_IE|CTRL_SIE|CTRL_EIE);
 
-	for(i = 0; i <= RECV_BUFF_DIVIDE; i++) {
+	for(i = 0; i < RECV_BUFF_DIVIDE; i++) {
 		if (!recv_buf_used[i]) {
-			CAN_set_up_filter(i, mask, data, ext);
+			CAN_set_up_filter((i+1), mask, data, ext);
 			recv_buf_used[i] = 1;
 			NVIC_EnableIRQ(CAN_IRQn);
 			LPC_CAN->CNTL |= (CTRL_IE|CTRL_SIE|CTRL_EIE);

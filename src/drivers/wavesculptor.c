@@ -267,27 +267,44 @@ uint8_t scandal_store_ws_message(can_msg *msg, Wavesculptor_Output_Struct *dataS
   return checks;
 }
 
-int32_t check_device_type(Wavesculptor_Output_Struct *dataStruct){
-    
-    int32_t device_Type=0;
-    //UART_printf("In the function_2 %c", *dataStruct->TritiumID[0]);
-    
-    /* If we have not received a message in the last 5 seconds, don't return a valid type of WS */
-    if((dataStruct->lastUpdateTime + 5000) < sc_get_timer()){
-      return device_Type;
+/* Returns 1 for valid device (data received in last 5 seconds and time initialised) */
+uint8_t check_device_valid(Wavesculptor_Output_Struct *dataStruct){
+  uint32_t time = (uint32_t) sc_get_timer();
+  
+      /* If we have not received a message in the last 5 seconds, don't return a valid type of WS */
+    if((dataStruct->lastUpdateTime + 2000) < sc_get_timer()){
+      UART_printf("Stale Data \r\n");
+      return 0; //FALSE -> not valid device
     }
     
-    /* Check for WS22 case as that should be more likely */
-    if((dataStruct->TritiumID[0]=='T') && (dataStruct->TritiumID[1]=='0') && (dataStruct->TritiumID[2]=='8') && (dataStruct->TritiumID[3]=='8')){
-        device_Type = WS_22;
-    /* Otherwise check if the device is a WS20 device, which is less likely */
-    } else if((dataStruct->TritiumID[0]=='T') && (dataStruct->TritiumID[1]=='R') && (dataStruct->TritiumID[2]=='I') && (dataStruct->TritiumID[3]=='a')){
-        device_Type = WS_20;
+    /* If lastUpdateTime is greater than the scandal time - the value probably hasn't been initialised yet */
+    if((dataStruct->lastUpdateTime) > sc_get_timer()){
+      UART_printf("Stale Data \r\n");
+      return 0; //FALSE -> not valid device
     }
     
-    return device_Type;
+    return 1; //if we make it this far, the device is valid
 }
 
+int32_t check_device_type(Wavesculptor_Output_Struct *dataStruct){
+    
+  int32_t device_Type=0;
+  
+  if(check_device_valid(dataStruct)){
+  
+    /* Check for WS22 case as that should be more likely */
+    if((dataStruct->TritiumID[0]=='T') && (dataStruct->TritiumID[1]=='0') && (dataStruct->TritiumID[2]=='8') && (dataStruct->TritiumID[3]=='8')){
+      device_Type = WS_22;
+      
+    /* Otherwise check if the device is a WS20 device, which is less likely */
+    } else if((dataStruct->TritiumID[0]=='T') && (dataStruct->TritiumID[1]=='R') && (dataStruct->TritiumID[2]=='I') && (dataStruct->TritiumID[3]=='a')){
+      device_Type = WS_20;
+    }
+  }
+
+    
+  return device_Type;
+}
 
 void send_ws_drive_commands(float rpm, float phase_current, float bus_current, Wavesculptor_Output_Struct *dataStruct){
     
@@ -301,12 +318,12 @@ void send_ws_drive_commands(float rpm, float phase_current, float bus_current, W
         //(dataStruc  t->ControlAddress + DC_DRIVE_OFFSET) //((dataStruct->ControlAddress) + DC_DRIVE_OFFSET), DC_POWER_OFFSET
         scandal_send_ws_drive_command(((dataStruct->ControlAddress) + DC_DRIVE_OFFSET), rpm, phase_current);
         scandal_send_ws_drive_command(((dataStruct->ControlAddress) + DC_POWER_OFFSET), 0, bus_current);
-        UART_printf("TX 22\t %x\t vel:%1.3f\t iph:%1.3f\t ibus:%1.3f\r\n", dataStruct->ControlAddress, rpm, phase_current, bus_current);
+        //UART_printf("TX 22\t %x\t vel:%1.3f\t iph:%1.3f\t ibus:%1.3f\r\n", dataStruct->ControlAddress, rpm, phase_current, bus_current);
 
     }else if(deviceType == WS_20){
         float velocity_KMH = rpm*RPM_TO_KMH_MULTIPLIER;
         scandal_send_ws_drive_command(((dataStruct->ControlAddress) + DC_DRIVE_OFFSET), velocity_KMH, phase_current);
         scandal_send_ws_drive_command(((dataStruct->ControlAddress) + DC_POWER_OFFSET), 0, bus_current);
-        UART_printf("TX 20\t %x\t vel:%1.3f\t iph:%1.3f\t ibus:%1.3f\r\n", dataStruct->ControlAddress, velocity_KMH, phase_current, bus_current);
+        //UART_printf("TX 20\t %x\t vel:%1.3f\t iph:%1.3f\t ibus:%1.3f\r\n", dataStruct->ControlAddress, velocity_KMH, phase_current, bus_current);
     }  
 }

@@ -39,6 +39,7 @@ at a time.
 #define TRANSMIT_ONLY           0
 
 #define CAN_DEBUG				0
+#define CAN_UART_DEBUG          0
 
 /* Data structure for a CAN message */
 typedef struct {

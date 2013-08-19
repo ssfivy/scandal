@@ -19,8 +19,8 @@
  * warranty that such application will be suitable for the specified
  * use without further testing or modification.
 ****************************************************************************/
-#include "driver_config.h"
-#include "timer16.h"
+#include <project/driver_config.h>
+#include <arch/timer16.h>
 
 #if CONFIG_ENABLE_DRIVER_TIMER16==1
 

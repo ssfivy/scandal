@@ -135,7 +135,7 @@ void SSP_IOConfig( uint8_t portNum )
   LPC_IOCON->PIO0_8           |= 0x01;		/* SSP MISO */
   LPC_IOCON->PIO0_9           &= ~0x07;	
   LPC_IOCON->PIO0_9           |= 0x01;		/* SSP MOSI */
-#ifdef __JTAG_DISABLED
+#ifdef USE_SCK_P0_10
 	LPC_IOCON->SCK_LOC = 0x00;
 	LPC_IOCON->SWCLK_PIO0_10 &= ~0x07;
 	LPC_IOCON->SWCLK_PIO0_10 |= 0x02;		/* SSP CLK */

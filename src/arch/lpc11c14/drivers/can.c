@@ -222,7 +222,9 @@ void CAN_decode_packet(uint8_t msg_num, can_msg *msg) {
 
 /* Set up a message buffer to receive a particular type of message specified in filter and mask */
 void CAN_set_up_filter(uint8_t msg_id, uint32_t filter_mask, uint32_t filter_addr, uint8_t ext) {
+#if CAN_UART_DEBUG
   UART_printf("Filter Setup: id:%u msk:%u flt:%u ext:%u\n", msg_id, filter_mask, filter_addr, ext);
+#endif
 	/* This is what we're changing in the message buffer object */
 	LPC_CAN->IF1_CMDMSK = WR | MASK | ARB | CTRL | DATAA | DATAB;
 

@@ -69,6 +69,7 @@
 #define SION								35
 #define WS20								36
 #define WS22								37
+#define BMS                                 38
 
 /* -----------------------------------------------
 	Channel Numbering Constants
@@ -734,28 +735,28 @@
 	/* Out Channels */
 	/* They're in milivolts / miliamps */
 	#define WS20_WAVESCULPTOR_TYPE				0 //Wavesculptor type, either 20 or 22. Will be 20 here.
-	#define WS20_ACTIVE_MOTOR				1 //integer
-	#define WS20_ERRORS					2 //bit flags
-	#define WS20_LIMITS					3 //bit flags
-	#define WS20_BUSCURRENT					4 //mV
-	#define WS20_BUSVOLT					5 //mA
+	#define WS20_ACTIVE_MOTOR			    	1 //integer
+	#define WS20_ERRORS			    	    	2 //bit flags
+	#define WS20_LIMITS			        		3 //bit flags
+	#define WS20_BUSCURRENT				    	4 //mV
+	#define WS20_BUSVOLT			    		5 //mA
 	#define WS20_VEHICLE_VELOCITY				6 //km/h
-	#define WS20_PHASE_A					7 //mA
-	#define WS20_PHASE_B					8 //mA
+	#define WS20_PHASE_A				    	7 //mA
+	#define WS20_PHASE_B				    	8 //mA
 	//motor vector and random voltage isnt useful to us
-	#define WS20_FAN_SPEED_RPM				9  //rpm
-	#define WS20_HEATSINK_TEMP				10 //milidegree celsius
-	#define WS20_MOTOR_TEMP					11 //milidegree celsius
+	#define WS20_FAN_SPEED_RPM			    	9  //rpm
+	#define WS20_HEATSINK_TEMP			    	10 //milidegree celsius
+	#define WS20_MOTOR_TEMP				    	11 //milidegree celsius
 	#define WS20_AMBIENT_AIR_IN_TEMP			12 //milidegree celsius
-	#define WS20_AMP_HOURS					13 //miliamp hours
-	#define WS20_ODOMETER					14 //metres
+	#define WS20_AMP_HOURS			    		13 //miliamp hours
+	#define WS20_ODOMETER			    		14 //metres
 	#define WS20_NUM_OUT_CHANNELS				15
 
 	/* In channels */
 	//There's no code to handle these. They are placeholder only.
 	#define WS20_MOTOR_DRIVE_COMMAND		0
 	#define WS20_MOTOR_POWER_COMMAND		1
-	#define WS20_RESET_COMMAND			2
+	#define WS20_RESET_COMMAND			    2
 	// Configuration commands
 	#define WS20_CHANGE_ACTIVE_MOTOR		3
 	#define WS20_NUM_IN_CHANNELS			4
@@ -768,24 +769,24 @@
 	/* Out Channels */
 	/* They're in milivolts / miliamps */
 	#define WS22_WAVESCULPTOR_TYPE				0 //Wavesculptor type, either 20 or 22. Will be 22 here.
-	#define WS22_ACTIVE_MOTOR				1 //integer
-	#define WS22_ERRORS					2 //bit flags
-	#define WS22_LIMITS					3 //bit flags
-	#define WS22_BUSCURRENT					4 //mV
-	#define WS22_BUSVOLT					5 //mA
+	#define WS22_ACTIVE_MOTOR				    1 //integer
+	#define WS22_ERRORS		        			2 //bit flags
+	#define WS22_LIMITS		    	    		3 //bit flags
+	#define WS22_BUSCURRENT					    4 //mV
+	#define WS22_BUSVOLT				    	5 //mA
 	#define WS22_VEHICLE_VELOCITY				6 //km/h
-	#define WS22_PHASE_A					7 //mA
-	#define WS22_PHASE_B					8 //mA
+	#define WS22_PHASE_A					    7 //mA
+	#define WS22_PHASE_B					    8 //mA
 	//motor vector and random voltage isnt useful to us
 	//#define WS22_FAN_SPEED_RPM				9  //not present in WS22
 	//#define WS22_HEATSINK_TEMP				10 //not present in WS22
-	#define WS22_MOTOR_TEMP					11 //milidegree celsius
+	#define WS22_MOTOR_TEMP					    11 //milidegree celsius
 	//#define WS22_AMBIENT_AIR_IN_TEMP			12 //not present in WS22
-	#define WS22_AMP_HOURS					13 //miliamp hours
-	#define WS22_ODOMETER					14 //metres
-	#define WS22_IPM_PHASEA_TEMP					15 //milidegree celsius
-	#define WS22_IPM_PHASEB_TEMP					16 //milidegree celsius
-	#define WS22_IPM_PHASEC_TEMP					17 //milidegree celsius
+	#define WS22_AMP_HOURS				    	13 //miliamp hours
+	#define WS22_ODOMETER					    14 //metres
+	#define WS22_IPM_PHASEA_TEMP				15 //milidegree celsius
+	#define WS22_IPM_PHASEB_TEMP				16 //milidegree celsius
+	#define WS22_IPM_PHASEC_TEMP				17 //milidegree celsius
 	#define WS22_DSP_BOARD_TEMP					18 //milidegree celsius
 	#define WS22_CAN_RX_ERROR_COUNT				19 //uint
 	#define WS22_CAN_TX_ERROR_COUNT				20 //uint
@@ -795,11 +796,18 @@
 	//There's no code to handle these, they are placeholder only.
 	#define WS20_MOTOR_DRIVE_COMMAND		0
 	#define WS20_MOTOR_POWER_COMMAND		1
-	#define WS22_RESET_COMMAND			2
+	#define WS22_RESET_COMMAND		    	2
 	// Configuration commands
 	#define WS22_CHANGE_ACTIVE_MOTOR		3 
 	#define WS22_NUM_IN_CHANNELS			4
 
 
+/* Battery Monitoring System */ 
+/* Out Channels */ 
 
 
+#define BMS_VOLTAGE_OFFSET              0 //Cell number + Voltage offert
+#define BMS_TEMPERATUER_OFFSET          100 //Cell number + Temperature offert
+
+#define BMS_NUM_OUT_CHANNELS			200
+#define BMS_NUM_IN_CHANNELS			0

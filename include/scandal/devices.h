@@ -32,6 +32,8 @@
    Used to identify the type of node sending the CAN packets
    This is NOT the device address, they are not hardcoded.
    -----------------------------------------------*/
+ #include <scandal/addresses.h>
+   
 #define CURRENTSENSOR						1
 #define DCDC								2
 #define DRIVERCONTROLS						3
@@ -332,7 +334,7 @@
 
 /* Data logger  */
 	/* Out Channels */
-                #define DATALOGGER_NUM_LOGGED_PACKETS                   0  
+        #define DATALOGGER_NUM_LOGGED_PACKETS                   0  
 		#define DATALOGGER_NUM_OUT_CHANNELS			1
 
 	/* In Channels */

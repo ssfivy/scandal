@@ -173,22 +173,25 @@ void SSP_IOConfig( uint8_t portNum )
 	LPC_SYSCON->SSP1CLKDIV = 0x02;			/* Divided by 2 */
 	LPC_IOCON->PIO2_2 &= ~0x07;	/*  SSP I/O config */
 	LPC_IOCON->PIO2_2 |= 0x02;		/* SSP MISO */
-	LPC_IOCON->PIO2_3 &= ~0x07;	
-	LPC_IOCON->PIO2_3 |= 0x02;		/* SSP MOSI */
+	LPC_IOCON->PIO2_3 &= ~0x07;
+	LPC_IOCON->PIO2_3 |= 0x02;
+	//LPC_IOCON->PIO2_3 &= ~0x73D;	
+	//LPC_IOCON->PIO2_3 |= 0xC2;		/* SSP MOSI */
 	LPC_IOCON->PIO2_1 &= ~0x07;
 	LPC_IOCON->PIO2_1 |= 0x02;		/* SSP CLK */
  
-#if USE_CS
+#if USE_CS || USE_CS_1
 	LPC_IOCON->PIO2_0 &= ~0x07;	
 	LPC_IOCON->PIO2_0 |= 0x02;		/* SSP SSEL */
 #else
 	/* Enable AHB clock to the GPIO domain. */
 	LPC_SYSCON->SYSAHBCLKCTRL |= (1<<6);
 		
-//	LPC_IOCON->PIO2_0 &= ~0x07;		/* SSP SSEL is a GPIO pin */
+//Why is the below commented out and not the above?
+	LPC_IOCON->PIO2_0 &= ~0x07;		/* SSP SSEL is a GPIO pin */
 	/* port2, bit 0 is set to GPIO output and high */
-//	GPIOSetDir( PORT2, 0, 1 );
-//	GPIOSetValue( PORT2, 0, 1 );
+	GPIO_SetDir( PORT2, 0, 1 );
+	GPIO_SetValue( PORT2, 0, 1 );
 #endif
   }
   return;		
@@ -591,7 +594,8 @@ void SSP_Receive( uint8_t portNum, uint8_t *buf, uint32_t Length )
 	else
 	{
 #if !LOOPBACK_MODE
-#if SSP_SLAVE
+#if SSP_SLAVE || SSP1_SLAVE
+	  LPC_SSP1->DR = 0x00;
 	  while ( !(LPC_SSP1->SR & SSPSR_RNE) );
 #else
 	  LPC_SSP1->DR = 0x00;

@@ -595,7 +595,7 @@ void SSP_Receive( uint8_t portNum, uint8_t *buf, uint32_t Length )
 	{
 #if !LOOPBACK_MODE
 #if SSP_SLAVE || SSP1_SLAVE
-	  LPC_SSP1->DR = 0x00;
+	  //LPC_SSP1->DR = 0x00;
 	  while ( !(LPC_SSP1->SR & SSPSR_RNE) );
 #else
 	  LPC_SSP1->DR = 0x00;
@@ -612,6 +612,30 @@ void SSP_Receive( uint8_t portNum, uint8_t *buf, uint32_t Length )
   return; 
 }
 #endif
+
+
+/*****************************************************************************
+** Function name:		SSP_RX_Flush
+** Descriptions:		The module will empty RX FIFO
+** parameters:			port
+** Returned value:		None
+** 
+*****************************************************************************/
+void SSP_RX_Flush( uint8_t portNum )
+{
+	uint32_t buf;
+
+	if (portNum == 0){
+		while ( (LPC_SSP0->SR & SSPSR_RNE) ){
+			buf = LPC_SSP0->DR;
+		}
+	}
+	else {
+		while ( (LPC_SSP1->SR & SSPSR_RNE) ){
+			buf = LPC_SSP1->DR;
+		}
+	}
+}
 
 /******************************************************************************
 **                            End Of File

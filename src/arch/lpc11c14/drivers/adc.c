@@ -129,19 +129,35 @@ void ADC_EnableChannel(uint32_t channel_num) {
 
 	switch (channel_num) {
 	 case 0:
+#if ADC_PULLUP0 == 1
+		GPIO_SetFunction(PORT0, 11, GPIO_FUNC1, GPIO_MODE_PULLUP);
+#else
 		GPIO_SetFunction(PORT0, 11, GPIO_FUNC1, GPIO_MODE_NONE);
+#endif
 		break;
 
 	 case 1:
+#if ADC_PULLUP1 == 1
+		GPIO_SetFunction(PORT1, 0, GPIO_FUNC1, GPIO_MODE_PULLUP);
+#else	 
 		GPIO_SetFunction(PORT1, 0, GPIO_FUNC1, GPIO_MODE_NONE);
+#endif
 		break;
 
 	 case 2:
+#if ADC_PULLUP2 == 1
+		GPIO_SetFunction(PORT1, 1, GPIO_FUNC1, GPIO_MODE_PULLUP);
+#else	
 		GPIO_SetFunction(PORT1, 1, GPIO_FUNC1, GPIO_MODE_NONE);
+#endif
 		break;
 
 	 case 3:
+#if ADC_PULLUP3 == 1
+		GPIO_SetFunction(PORT1, 2, GPIO_FUNC1, GPIO_MODE_PULLUP);
+#else	
 		GPIO_SetFunction(PORT1, 2, GPIO_FUNC1, GPIO_MODE_NONE);
+#endif
 		break;
 
 	 case 4:

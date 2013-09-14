@@ -192,6 +192,7 @@ void SSP_IOConfig( uint8_t portNum )
 	/* port2, bit 0 is set to GPIO output and high */
 	GPIO_SetDir( PORT2, 0, 1 );
 	GPIO_SetValue( PORT2, 0, 1 );
+	//LPC_IOCON->PIO2_0 |= 0x02;
 #endif
   }
   return;		

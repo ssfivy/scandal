@@ -379,12 +379,13 @@ void GPIO_SetInterrupt( uint32_t portNum, uint32_t bitPosi, uint32_t sense,
 
 		} else {
 			LPC_GPIO0->IS |= (0x1<<bitPosi);
-
-			if ( event == 0 )
-				LPC_GPIO0->IEV &= ~(0x1<<bitPosi);
-			else
-				LPC_GPIO0->IEV |= (0x1<<bitPosi);
 		}
+		
+		if ( event == 0 )
+			LPC_GPIO0->IEV &= ~(0x1<<bitPosi);
+		else
+			LPC_GPIO0->IEV |= (0x1<<bitPosi);		
+		
 		break;
 
 	 case PORT1:
@@ -397,11 +398,13 @@ void GPIO_SetInterrupt( uint32_t portNum, uint32_t bitPosi, uint32_t sense,
 				LPC_GPIO1->IBE |= (0x1<<bitPosi);
 		} else {
 			LPC_GPIO1->IS |= (0x1<<bitPosi);
-			if ( event == 0 )
-				LPC_GPIO1->IEV &= ~(0x1<<bitPosi);
-			else
-				LPC_GPIO1->IEV |= (0x1<<bitPosi);
 		}
+			
+		if ( event == 0 )
+			LPC_GPIO1->IEV &= ~(0x1<<bitPosi);
+		else
+			LPC_GPIO1->IEV |= (0x1<<bitPosi);
+		
 		break;
 
 	 case PORT2:
@@ -414,11 +417,13 @@ void GPIO_SetInterrupt( uint32_t portNum, uint32_t bitPosi, uint32_t sense,
 				LPC_GPIO2->IBE |= (0x1<<bitPosi);
 		} else {
 			LPC_GPIO2->IS |= (0x1<<bitPosi);
-			if ( event == 0 )
-				LPC_GPIO2->IEV &= ~(0x1<<bitPosi);
-			else
-				LPC_GPIO2->IEV |= (0x1<<bitPosi);  
 		}
+
+		if ( event == 0 )
+			LPC_GPIO2->IEV &= ~(0x1<<bitPosi);
+		else
+			LPC_GPIO2->IEV |= (0x1<<bitPosi);  
+		
 		break;
 
 	 case PORT3:
@@ -431,11 +436,13 @@ void GPIO_SetInterrupt( uint32_t portNum, uint32_t bitPosi, uint32_t sense,
 				LPC_GPIO3->IBE |= (0x1<<bitPosi);
 		} else {
 			LPC_GPIO3->IS |= (0x1<<bitPosi);
-			if ( event == 0 )
-				LPC_GPIO3->IEV &= ~(0x1<<bitPosi);
-			else
-				LPC_GPIO3->IEV |= (0x1<<bitPosi);
 		}
+
+		if ( event == 0 )
+			LPC_GPIO3->IEV &= ~(0x1<<bitPosi);
+		else
+			LPC_GPIO3->IEV |= (0x1<<bitPosi);
+				
 		break;
 	}
 }

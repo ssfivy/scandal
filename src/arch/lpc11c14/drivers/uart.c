@@ -194,13 +194,24 @@ void UART_putchar(char c) {
 	UART_Send(&c1, 1);
 }
 
+/* If the write position is not the same as read position, a new character has been read. Note
+that this function does not detect overflow, hence if the data is not read quickly enough then 
+it may be lost.  */
 u08 UART_is_received(void) {
-	return UARTCount > 0;
+	if(current_buffer->write_pos!= current_buffer->last_read_pos) { 
+		return 1; 
+	} else { 
+		return 0; 	
+	}
 }
 
-/* Scandal UART_ReceiveByte */
+/* Scandal UART_ReceiveByte. Do not call this function without checking whether data is received through
+UART_is_received function*/
 u08  UART_ReceiveByte(void) {
-	return 0;
+	if(current_buffer->last_read_pos >= current_buffer->size) { 
+ 		current_buffer->last_read_pos=0; 
+	}
+	return current_buffer->buf[current_buffer->last_read_pos++]; 	 
 }
 
 /* Wait until a '\n' character comes, then return. The user should then
@@ -234,11 +245,13 @@ void UART_init_double_buffer(struct UART_buffer_descriptor *desc_1, char *buf_1,
 	desc_1->size = size_1;
 	desc_1->write_pos = 0;
 	desc_1->overflow = 0;
+	desc_1->last_read_pos=0;
 
 	desc_2->buf = buf_2;
 	desc_2->size = size_2;
 	desc_2->write_pos = 0;
 	desc_2->overflow = 0;
+	desc_2->last_read_pos=0;
 
 	current_buffer = desc_1;
 }
@@ -273,3 +286,17 @@ char *UART_readline_double_buffer(struct UART_buffer_descriptor *desc_1, struct 
 	}
 	return NULL;
 }
+
+/* 
+	Initialise single buffer
+*/
+void UART_init_buffer(struct UART_buffer_descriptor *desc_1, char* buf_1, uint32_t size_1) {
+	desc_1->buf = buf_1;
+	desc_1->size = size_1;
+	desc_1->write_pos = 0;
+	desc_1->overflow = 0;
+	desc_1->last_read_pos=0;
+	
+	current_buffer = desc_1; 	
+}
+

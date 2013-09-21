@@ -72,11 +72,14 @@ struct UART_buffer_descriptor {
 	uint32_t size;
 	uint32_t write_pos;
 	uint8_t overflow;
+	uint8_t last_read_pos;
 };
 
 char *UART_readline_double_buffer(struct UART_buffer_descriptor *desc_1, struct UART_buffer_descriptor *desc_2);
-void UART_init_double_buffer(struct UART_buffer_descriptor *desc_1, char *buf_1, uint32_t size_1,
-	struct UART_buffer_descriptor *desc_2, char *buf_2, uint32_t size_2);
+void UART_init_double_buffer(struct UART_buffer_descriptor *desc_1, char *buf_1, uint32_t size_1, struct UART_buffer_descriptor *desc_2, char *buf_2, uint32_t size_2);
+
+//Single buffer reading like MSP430
+void UART_init_buffer(struct UART_buffer_descriptor* desc_1, char* buf_1, uint32_t size_1);
 
 /* Utilities */
 void print_hex(u08 byte);

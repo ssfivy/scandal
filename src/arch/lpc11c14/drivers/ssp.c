@@ -612,7 +612,7 @@ void SSP_Receive( uint8_t portNum, uint8_t *buf, uint32_t Length )
   }
   return; 
 }
-#endif
+
 
 
 /*****************************************************************************
@@ -642,3 +642,4 @@ void SSP_RX_Flush( uint8_t portNum )
 **                            End Of File
 ******************************************************************************/
 
+#endif

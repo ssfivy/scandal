@@ -269,7 +269,6 @@ uint8_t scandal_store_ws_message(can_msg *msg, Wavesculptor_Output_Struct *dataS
 
 /* Returns 1 for valid device (data received in last 5 seconds and time initialised) */
 uint8_t check_device_valid(Wavesculptor_Output_Struct *dataStruct){
-  uint32_t time = (uint32_t) sc_get_timer();
   
       /* If we have not received a message in the last 5 seconds, don't return a valid type of WS */
     if((dataStruct->lastUpdateTime + 2000) < sc_get_timer()){

@@ -72,6 +72,7 @@
 #define WS20								36
 #define WS22								37
 #define BMS                                 38
+#define STEVE                               39
 
 /* -----------------------------------------------
 	Channel Numbering Constants
@@ -812,4 +813,45 @@
 #define BMS_TEMPERATUER_OFFSET          100 //Cell number + Temperature offert
 
 #define BMS_NUM_OUT_CHANNELS			200
-#define BMS_NUM_IN_CHANNELS			0
+#define BMS_NUM_IN_CHANNELS			    0
+
+#define STEVE_BRAKE                     0
+#define STEVE_L_IND                     1
+#define STEVE_R_IND                     2
+#define STEVE_HORN                      3
+#define STEVE_REAR_VIS                  4
+
+#define STEVE_CRUISE_OFFSET
+#define STEVE_CRUISE_STATUS              (STEVE_CRUISE_OFFSET + 10)
+#define STEVE_CRUISE_VELOCITY            (STEVE_CRUISE_OFFSET + 11)
+#define STEVE_CRUISE_INTEGRAL            (STEVE_CRUISE_OFFSET + 12)
+
+#define STEVE_STEVE_LHS_MOTOR_OFFSET     20
+#define STEVE_L_WS_TYPE                  (STEVE_LHS_MOTOR_OFFSET + 0)
+#define STEVE_L_ACTIVE_MOTOR             (STEVE_LHS_MOTOR_OFFSET + 1)
+#define STEVE_L_ERRORS                   (STEVE_LHS_MOTOR_OFFSET + 2)
+#define STEVE_L_LIMIT                    (STEVE_LHS_MOTOR_OFFSET + 3)
+#define STEVE_L_BUS_CURR                 (STEVE_LHS_MOTOR_OFFSET + 4)
+#define STEVE_L_BUS_VOLT                 (STEVE_LHS_MOTOR_OFFSET + 5)
+#define STEVE_L_MOTOR_VEL                (STEVE_LHS_MOTOR_OFFSET + 6)
+#define STEVE_L_PHASE_A                  (STEVE_LHS_MOTOR_OFFSET + 7)
+#define STEVE_L_PHASE_B                  (STEVE_LHS_MOTOR_OFFSET + 8)
+#define STEVE_L_MOTOR_TEMP               (STEVE_LHS_MOTOR_OFFSET + 9)
+#define STEVE_L_HEATSINK_TEMP            (STEVE_LHS_MOTOR_OFFSET + 10)
+#define STEVE_L_AMP_HOURS                (STEVE_LHS_MOTOR_OFFSET + 11)
+#define STEVE_L_ODOMETER                 (STEVE_LHS_MOTOR_OFFSET + 12)
+
+#define STEVE_RHS_MOTOR_OFFSET           40
+#define STEVE_R_WS_TYPE                  (STEVE_RHS_MOTOR_OFFSET + 0)
+#define STEVE_R_ACTIVE_MOTOR             (STEVE_RHS_MOTOR_OFFSET + 1)
+#define STEVE_R_ERRORS                   (STEVE_RHS_MOTOR_OFFSET + 2)
+#define STEVE_R_LIMIT                    (STEVE_RHS_MOTOR_OFFSET + 3)
+#define STEVE_R_BUS_CURR                 (STEVE_RHS_MOTOR_OFFSET + 4)
+#define STEVE_R_BUS_VOLT                 (STEVE_RHS_MOTOR_OFFSET + 5)
+#define STEVE_R_MOTOR_VEL                (STEVE_RHS_MOTOR_OFFSET + 6)
+#define STEVE_R_PHASE_A                  (STEVE_RHS_MOTOR_OFFSET + 7)
+#define STEVE_R_PHASE_B                  (STEVE_RHS_MOTOR_OFFSET + 8)
+#define STEVE_R_MOTOR_TEMP               (STEVE_RHS_MOTOR_OFFSET + 9)
+#define STEVE_R_HEATSINK_TEMP            (STEVE_RHS_MOTOR_OFFSET + 10)
+#define STEVE_R_AMP_HOURS                (STEVE_RHS_MOTOR_OFFSET + 11)
+#define STEVE_R_ODOMETER                 (STEVE_RHS_MOTOR_OFFSET + 12)

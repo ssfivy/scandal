@@ -14,7 +14,7 @@
 #include <scandal/message.h>
 #include <scandal/timer.h>
 #include <scandal/error.h>
-#include <scandal/tritium.h>
+#include <scandal/wavesculptor.h>
 
 #include <string.h>
 
@@ -167,10 +167,10 @@ u08 scandal_send_reset(u08 priority, u08 node) {
 
 u08 scandal_send_user_config(u08 priority, u08 node, u08 param, 
 			u32 value1, u32 value2) {
-	u32 value;
+	//u32 value;
 	can_msg msg;
 
-	value = scandal_get_realtime32();
+	//value = scandal_get_realtime32();
 	msg.id = scandal_mk_user_config_id(priority, node, param);
 
 	msg.data[0] = (value1 >> 24) & 0xFF;
@@ -261,4 +261,24 @@ u08 scandal_send_ws_id(uint32_t identifier, const char *str, int len) {
 
 	return NO_ERR;
 
+}
+
+u08 scandal_send_ws_reset(Wavesculptor_Output_Struct *dataStruct) {
+  can_msg msg;
+  
+  msg.id = ((dataStruct->BaseAddress) + 25);
+  msg.ext = CAN_STD_MSG;
+  
+  msg.data[0] = 0;
+	msg.data[1] = 'T';
+	msg.data[2] = 'W';
+	msg.data[3] = 'S';
+	msg.data[4] = 'R';
+	msg.data[5] = 'E';
+	msg.data[6] = 'S';
+	msg.data[7] = 'E';
+
+  can_send_msg(&msg, 3);
+
+	return NO_ERR;
 }

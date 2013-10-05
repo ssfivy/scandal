@@ -820,11 +820,15 @@
 #define STEVE_R_IND                     2
 #define STEVE_HORN                      3
 #define STEVE_REAR_VIS                  4
+#define STEVE_PRECHARGE					5
 
 #define STEVE_CRUISE_OFFSET				10
 #define STEVE_CRUISE_STATUS              (STEVE_CRUISE_OFFSET + 0)
 #define STEVE_CRUISE_VELOCITY            (STEVE_CRUISE_OFFSET + 1)
 #define STEVE_CRUISE_INTEGRAL            (STEVE_CRUISE_OFFSET + 2)
+#define STEVE_CURRENT_VELOCITY			 (STEVE_CRUISE_OFFSET + 3)
+#define STEVE_SYS_STATE					 (STEVE_CRUISE_OFFSET + 4)
+#define STEVE_CRUISE_PROPORTIONAL		 (STEVE_CRUISE_OFFSET + 5)
 
 #define STEVE_LHS_MOTOR_OFFSET     		20
 #define STEVE_L_WS_TYPE                  (STEVE_LHS_MOTOR_OFFSET + 0)

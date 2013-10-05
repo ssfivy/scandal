@@ -263,22 +263,3 @@ u08 scandal_send_ws_id(uint32_t identifier, const char *str, int len) {
 
 }
 
-u08 scandal_send_ws_reset(Wavesculptor_Output_Struct *dataStruct) {
-  can_msg msg;
-  
-  msg.id = ((dataStruct->BaseAddress) + 25);
-  msg.ext = CAN_STD_MSG;
-  
-  msg.data[0] = 0;
-	msg.data[1] = 'T';
-	msg.data[2] = 'W';
-	msg.data[3] = 'S';
-	msg.data[4] = 'R';
-	msg.data[5] = 'E';
-	msg.data[6] = 'S';
-	msg.data[7] = 'E';
-
-  can_send_msg(&msg, 3);
-
-	return NO_ERR;
-}

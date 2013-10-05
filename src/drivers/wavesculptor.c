@@ -326,3 +326,24 @@ void send_ws_drive_commands(float rpm, float phase_current, float bus_current, W
         //UART_printf("TX 20\t %x\t vel:%1.3f\t iph:%1.3f\t ibus:%1.3f\r\n", dataStruct->ControlAddress, velocity_KMH, phase_current, bus_current);
     }  
 }
+
+
+u08 scandal_send_ws_reset(Wavesculptor_Output_Struct *dataStruct) {
+  can_msg msg;
+  
+  msg.id = ((dataStruct->BaseAddress) + 25);
+  msg.ext = CAN_STD_MSG;
+  
+  msg.data[0] = 0;
+	msg.data[1] = 'T';
+	msg.data[2] = 'W';
+	msg.data[3] = 'S';
+	msg.data[4] = 'R';
+	msg.data[5] = 'E';
+	msg.data[6] = 'S';
+	msg.data[7] = 'E';
+
+  can_send_msg(&msg, 3);
+
+	return NO_ERR;
+}

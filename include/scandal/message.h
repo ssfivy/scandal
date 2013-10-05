@@ -270,6 +270,7 @@ u08 scandal_send_timesync(u08 priority, u08 node, uint64_t newtime);
 u08 scandal_send_ws_drive_command(uint32_t identifier, float first, float second);
 u08 scandal_send_ws_id(uint32_t identifier, const char *str, int len);
 
+
 /* More static inline functions */ 
 
 static inline u08 scandal_send_channel(u08 pri, u16 chan_num, u32 value){

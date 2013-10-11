@@ -331,17 +331,17 @@ void send_ws_drive_commands(float rpm, float phase_current, float bus_current, W
 u08 scandal_send_ws_reset(Wavesculptor_Output_Struct *dataStruct) {
   can_msg msg;
   
-  msg.id = ((dataStruct->BaseAddress) + 25);
+  msg.id = ((dataStruct->ControlAddress) + 3);
   msg.ext = CAN_STD_MSG;
   
-  msg.data[0] = 0;
-	msg.data[1] = 'T';
-	msg.data[2] = 'W';
-	msg.data[3] = 'S';
-	msg.data[4] = 'R';
-	msg.data[5] = 'E';
-	msg.data[6] = 'S';
-	msg.data[7] = 'E';
+	msg.data[0] = 'E';
+	msg.data[1] = 'S';
+	msg.data[2] = 'E';
+	msg.data[3] = 'R';
+	msg.data[4] = 'S';
+	msg.data[5] = 'W';
+	msg.data[6] = 'T';
+	msg.data[7] = 0;
 
   can_send_msg(&msg, 3);
 

@@ -163,7 +163,7 @@ uint8_t scandal_store_ws_message(can_msg *msg, Wavesculptor_Output_Struct *dataS
         typedef union _group_64 {
             float data_fp[2];
             unsigned char data_u8[8];
-            unsigned int data_u16[4];
+            unsigned short int data_u16[4];
             unsigned long data_u32[2];
         } group_64;
         */

@@ -32,6 +32,9 @@ typedef union _group_64 {
 	unsigned char data_u8[8];
 	unsigned short int data_u16[4];
 	unsigned int data_u32[2];
+	int data_16[4];
+	long data_32[2];
+	char data_8[8];
 } group_64;
 
 typedef union _group_32 {
@@ -51,7 +54,7 @@ typedef union _group_16 {
 #define DC_DRIVE				DC_BASE+1
 #define DC_POWER				DC_BASE+2
 #define DC_RESET				DC_BASE+3
-#define DC_SWITCH				DC_BASE+4
+#define DC_SWITCH				DC_BASE+5
 
 #define MC_BASE					0x400
 #define MC_STATUS				MC_BASE+1
@@ -68,6 +71,22 @@ typedef union _group_16 {
 #define MC_AIR_IN_CPU_TEMP		MC_BASE+12
 #define MC_AIR_OUT_CAP_TEMP		MC_BASE+13
 #define MC_ODOMETER_BUSAMPHOURS	MC_BASE+14
+
+// BMU CAN base address and packet offsets
+#define BMS_BASE					0x600
+#define BMS_CMU_LOWER_LIMIT			BMS_BASE + 0x01
+#define BMS_CMU_UPPER_LIMIT			BMS_BASE + 0xEF
+#define BMS_PACK_SOC				BMS_BASE + 0xF4
+#define BMS_BALANCE_SOC				BMS_BASE + 0xF5
+#define BMS_CHARGER_TELEMETRY		BMS_BASE + 0xF6
+#define BMS_PRECHARGE_STATUS		BMS_BASE + 0xF7
+#define BMS_MINMAX_CELL_VOLTAGE		BMS_BASE + 0xF8
+#define BMS_MINMAX_CELL_TEMP		BMS_BASE + 0xF9
+#define BMS_PACK_VOLTAGE_CURRENT	BMS_BASE + 0xFA
+#define BMS_PACK_STATUS				BMS_BASE + 0xFB
+#define BMS_PACK_FAN_STATUS			BMS_BASE + 0xFC 
+#define BMS_PACK_EXTENDED_STATUS	BMS_BASE + 0xFD
+
 
 // Status values (for message reception)
 #define CAN_ERROR		0xFFFF

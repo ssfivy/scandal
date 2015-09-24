@@ -7,6 +7,33 @@
 #include <scandal/error.h> //Added
 #include <scandal/message.h>
 
+
+void scandal_register_bms_id(){
+    u08 status = NO_ERR;
+    BMS_ADDR = BMS_BASE;
+
+    status = can_register_id(CAN_ID_STD_MASK, BMS_ADDR, 0, CAN_STD_MSG);
+    BMS_ADDR = BMS_PACK_SOC;
+
+    if (status != NO_ERR) {
+        UART_printf("ERROR REGISTERING BMS CAN ID: ID = %04x \n", BMS_ADDR);
+        return;
+    }
+
+    while (BMS_ADDR <= BMS_PACK_EXTENDED_STATUS) {
+        status = can_register_id(CAN_ID_STD_MASK, BMS_ADDR, 0, CAN_STD_MSG);
+        BMS_ADDR++;
+        if (status != NO_ERR) {
+            UART_printf("ERROR REGISTERING BMS CAN ID: ID = %04x \n", BMS_ADDR);
+            return;
+        }
+    }
+
+    UART_printf("chariths loop hack\n");
+    while(can_register_id(0, 0, 0, 0)==NO_ERR)
+    ;
+}
+
 uint8_t scandal_store_bms_message(can_msg *msg, BMS_Output_Struct *dataStruct){
 	uint8_t checks = NO_ERR;
 	uint16_t baseAddress = msg->id & 0x7E0;
